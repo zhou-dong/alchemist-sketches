@@ -1,92 +1,314 @@
-import { useState, useEffect } from 'react';
-import { styled } from '@mui/material/styles';
-import { Box, Typography, BottomNavigation, BottomNavigationAction, Container, Divider, Paper } from '@mui/material';
-import KthSmallestEstimation from './Kse';
-import KmvImplementation from './Kmv';
+import { Box, Typography, alpha, useTheme, Grid, Button, Container } from '@mui/material';
+import { slideUp } from '@alchemist/shared';
 
+import * as Tag from '@mui/icons-material/Tag';
+import * as ScatterPlot from '@mui/icons-material/ScatterPlot';
+import * as Memory from '@mui/icons-material/Memory';
+import * as PlaylistAdd from '@mui/icons-material/PlaylistAdd';
 import * as Functions from '@mui/icons-material/Functions';
-import * as Storage from '@mui/icons-material/Storage';
-import * as Settings from '@mui/icons-material/Settings';
+import * as ArrowForward from '@mui/icons-material/ArrowForward';
 
+const ArrowForwardIcon = ArrowForward.default as unknown as React.ElementType;
+const TagIcon = Tag.default as unknown as React.ElementType;
+const ScatterPlotIcon = ScatterPlot.default as unknown as React.ElementType;
+const MemoryIcon = Memory.default as unknown as React.ElementType;
+const PlaylistAddIcon = PlaylistAdd.default as unknown as React.ElementType;
 const FunctionsIcon = Functions.default as unknown as React.ElementType;
-const StorageIcon = Storage.default as unknown as React.ElementType;
-const SettingsIcon = Settings.default as unknown as React.ElementType;
 
-const FloatingBox = styled(Box)({
-    position: 'fixed',
-    top: '50%',
-    left: '50%',
-    transform: 'translate(-50%, -50%)',
-    zIndex: 1000,
-    width: '100%',
-});
+interface InfoCardProps {
+    icon: React.ReactNode;
+    title: string;
+    description: string;
+    delay?: number;
+    accent?: 'primary' | 'secondary' | 'info';
+}
 
-const Navigation = ({
-    currentIndex,
-    setCurrentIndex
-}: {
-    currentIndex: number,
-    setCurrentIndex: (index: number) => void
-}) => {
+function InfoCard({ icon, title, description, delay = 0, accent = 'primary' }: InfoCardProps) {
+    const theme = useTheme();
+    const accentColor = theme.palette[accent].main;
+
     return (
-        <BottomNavigation
-            value={currentIndex}
-            onChange={(_, newValue) => {
-                setCurrentIndex(newValue);
-            }}
+        <Box
             sx={{
-                backgroundColor: "transparent",
-                zIndex: 1000,
+                display: 'flex',
+                gap: 1.5,
+                p: 2,
+                borderRadius: 2,
+                border: `1px solid ${alpha(accentColor, 0.15)}`,
+                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                animation: `${slideUp} 0.5s ease-out ${delay}s both`,
+                height: '100%',
+                '&:hover': {
+                    background: alpha(accentColor, 0.08),
+                    borderColor: alpha(accentColor, 0.3),
+                    transform: 'translateY(-2px)',
+                    boxShadow: `0 6px 20px ${alpha(accentColor, 0.1)}`,
+                },
             }}
         >
-            <BottomNavigationAction
-                label="KST"
-                value={0}
-                icon={<FunctionsIcon />}
-            />
-            <BottomNavigationAction
-                label="KMV"
-                value={1}
-                icon={<StorageIcon />}
-            />
-            <BottomNavigationAction
-                label="Start"
-                value={2}
-                icon={<SettingsIcon />}
-            />
-        </BottomNavigation>
+            <Box
+                sx={{
+                    width: 36,
+                    height: 36,
+                    borderRadius: 1.5,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    background: alpha(accentColor, 0.1),
+                    color: accentColor,
+                    flexShrink: 0,
+                }}
+            >
+                {icon}
+            </Box>
+            <Box sx={{ minWidth: 0, flex: 1 }}>
+                <Typography
+                    variant="subtitle1"
+                    sx={{
+                        fontWeight: 600,
+                        mb: 0.25,
+                        color: 'text.primary',
+                    }}
+                >
+                    {title}
+                </Typography>
+                <Typography
+                    variant="body1"
+                    sx={{
+                        lineHeight: 1.5,
+                        color: 'text.secondary',
+                    }}
+                >
+                    {description}
+                </Typography>
+            </Box>
+        </Box>
     );
-};
+}
 
-export default function KstToKmv({ onClose }: { onClose: () => void }) {
-    const [currentIndex, setCurrentIndex] = useState(0);
+interface StepSectionProps {
+    step: number;
+    title: string;
+    children: React.ReactNode;
+    isLast?: boolean;
+    delay?: number;
+}
 
-    useEffect(() => {
-        if (currentIndex === 2) {
-            onClose();
-        }
-    }, [currentIndex]);
+function StepSection({ step, title, children, isLast = false, delay = 0 }: StepSectionProps) {
+    const theme = useTheme();
 
     return (
-        <FloatingBox>
-
-            <Container maxWidth="lg" sx={{ py: 2 }}>
-                <Paper elevation={2} sx={{ p: 2 }}>
-
-                    <Typography variant='h6' align="center" sx={{ mb: 3 }}>
-                        From <Typography variant='h6' component="span" color={currentIndex === 0 ? "primary" : "text.primary"}>K-th Smallest Estimation</Typography> to <Typography variant='h6' component="span" color={currentIndex === 1 ? "primary" : "text.primary"}>K Minimum Value</Typography>
+        <Box
+            sx={{
+                display: 'flex',
+                gap: 3,
+                animation: `${slideUp} 0.5s ease-out ${delay}s both`,
+            }}
+        >
+            {/* Step indicator with connector line */}
+            <Box
+                sx={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    flexShrink: 0,
+                }}
+            >
+                {/* Step number */}
+                <Box
+                    sx={{
+                        width: 40,
+                        height: 40,
+                        borderRadius: '50%',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
+                        boxShadow: `0 4px 14px ${alpha(theme.palette.primary.main, 0.35)}`,
+                        flexShrink: 0,
+                    }}
+                >
+                    <Typography
+                        sx={{
+                            fontSize: '1rem',
+                            fontWeight: 700,
+                            color: 'primary.contrastText',
+                        }}
+                    >
+                        {step}
                     </Typography>
+                </Box>
 
-                    <Divider sx={{ my: 2 }} />
+                {/* Connector line */}
+                {!isLast && (
+                    <Box
+                        sx={{
+                            width: 2,
+                            flex: 1,
+                            mt: 1,
+                            background: `linear-gradient(to bottom, ${alpha(theme.palette.primary.main, 0.3)} 0%, ${alpha(theme.palette.primary.main, 0.05)} 100%)`,
+                            borderRadius: 1,
+                        }}
+                    />
+                )}
+            </Box>
 
-                    {currentIndex === 0 && <KthSmallestEstimation />}
-                    {currentIndex === 1 && <KmvImplementation />}
+            {/* Content */}
+            <Box sx={{ flex: 1, pb: isLast ? 0 : 4 }}>
+                <Typography
+                    variant="h6"
+                    sx={{
+                        fontWeight: 600,
+                        mb: 1.5,
+                        color: 'text.primary',
+                        letterSpacing: '0.01em',
+                    }}
+                >
+                    {title}
+                </Typography>
+                {children}
+            </Box>
+        </Box>
+    );
+}
 
-                    <Divider sx={{ my: 2 }} />
+export default function KseToKmv({ onClose }: { onClose: () => void }) {
+    const theme = useTheme();
 
-                    <Navigation currentIndex={currentIndex} setCurrentIndex={setCurrentIndex} />
-                </Paper>
-            </Container>
-        </FloatingBox>
+    return (
+        <Container
+            maxWidth="xl"
+            sx={{
+                position: "absolute",
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                width: "100%",
+                height: "100vh",
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "center",
+                padding: 2,
+            }}
+        >
+            {/* Section 1: The Core Insight */}
+            <StepSection step={1} title="The Core Insight" delay={0.1}>
+                <Typography
+                    variant="body1"
+                    sx={{
+                        lineHeight: 1.8,
+                        color: 'text.secondary',
+                    }}
+                >
+                    From <strong>Order Statistics</strong>, we know that among N uniformly distributed values in (0,1),
+                    the K-th smallest has an expected value of <strong>K / (N + 1)</strong>.
+                    <strong> K-th Smallest Estimation</strong> flips this relationship: by observing <strong>θ</strong>,
+                    the K-th smallest value, we can estimate the total count <strong>N ≈ (K / θ) − 1</strong>.
+                </Typography>
+            </StepSection>
+
+            {/* Section 2: Requirements */}
+            <StepSection step={2} title="Requirements for Practice" delay={0.2}>
+                <Typography
+                    variant="subtitle1"
+                    sx={{
+                        color: 'text.secondary',
+                        mb: 2,
+                    }}
+                >
+                    To apply this in big data scenarios, we need these conditions:
+                </Typography>
+
+                <Grid container spacing={2}>
+                    <Grid size={{ xs: 12, md: 6 }}>
+                        <InfoCard
+                            icon={<TagIcon sx={{ fontSize: 22 }} />}
+                            title="Uniform Hash Function"
+                            description="Hash values uniformly distributed in (0,1), ensuring equal probability for any value."
+                            delay={0.25}
+                        />
+                    </Grid>
+                    <Grid size={{ xs: 12, md: 6 }}>
+                        <InfoCard
+                            icon={<ScatterPlotIcon sx={{ fontSize: 22 }} />}
+                            title="Sufficient Sample Size"
+                            description="N large enough for hash values to be evenly distributed across the interval."
+                            delay={0.3}
+                        />
+                    </Grid>
+                </Grid>
+            </StepSection>
+
+            {/* Section 3: KMV Algorithm */}
+            <StepSection step={3} title="KMV: The Implementation" isLast delay={0.35}>
+                <Typography
+                    variant="subtitle1"
+                    sx={{
+                        color: 'text.secondary',
+                        mb: 2,
+                    }}
+                >
+                    KMV stores <strong>only</strong> K hash values in memory, regardless of stream size:
+                </Typography>
+
+                <Grid container spacing={2}>
+                    <Grid size={{ xs: 12, md: 4 }}>
+                        <InfoCard
+                            icon={<MemoryIcon sx={{ fontSize: 22 }} />}
+                            title="Initialize"
+                            description="Container for K smallest hash values (initially empty)."
+                            delay={0.4}
+                        />
+                    </Grid>
+                    <Grid size={{ xs: 12, md: 4 }}>
+                        <InfoCard
+                            icon={<PlaylistAddIcon sx={{ fontSize: 22 }} />}
+                            title="Process"
+                            description="Hash to (0,1). If smaller than K-th, add and remove largest."
+                            delay={0.45}
+                        />
+                    </Grid>
+                    <Grid size={{ xs: 12, md: 4 }}>
+                        <InfoCard
+                            icon={<FunctionsIcon sx={{ fontSize: 22 }} />}
+                            title="Estimate"
+                            description="Calculate N ≈ (K / θ) − 1 using K-th smallest value."
+                            delay={0.5}
+                        />
+                    </Grid>
+                </Grid>
+            </StepSection>
+
+            <div style={{
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                marginTop: 50,
+            }}>
+                <Button
+                    variant="contained"
+                    size="large"
+                    endIcon={<ArrowForwardIcon />}
+                    onClick={onClose}
+                    sx={{
+                        px: 5,
+                        py: 1.5,
+                        borderRadius: 3,
+                        fontWeight: 600,
+                        letterSpacing: '0.03em',
+                        boxShadow: `0 4px 20px ${alpha(theme.palette.primary.main, 0.3)}`,
+                        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                        '&:hover': {
+                            transform: 'translateY(-2px)',
+                            boxShadow: `0 8px 30px ${alpha(theme.palette.primary.main, 0.4)}`,
+                        },
+                        animation: `${slideUp} 0.5s ease-out ${0.5}s both`,
+                    }}
+                >
+                    Configure & Start Demo
+                </Button>
+            </div>
+        </Container>
     );
 }
