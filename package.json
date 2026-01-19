@@ -29,7 +29,6 @@
     "gsap": "^3.14.2",
     "obelus": "^0.0.14",
     "obelus-gsap-animator": "^0.0.1",
-    "obelus-three-render": "^0.0.5",
-    "three": "^0.182.0"
+    "obelus-three-render": "^0.0.5"
   }
 }
