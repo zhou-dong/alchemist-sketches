@@ -1,29 +1,60 @@
-import { Box, Typography, alpha, useTheme, Grid, Button, Container } from '@mui/material';
-import { slideUp } from '@alchemist/shared';
+import { useState, useCallback, useEffect, useRef } from 'react';
+import { Box, Typography, alpha, useTheme, Grid, Container, IconButton, Slider, Stack, Tooltip, Paper, Fade } from '@mui/material';
 
 import * as Tag from '@mui/icons-material/Tag';
 import * as ScatterPlot from '@mui/icons-material/ScatterPlot';
 import * as Memory from '@mui/icons-material/Memory';
 import * as PlaylistAdd from '@mui/icons-material/PlaylistAdd';
 import * as Functions from '@mui/icons-material/Functions';
-import * as ArrowForward from '@mui/icons-material/ArrowForward';
+import * as SkipNext from '@mui/icons-material/SkipNext';
+import * as Replay from '@mui/icons-material/Replay';
+import * as PlayArrow from '@mui/icons-material/PlayArrow';
+import * as Pause from '@mui/icons-material/Pause';
 
-const ArrowForwardIcon = ArrowForward.default as unknown as React.ElementType;
+const SkipNextIcon = SkipNext.default as unknown as React.ElementType;
+const ReplayIcon = Replay.default as unknown as React.ElementType;
 const TagIcon = Tag.default as unknown as React.ElementType;
 const ScatterPlotIcon = ScatterPlot.default as unknown as React.ElementType;
 const MemoryIcon = Memory.default as unknown as React.ElementType;
 const PlaylistAddIcon = PlaylistAdd.default as unknown as React.ElementType;
 const FunctionsIcon = Functions.default as unknown as React.ElementType;
+const PlayIcon = PlayArrow.default as unknown as React.ElementType;
+const PauseIcon = Pause.default as unknown as React.ElementType;
+
+// Define narration sections with their content
+interface NarrationSection {
+    id: string;
+    text: string;
+}
+
+const NARRATION_SECTIONS: NarrationSection[] = [
+    {
+        id: 'insight',
+        text: 'The Core Insight. From Order Statistics, we know that among N uniformly distributed values between 0 and 1, the K-th smallest has an expected value of K divided by N plus 1. K-th Smallest Estimation flips this relationship: by observing theta, the K-th smallest value, we can estimate the total count N, approximately equal to K divided by theta, minus 1.',
+    },
+    {
+        id: 'requirements',
+        text: 'Requirements for Practice. To apply this in big data scenarios, we need two conditions. First, a Uniform Hash Function: hash values must be uniformly distributed between 0 and 1, ensuring equal probability for any value. Second, Sufficient Sample Size: N must be large enough for hash values to be evenly distributed across the interval.',
+    },
+    {
+        id: 'kmv',
+        text: 'KMV: The Implementation. KMV, which stands for K Minimum Values, stores only K hash values in memory, regardless of stream size. The algorithm has three steps. Initialize: create a container for K smallest hash values, initially empty. Process: hash each element to a value between 0 and 1. If it is smaller than the K-th smallest, add it and remove the largest. Estimate: calculate N approximately equal to K divided by theta minus 1, using the K-th smallest value.',
+    },
+    {
+        id: 'cta',
+        text: 'When you are ready, click the next button to configure and start the demo.',
+    },
+];
 
 interface InfoCardProps {
     icon: React.ReactNode;
     title: string;
     description: string;
-    delay?: number;
+    isActive?: boolean;
     accent?: 'primary' | 'secondary' | 'info';
 }
 
-function InfoCard({ icon, title, description, delay = 0, accent = 'primary' }: InfoCardProps) {
+function InfoCard({ icon, title, description, isActive = false, accent = 'primary' }: InfoCardProps) {
     const theme = useTheme();
     const accentColor = theme.palette[accent].main;
 
@@ -34,10 +65,11 @@ function InfoCard({ icon, title, description, delay = 0, accent = 'primary' }: I
                 gap: 1.5,
                 p: 2,
                 borderRadius: 2,
-                border: `1px solid ${alpha(accentColor, 0.15)}`,
+                border: `1px solid ${alpha(accentColor, isActive ? 0.5 : 0.15)}`,
+                background: isActive ? alpha(accentColor, 0.1) : 'transparent',
                 transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                animation: `${slideUp} 0.5s ease-out ${delay}s both`,
                 height: '100%',
+                boxShadow: isActive ? `0 4px 20px ${alpha(accentColor, 0.15)}` : 'none',
                 '&:hover': {
                     background: alpha(accentColor, 0.08),
                     borderColor: alpha(accentColor, 0.3),
@@ -54,7 +86,7 @@ function InfoCard({ icon, title, description, delay = 0, accent = 'primary' }: I
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    background: alpha(accentColor, 0.1),
+                    background: alpha(accentColor, isActive ? 0.2 : 0.1),
                     color: accentColor,
                     flexShrink: 0,
                 }}
@@ -87,70 +119,48 @@ function InfoCard({ icon, title, description, delay = 0, accent = 'primary' }: I
 }
 
 interface StepSectionProps {
-    step: number;
     title: string;
     children: React.ReactNode;
     isLast?: boolean;
-    delay?: number;
+    isActive?: boolean;
 }
 
-function StepSection({ step, title, children, isLast = false, delay = 0 }: StepSectionProps) {
+function StepSection({ title, children, isLast = false, isActive = false }: StepSectionProps) {
     const theme = useTheme();
 
     return (
         <Box
             sx={{
                 display: 'flex',
-                gap: 3,
-                animation: `${slideUp} 0.5s ease-out ${delay}s both`,
+                gap: 2.5,
+                transition: 'all 0.3s ease',
+                opacity: isActive ? 1 : 0.6,
+                transform: isActive ? 'scale(1)' : 'scale(0.98)',
             }}
         >
-            {/* Step indicator with connector line */}
+            {/* Vertical line indicator */}
             <Box
                 sx={{
                     display: 'flex',
                     flexDirection: 'column',
                     alignItems: 'center',
                     flexShrink: 0,
+                    pt: 0.5,
                 }}
             >
-                {/* Step number */}
                 <Box
                     sx={{
-                        width: 40,
-                        height: 40,
-                        borderRadius: '50%',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
-                        boxShadow: `0 4px 14px ${alpha(theme.palette.primary.main, 0.35)}`,
-                        flexShrink: 0,
+                        width: 3,
+                        height: '100%',
+                        minHeight: 60,
+                        borderRadius: 1.5,
+                        background: isActive
+                            ? `linear-gradient(to bottom, ${theme.palette.primary.main} 0%, ${alpha(theme.palette.primary.main, 0.3)} 100%)`
+                            : alpha(theme.palette.primary.main, 0.15),
+                        boxShadow: isActive ? `0 0 8px ${alpha(theme.palette.primary.main, 0.4)}` : 'none',
+                        transition: 'all 0.3s ease',
                     }}
-                >
-                    <Typography
-                        sx={{
-                            fontSize: '1rem',
-                            fontWeight: 700,
-                            color: 'primary.contrastText',
-                        }}
-                    >
-                        {step}
-                    </Typography>
-                </Box>
-
-                {/* Connector line */}
-                {!isLast && (
-                    <Box
-                        sx={{
-                            width: 2,
-                            flex: 1,
-                            mt: 1,
-                            background: `linear-gradient(to bottom, ${alpha(theme.palette.primary.main, 0.3)} 0%, ${alpha(theme.palette.primary.main, 0.05)} 100%)`,
-                            borderRadius: 1,
-                        }}
-                    />
-                )}
+                />
             </Box>
 
             {/* Content */}
@@ -160,8 +170,9 @@ function StepSection({ step, title, children, isLast = false, delay = 0 }: StepS
                     sx={{
                         fontWeight: 600,
                         mb: 1.5,
-                        color: 'text.primary',
+                        color: isActive ? 'text.primary' : 'text.secondary',
                         letterSpacing: '0.01em',
+                        transition: 'all 0.3s ease',
                     }}
                 >
                     {title}
@@ -172,8 +183,221 @@ function StepSection({ step, title, children, isLast = false, delay = 0 }: StepS
     );
 }
 
+// Find the best available voice, preferring Google voices
+function getBestVoice(): SpeechSynthesisVoice | null {
+    const voices = speechSynthesis.getVoices();
+    if (voices.length === 0) return null;
+
+    // Prefer Google voices
+    const googleVoice = voices.find(v =>
+        v.name.toLowerCase().includes('google') &&
+        v.lang.startsWith('en')
+    );
+    if (googleVoice) return googleVoice;
+
+    // Fallback to any English voice
+    const englishVoice = voices.find(v => v.lang.startsWith('en'));
+    if (englishVoice) return englishVoice;
+
+    // Fallback to first available
+    return voices[0];
+}
+
+// Section-based narration player
+function useSectionedNarration(sections: NarrationSection[], rate: number = 1.0) {
+    const [isPlaying, setIsPlaying] = useState(false);
+    const [isPaused, setIsPaused] = useState(false);
+    const [currentSectionIndex, setCurrentSectionIndex] = useState(-1);
+    const [progress, setProgress] = useState(0);
+    const [voice, setVoice] = useState<SpeechSynthesisVoice | null>(null);
+    const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
+    const progressIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+    // Load voices when available
+    useEffect(() => {
+        const loadVoices = () => {
+            const bestVoice = getBestVoice();
+            if (bestVoice) {
+                setVoice(bestVoice);
+            }
+        };
+
+        // Voices may not be immediately available
+        loadVoices();
+        speechSynthesis.onvoiceschanged = loadVoices;
+
+        return () => {
+            speechSynthesis.onvoiceschanged = null;
+        };
+    }, []);
+
+    const stopProgressTracking = useCallback(() => {
+        if (progressIntervalRef.current) {
+            clearInterval(progressIntervalRef.current);
+            progressIntervalRef.current = null;
+        }
+    }, []);
+
+    const speakSection = useCallback((index: number) => {
+        if (index >= sections.length) {
+            // All sections complete
+            setIsPlaying(false);
+            setIsPaused(false);
+            setCurrentSectionIndex(-1);
+            setProgress(100);
+            stopProgressTracking();
+            return;
+        }
+
+        const section = sections[index];
+        setCurrentSectionIndex(index);
+
+        const utterance = new SpeechSynthesisUtterance(section.text);
+        utterance.rate = rate;
+
+        // Use Google voice if available
+        if (voice) {
+            utterance.voice = voice;
+        }
+
+        utteranceRef.current = utterance;
+
+        // Calculate progress for this section
+        const sectionProgress = (index / sections.length) * 100;
+        const sectionWeight = 100 / sections.length;
+
+        utterance.onstart = () => {
+            setProgress(sectionProgress);
+            // Start progress tracking within section
+            const words = section.text.split(/\s+/).length;
+            const estimatedDuration = (words / 2.5) * 1000 / rate;
+            const startTime = Date.now();
+
+            stopProgressTracking();
+            progressIntervalRef.current = setInterval(() => {
+                const elapsed = Date.now() - startTime;
+                const sectionProgressPercent = Math.min(elapsed / estimatedDuration, 1);
+                setProgress(sectionProgress + sectionProgressPercent * sectionWeight);
+            }, 100);
+        };
+
+        utterance.onend = () => {
+            stopProgressTracking();
+            // Move to next section
+            speakSection(index + 1);
+        };
+
+        utterance.onerror = () => {
+            stopProgressTracking();
+            setIsPlaying(false);
+            setIsPaused(false);
+        };
+
+        speechSynthesis.speak(utterance);
+    }, [sections, rate, voice, stopProgressTracking]);
+
+    const play = useCallback(() => {
+        speechSynthesis.cancel();
+        setIsPlaying(true);
+        setIsPaused(false);
+        setProgress(0);
+        speakSection(0);
+    }, [speakSection]);
+
+    const pause = useCallback(() => {
+        speechSynthesis.pause();
+        setIsPaused(true);
+        stopProgressTracking();
+    }, [stopProgressTracking]);
+
+    const resume = useCallback(() => {
+        speechSynthesis.resume();
+        setIsPaused(false);
+    }, []);
+
+    const stop = useCallback(() => {
+        speechSynthesis.cancel();
+        setIsPlaying(false);
+        setIsPaused(false);
+        setCurrentSectionIndex(-1);
+        setProgress(0);
+        stopProgressTracking();
+    }, [stopProgressTracking]);
+
+    // Cleanup on unmount
+    useEffect(() => {
+        return () => {
+            speechSynthesis.cancel();
+            stopProgressTracking();
+        };
+    }, [stopProgressTracking]);
+
+    return {
+        isPlaying,
+        isPaused,
+        currentSectionIndex,
+        currentSectionId: currentSectionIndex >= 0 ? sections[currentSectionIndex]?.id : null,
+        progress,
+        play,
+        pause,
+        resume,
+        stop,
+    };
+}
+
 export default function KseToKmv({ onClose }: { onClose: () => void }) {
     const theme = useTheme();
+    const {
+        isPlaying,
+        isPaused,
+        currentSectionIndex,
+        currentSectionId,
+        progress,
+        play,
+        pause,
+        resume,
+        stop,
+    } = useSectionedNarration(NARRATION_SECTIONS, 1.0);
+
+    // Track the highest section index that has been revealed
+    const [revealedSectionIndex, setRevealedSectionIndex] = useState(-1);
+
+    // Update revealed sections when current section changes
+    useEffect(() => {
+        if (currentSectionIndex > revealedSectionIndex) {
+            setRevealedSectionIndex(currentSectionIndex);
+        }
+    }, [currentSectionIndex, revealedSectionIndex]);
+
+    const handlePlayPause = () => {
+        if (!isPlaying) {
+            play();
+        } else if (isPaused) {
+            resume();
+        } else {
+            pause();
+        }
+    };
+
+    const handleClose = () => {
+        stop();
+        onClose();
+    };
+
+    const handleRestart = () => {
+        stop();
+        setRevealedSectionIndex(-1);
+        // Small delay to ensure state is reset before playing
+        setTimeout(() => {
+            play();
+        }, 50);
+    };
+
+    // Helper to check if a section should be visible
+    const isSectionVisible = (sectionIndex: number) => sectionIndex <= revealedSectionIndex;
+
+    // Helper to check if a section is the current active one
+    const isSectionActive = (sectionId: string) => currentSectionId === sectionId;
 
     return (
         <Container
@@ -193,122 +417,186 @@ export default function KseToKmv({ onClose }: { onClose: () => void }) {
             }}
         >
             {/* Section 1: The Core Insight */}
-            <StepSection step={1} title="The Core Insight" delay={0.1}>
-                <Typography
-                    variant="body1"
-                    sx={{
-                        lineHeight: 1.8,
-                        color: 'text.secondary',
-                    }}
-                >
-                    From <strong>Order Statistics</strong>, we know that among N uniformly distributed values in (0,1),
-                    the K-th smallest has an expected value of <strong>K / (N + 1)</strong>.
-                    <strong> K-th Smallest Estimation</strong> flips this relationship: by observing <strong>θ</strong>,
-                    the K-th smallest value, we can estimate the total count <strong>N ≈ (K / θ) − 1</strong>.
-                </Typography>
-            </StepSection>
+            <Fade in={isSectionVisible(0)} timeout={600}>
+                <Box>
+                    <StepSection
+                        title="The Core Insight"
+                        isActive={isSectionActive('insight')}
+                    >
+                        <Typography
+                            variant="body1"
+                            sx={{
+                                lineHeight: 1.8,
+                                color: 'text.secondary',
+                            }}
+                        >
+                            From <strong>Order Statistics</strong>, we know that among N uniformly distributed values in (0,1),
+                            the K-th smallest has an expected value of <strong>K / (N + 1)</strong>.
+                            <strong> K-th Smallest Estimation</strong> flips this relationship: by observing <strong>θ</strong>,
+                            the K-th smallest value, we can estimate the total count <strong>N ≈ (K / θ) − 1</strong>.
+                        </Typography>
+                    </StepSection>
+                </Box>
+            </Fade>
 
             {/* Section 2: Requirements */}
-            <StepSection step={2} title="Requirements for Practice" delay={0.2}>
-                <Typography
-                    variant="subtitle1"
-                    sx={{
-                        color: 'text.secondary',
-                        mb: 2,
-                    }}
-                >
-                    To apply this in big data scenarios, we need these conditions:
-                </Typography>
+            <Fade in={isSectionVisible(1)} timeout={600}>
+                <Box>
+                    <StepSection
+                        title="Requirements for Practice"
+                        isActive={isSectionActive('requirements')}
+                    >
+                        <Typography
+                            variant="subtitle1"
+                            sx={{
+                                color: 'text.secondary',
+                                mb: 2,
+                            }}
+                        >
+                            To apply this in big data scenarios, we need these conditions:
+                        </Typography>
 
-                <Grid container spacing={2}>
-                    <Grid size={{ xs: 12, md: 6 }}>
-                        <InfoCard
-                            icon={<TagIcon sx={{ fontSize: 22 }} />}
-                            title="Uniform Hash Function"
-                            description="Hash values uniformly distributed in (0,1), ensuring equal probability for any value."
-                            delay={0.25}
-                        />
-                    </Grid>
-                    <Grid size={{ xs: 12, md: 6 }}>
-                        <InfoCard
-                            icon={<ScatterPlotIcon sx={{ fontSize: 22 }} />}
-                            title="Sufficient Sample Size"
-                            description="N large enough for hash values to be evenly distributed across the interval."
-                            delay={0.3}
-                        />
-                    </Grid>
-                </Grid>
-            </StepSection>
+                        <Grid container spacing={2}>
+                            <Grid size={{ xs: 12, md: 6 }}>
+                                <InfoCard
+                                    icon={<TagIcon sx={{ fontSize: 22 }} />}
+                                    title="Uniform Hash Function"
+                                    description="Hash values uniformly distributed in (0,1), ensuring equal probability for any value."
+                                    isActive={isSectionActive('requirements')}
+                                />
+                            </Grid>
+                            <Grid size={{ xs: 12, md: 6 }}>
+                                <InfoCard
+                                    icon={<ScatterPlotIcon sx={{ fontSize: 22 }} />}
+                                    title="Sufficient Sample Size"
+                                    description="N large enough for hash values to be evenly distributed across the interval."
+                                    isActive={isSectionActive('requirements')}
+                                />
+                            </Grid>
+                        </Grid>
+                    </StepSection>
+                </Box>
+            </Fade>
 
             {/* Section 3: KMV Algorithm */}
-            <StepSection step={3} title="KMV: The Implementation" isLast delay={0.35}>
-                <Typography
-                    variant="subtitle1"
-                    sx={{
-                        color: 'text.secondary',
-                        mb: 2,
-                    }}
-                >
-                    KMV stores <strong>only</strong> K hash values in memory, regardless of stream size:
-                </Typography>
+            <Fade in={isSectionVisible(2)} timeout={600}>
+                <Box>
+                    <StepSection
+                        title="KMV: The Implementation"
+                        isLast
+                        isActive={isSectionActive('kmv')}
+                    >
+                        <Typography
+                            variant="subtitle1"
+                            sx={{
+                                color: 'text.secondary',
+                                mb: 2,
+                            }}
+                        >
+                            KMV stores <strong>only</strong> K hash values in memory, regardless of stream size:
+                        </Typography>
 
-                <Grid container spacing={2}>
-                    <Grid size={{ xs: 12, md: 4 }}>
-                        <InfoCard
-                            icon={<MemoryIcon sx={{ fontSize: 22 }} />}
-                            title="Initialize"
-                            description="Container for K smallest hash values (initially empty)."
-                            delay={0.4}
-                        />
-                    </Grid>
-                    <Grid size={{ xs: 12, md: 4 }}>
-                        <InfoCard
-                            icon={<PlaylistAddIcon sx={{ fontSize: 22 }} />}
-                            title="Process"
-                            description="Hash to (0,1). If smaller than K-th, add and remove largest."
-                            delay={0.45}
-                        />
-                    </Grid>
-                    <Grid size={{ xs: 12, md: 4 }}>
-                        <InfoCard
-                            icon={<FunctionsIcon sx={{ fontSize: 22 }} />}
-                            title="Estimate"
-                            description="Calculate N ≈ (K / θ) − 1 using K-th smallest value."
-                            delay={0.5}
-                        />
-                    </Grid>
-                </Grid>
-            </StepSection>
+                        <Grid container spacing={2}>
+                            <Grid size={{ xs: 12, md: 4 }}>
+                                <InfoCard
+                                    icon={<MemoryIcon sx={{ fontSize: 22 }} />}
+                                    title="Initialize"
+                                    description="Container for K smallest hash values (initially empty)."
+                                    isActive={isSectionActive('kmv')}
+                                />
+                            </Grid>
+                            <Grid size={{ xs: 12, md: 4 }}>
+                                <InfoCard
+                                    icon={<PlaylistAddIcon sx={{ fontSize: 22 }} />}
+                                    title="Process"
+                                    description="Hash to (0,1). If smaller than K-th, add and remove largest."
+                                    isActive={isSectionActive('kmv')}
+                                />
+                            </Grid>
+                            <Grid size={{ xs: 12, md: 4 }}>
+                                <InfoCard
+                                    icon={<FunctionsIcon sx={{ fontSize: 22 }} />}
+                                    title="Estimate"
+                                    description="Calculate N ≈ (K / θ) − 1 using K-th smallest value."
+                                    isActive={isSectionActive('kmv')}
+                                />
+                            </Grid>
+                        </Grid>
+                    </StepSection>
+                </Box>
+            </Fade>
 
-            <div style={{
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center',
-                marginTop: 50,
-            }}>
-                <Button
-                    variant="contained"
-                    size="large"
-                    endIcon={<ArrowForwardIcon />}
-                    onClick={onClose}
+            {/* Narration Player */}
+            <Box
+                sx={{
+                    position: 'fixed',
+                    bottom: window.innerHeight / 12,
+                    left: 0,
+                    right: 0,
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    zIndex: 1000,
+                }}
+            >
+                <Paper
+                    elevation={0}
                     sx={{
-                        px: 5,
-                        py: 1.5,
+                        p: 2,
                         borderRadius: 3,
-                        fontWeight: 600,
-                        letterSpacing: '0.03em',
-                        boxShadow: `0 4px 20px ${alpha(theme.palette.primary.main, 0.3)}`,
-                        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                        '&:hover': {
-                            transform: 'translateY(-2px)',
-                            boxShadow: `0 8px 30px ${alpha(theme.palette.primary.main, 0.4)}`,
-                        },
-                        animation: `${slideUp} 0.5s ease-out ${0.5}s both`,
+                        background: 'transparent',
+                        minWidth: 600,
+                        // maxWidth: 500,
                     }}
                 >
-                    Configure & Start Demo
-                </Button>
-            </div>
+                    <Stack spacing={1.5}>
+                        {/* Progress Bar */}
+                        <Slider
+                            value={progress}
+                            disabled
+                            sx={{
+                                '& .MuiSlider-thumb': { width: 12, height: 12 },
+                                '& .MuiSlider-track': { height: 3, borderRadius: 2 },
+                                '& .MuiSlider-rail': { height: 3, borderRadius: 2 },
+                                '&.Mui-disabled': { color: theme.palette.primary.main },
+                            }}
+                        />
+
+                        {/* Restart, Play/Pause and Next Buttons */}
+                        <Stack direction="row" justifyContent="center" spacing={2}>
+                            <Tooltip title="Restart">
+                                <IconButton
+                                    onClick={handleRestart}
+                                    size="large"
+                                >
+                                    <ReplayIcon />
+                                </IconButton>
+                            </Tooltip>
+                            <Tooltip title={!isPlaying ? 'Play' : isPaused ? 'Resume' : 'Pause'}>
+                                <IconButton
+                                    onClick={handlePlayPause}
+                                    size="large"
+                                    sx={{
+                                        backgroundColor: theme.palette.primary.main,
+                                        color: theme.palette.primary.contrastText,
+                                        '&:hover': { backgroundColor: theme.palette.primary.dark },
+                                    }}
+                                >
+                                    {!isPlaying || isPaused ? <PlayIcon /> : <PauseIcon />}
+                                </IconButton>
+                            </Tooltip>
+                            <Tooltip title="Next: Configure Demo">
+                                <IconButton
+                                    onClick={handleClose}
+                                    size="large"
+                                >
+                                    <SkipNextIcon />
+                                </IconButton>
+                            </Tooltip>
+                        </Stack>
+                    </Stack>
+                </Paper>
+            </Box>
         </Container>
     );
 }
