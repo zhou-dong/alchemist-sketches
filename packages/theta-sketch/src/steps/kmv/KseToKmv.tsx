@@ -66,7 +66,7 @@ function InfoCard({ icon, title, description, isActive = false, accent = 'primar
                 p: 2,
                 borderRadius: 2,
                 border: `1px solid ${alpha(accentColor, isActive ? 0.5 : 0.15)}`,
-                background: isActive ? alpha(accentColor, 0.1) : 'transparent',
+                background: 'transparent',
                 transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
                 height: '100%',
                 boxShadow: isActive ? `0 4px 20px ${alpha(accentColor, 0.15)}` : 'none',
