@@ -1,29 +1,22 @@
 import React, { useState } from 'react';
 import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
+  Box,
   Button,
   TextField,
   Typography,
   Stack,
-  Chip,
   Alert,
   useTheme,
-  IconButton
+  alpha,
+  Paper
 } from '@mui/material';
-import * as Close from '@mui/icons-material/Close';
 import * as RestartAlt from '@mui/icons-material/RestartAlt';
-import * as SportsEsports from '@mui/icons-material/SportsEsports';
+import * as PlayArrow from '@mui/icons-material/PlayArrow';
 
-const CloseIcon = Close.default as unknown as React.ElementType;
 const RestartAltIcon = RestartAlt.default as unknown as React.ElementType;
-const SportsEsportsIcon = SportsEsports.default as unknown as React.ElementType;
+const PlayArrowIcon = PlayArrow.default as unknown as React.ElementType;
 
-interface KmvConfigDialogProps {
-  open: boolean;
-  onClose: () => void;
+interface KmvConfigProps {
   onStart: () => void;
   k: number;
   streamSize: number;
@@ -33,9 +26,7 @@ interface KmvConfigDialogProps {
   defaultStreamSize: number;
 }
 
-export default function KmvConfigDialog({
-  open,
-  onClose,
+export default function KmvConfig({
   onStart,
   k,
   streamSize,
@@ -43,7 +34,7 @@ export default function KmvConfigDialog({
   setStreamSize,
   defaultK,
   defaultStreamSize
-}: KmvConfigDialogProps) {
+}: KmvConfigProps) {
   const theme = useTheme();
 
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -70,7 +61,6 @@ export default function KmvConfigDialog({
   const handleStart = () => {
     if (validateConfig()) {
       onStart();
-      onClose();
     }
   };
 
@@ -81,38 +71,54 @@ export default function KmvConfigDialog({
   };
 
   return (
-    <Dialog
-      open={open}
-      onClose={onClose}
-      maxWidth="sm"
-      fullWidth
+    <Box
       sx={{
-        '& .MuiDialog-paper': {
-          borderRadius: 3,
-          background: theme.palette.mode === 'dark'
-            ? 'rgba(18, 18, 18, 0.95)'
-            : 'rgba(255, 255, 255, 0.95)',
-          backdropFilter: 'blur(10px)',
-          border: `1px solid ${theme.palette.mode === 'dark'
-            ? 'rgba(255, 255, 255, 0.1)'
-            : 'rgba(0, 0, 0, 0.1)'}`,
-          color: theme.palette.text.primary
-        }
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        p: 3,
       }}
     >
-      <DialogTitle sx={{ pb: 1, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Typography>
-          KMV Animation Configuration
+      <Paper
+        elevation={0}
+        variant="outlined"
+        sx={{
+          maxWidth: 480,
+          width: '100%',
+          p: 4,
+          borderRadius: 3,
+          background: 'transparent',
+        }}
+      >
+        {/* Header */}
+        <Typography
+          variant="h5"
+          sx={{
+            fontWeight: 600,
+            mb: 1,
+            color: 'text.primary',
+            letterSpacing: '-0.01em',
+          }}
+        >
+          Configure Demo
         </Typography>
-        <IconButton onClick={onClose}>
-          <CloseIcon />
-        </IconButton>
-      </DialogTitle>
+        <Typography
+          variant="body2"
+          sx={{
+            color: 'text.secondary',
+            mb: 4,
+          }}
+        >
+          Adjust the parameters to see how KMV algorithm performs with different settings.
+        </Typography>
 
-      <DialogContent>
-        <Stack spacing={2} sx={{ mt: 1 }}>
-          {/* K Value Configuration */}
-
+        {/* Form Fields */}
+        <Stack spacing={3}>
           <TextField
             fullWidth
             type="number"
@@ -121,6 +127,11 @@ export default function KmvConfigDialog({
             error={!!errors.k}
             helperText={errors.k || "K: Number of smallest hash values to keep"}
             size="small"
+            sx={{
+              '& .MuiOutlinedInput-root': {
+                borderRadius: 2,
+              },
+            }}
           />
 
           <TextField
@@ -131,52 +142,125 @@ export default function KmvConfigDialog({
             error={!!errors.streamSize}
             helperText={errors.streamSize || "Stream Size: Number of elements to process"}
             size="small"
+            sx={{
+              '& .MuiOutlinedInput-root': {
+                borderRadius: 2,
+              },
+            }}
           />
 
-          {/* Stream Size Configuration */}
-          <Stack direction="row" spacing={1} alignItems="center" sx={{ mt: 0 }}>
-            <Chip
-              label={`Estimated accuracy: ${Math.round((1 - Math.sqrt(1 / k - 1 / streamSize)) * 100)}%)`}
-              size="small"
-              color="secondary"
-              variant="outlined"
+          {/* Accuracy Info */}
+          <Box
+            sx={{
+              p: 2.5,
+              borderRadius: 3,
+              // background: `linear-gradient(135deg, ${alpha(theme.palette.primary.main, 0.06)} 0%, ${alpha(theme.palette.secondary.main, 0.06)} 100%)`,
+              border: `1px solid ${alpha(theme.palette.divider, 1)}`,
+              position: 'relative',
+              overflow: 'hidden',
+            }}
+          >
+            {/* Decorative gradient circle */}
+            <Box
+              sx={{
+                position: 'absolute',
+                top: -20,
+                right: -20,
+                width: 80,
+                height: 80,
+                borderRadius: '50%',
+                background: `radial-gradient(circle, ${alpha(theme.palette.primary.main, 0.15)} 0%, transparent 70%)`,
+                pointerEvents: 'none',
+              }}
             />
-            <Typography variant="caption" color="text.secondary">
-              {streamSize > k * 100 ?
-                `Note: Accuracy converges to ~${Math.round((1 - 1 / Math.sqrt(k)) * 100)}% when N >> K` :
-                'Accuracy improves as K increases relative to N'
-              }
-            </Typography>
-          </Stack>
+
+            <Stack direction="row" spacing={2.5} alignItems="center">
+
+              {/* Content */}
+              <Box sx={{ flex: 1, minWidth: 0 }}>
+                <Stack direction="row" alignItems="baseline" spacing={0.5}>
+                  <Typography
+                    sx={{
+                      fontSize: '1.2rem',
+                      fontWeight: 700,
+                      color: 'text.primary',
+                      lineHeight: 1,
+                    }}
+                  >
+                    ~{Math.round((1 - Math.sqrt(1 / k - 1 / streamSize)) * 100)}%
+                  </Typography>
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      color: 'text.secondary',
+                      fontWeight: 500,
+                    }}
+                  >
+                    accuracy
+                  </Typography>
+                </Stack>
+                <Typography
+                  variant="caption"
+                  sx={{
+                    color: 'text.secondary',
+                    display: 'block',
+                    mt: 0.5,
+                  }}
+                >
+                  {streamSize > k * 100
+                    ? `Converges to ~${Math.round((1 - 1 / Math.sqrt(k)) * 100)}% when N >> K`
+                    : 'Accuracy improves as K increases relative to N'}
+                </Typography>
+              </Box>
+            </Stack>
+          </Box>
 
           {/* Validation Alert */}
           {Object.keys(errors).length > 0 && (
-            <Alert severity="error" sx={{ mt: 1 }}>
-              Please fix the configuration errors above before starting the animation.
+            <Alert severity="error" sx={{ borderRadius: 2 }}>
+              Please fix the configuration errors above before starting.
             </Alert>
           )}
         </Stack>
-      </DialogContent>
 
-      <DialogActions sx={{ p: 3, pt: 1 }}>
-        <Button
-          onClick={handleReset}
-          variant="outlined"
-          startIcon={<RestartAltIcon />}
-          sx={{ textTransform: 'none' }}
-        >
-          Reset
-        </Button>
+        {/* Actions */}
+        <Stack direction="row" spacing={2} justifyContent="center" sx={{ mt: 4 }}>
+          <Button
+            onClick={handleReset}
+            variant="text"
+            startIcon={<RestartAltIcon />}
+            sx={{
+              textTransform: 'none',
+              color: 'text.secondary',
+              '&:hover': {
+                backgroundColor: alpha(theme.palette.divider, 0.1),
+              },
+            }}
+          >
+            Reset
+          </Button>
 
-        <Button
-          onClick={handleStart}
-          variant="contained"
-          startIcon={<SportsEsportsIcon />}
-          disabled={Object.keys(errors).length > 0}
-        >
-          Start
-        </Button>
-      </DialogActions>
-    </Dialog>
+          <Button
+            onClick={handleStart}
+            variant="contained"
+            endIcon={<PlayArrowIcon />}
+            disabled={Object.keys(errors).length > 0}
+            sx={{
+              px: 4,
+              py: 1,
+              borderRadius: 2,
+              textTransform: 'none',
+              fontWeight: 600,
+              boxShadow: `0 4px 14px ${alpha(theme.palette.primary.main, 0.3)}`,
+              '&:hover': {
+                boxShadow: `0 6px 20px ${alpha(theme.palette.primary.main, 0.4)}`,
+              },
+            }}
+          >
+            Start Demo
+          </Button>
+        </Stack>
+      </Paper>
+    </Box>
   );
-} 
+}
