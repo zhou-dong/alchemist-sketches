@@ -16,7 +16,6 @@ import * as Settings from '@mui/icons-material/Settings';
 import * as TipsAndUpdates from '@mui/icons-material/TipsAndUpdates';
 import * as SportsEsports from '@mui/icons-material/SportsEsports';
 import NextPageButton from '../../components/NextPageButton';
-import StartButton from '../../components/StartButton';
 import StepTitle from '@alchemist/theta-sketch/components/StepTitle';
 import { axisStyle, textStyle, circleStyle, lineStyle, useSyncObelusTheme } from '../../theme/obelusTheme';
 import { useThetaSketchProgress } from '../../contexts/ThetaSketchProgressContext';
@@ -154,10 +153,13 @@ function ThetaSketchPageContent() {
     const [k, setK] = React.useState(defaultK);
     const [streamSize, setStreamSize] = React.useState(defaultStreamSize);
 
-    const [displayIntroduction, setDisplayIntroduction] = React.useState(false);
+    const [displayIntroduction, setDisplayIntroduction] = React.useState(true);
     const [openKmvConfigDialog, setOpenKmvConfigDialog] = React.useState(false);
     const [showTimelinePlayer, setShowTimelinePlayer] = React.useState(false);
     const [showNextPageButton, setShowNextPageButton] = React.useState(false);
+    
+    // Progressive flow step: 'start' | 'intro' | 'config' | 'demo' | 'complete'
+    const [flowStep, setFlowStep] = React.useState<'start' | 'intro' | 'config' | 'demo' | 'complete'>('start');
 
     const [timeline, setTimeline] = React.useState<any>(null);
 
@@ -262,39 +264,56 @@ function ThetaSketchPageContent() {
         >
             <TimelinePlayer
                 timeline={timeline}
+                showNextButton={true}
+                nextPagePath="/theta-sketch/roadmap"
+                nextPageTitle="Go to Roadmap"
+                enableNextButton={flowStep === 'complete'}
                 onStart={() => {
                     animationController.startAnimation();
                 }}
                 onPause={() => {
                     animationController.stopAnimation();
                 }}
-                onComplete={() => {
-                    setShowNextPageButton(true);
-                    componentLevelShowNextPageButton = true;
-                    animationController.stopAnimation();
-                    completeStep('kmv');
-                }}
+                onComplete={handleDemoComplete}
             />
         </Container>
     );
 
+    // Progressive flow handlers
     const handleStart = () => {
+        setFlowStep('intro');
         setDisplayIntroduction(true);
-    }
+    };
+
+    const handleIntroComplete = () => {
+        setFlowStep('config');
+        setDisplayIntroduction(false);
+        setOpenKmvConfigDialog(true);
+    };
+
+    const handleConfigComplete = () => {
+        setFlowStep('demo');
+        setOpenKmvConfigDialog(false);
+        setShowTimelinePlayer(true);
+        handleBuildTimeline();
+    };
+
+    const handleDemoComplete = () => {
+        setFlowStep('complete');
+        setShowNextPageButton(true);
+        componentLevelShowNextPageButton = true;
+        animationController.stopAnimation();
+        completeStep('kmv');
+    };
 
     return (
         <>
             <StepTitle title="K Minimum Value (KMV)" />
-            {displayIntroduction && <KseToKmv onClose={() => {
-                setDisplayIntroduction(false);
-                setOpenKmvConfigDialog(true);
-            }} />}
+            {displayIntroduction && <KseToKmv onClose={handleIntroComplete} />}
             {showTimelinePlayer && <TimelinePlayerContainer />}
             <KmvSettingsToggle />
             <TimelinePlayerToggle />
             <IntroductionToggle />
-
-            <StartButton onStart={handleStart} />
 
             <Container maxWidth="xs">
                 <KmvConfigDialog
@@ -302,10 +321,7 @@ function ThetaSketchPageContent() {
                     onClose={() => {
                         setOpenKmvConfigDialog(false);
                     }}
-                    onStart={() => {
-                        setShowTimelinePlayer(true);
-                        handleBuildTimeline();
-                    }}
+                    onStart={handleConfigComplete}
                     k={k}
                     streamSize={streamSize}
                     setK={setK}
