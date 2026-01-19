@@ -556,8 +556,8 @@ export default function KseToKmv({ onClose }: { onClose: () => void }) {
                             disabled
                             sx={{
                                 '& .MuiSlider-thumb': { width: 12, height: 12 },
-                                '& .MuiSlider-track': { height: 3, borderRadius: 2 },
-                                '& .MuiSlider-rail': { height: 3, borderRadius: 2 },
+                                '& .MuiSlider-track': { height: 2, borderRadius: 1 },
+                                '& .MuiSlider-rail': { height: 2, borderRadius: 1 },
                                 '&.Mui-disabled': { color: theme.palette.primary.main },
                             }}
                         />
