@@ -44,7 +44,7 @@ export default function NarrationPlayer({
   subtitleMaxWidth = 600,
 }: NarrationPlayerProps) {
   const theme = useTheme();
-  const { isSupported, currentVoice } = useSpeech({ rate });
+  const { isSupported, getCurrentVoice } = useSpeech({ rate });
 
   const [isPlaying, setIsPlaying] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
@@ -140,9 +140,10 @@ export default function NarrationPlayer({
     utterance.rate = rate;
     utteranceRef.current = utterance;
 
-    // Use the best voice from useSpeech hook
-    if (currentVoice) {
-      utterance.voice = currentVoice;
+    // Use getCurrentVoice() to always get the latest voice (safe for any timing)
+    const voice = getCurrentVoice();
+    if (voice) {
+      utterance.voice = voice;
     }
 
     // Set initial subtitle to first sentence
@@ -181,7 +182,7 @@ export default function NarrationPlayer({
     onPlayingChange?.(true);
 
     speechSynthesis.speak(utterance);
-  }, [content, rate, onComplete, onPlayingChange, estimateDuration, startProgressTracking, stopProgressTracking, currentVoice, sentenceData]);
+  }, [content, rate, onComplete, onPlayingChange, estimateDuration, startProgressTracking, stopProgressTracking, getCurrentVoice, sentenceData]);
 
   // Play/Pause toggle
   const handlePlayPause = useCallback(() => {
