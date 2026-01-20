@@ -70,16 +70,16 @@ function scoreVoice(voice: SpeechSynthesisVoice): number {
   let score = 0;
   const name = voice.name;
   const lang = voice.lang;
-  
+
   // HIGHEST PRIORITY: Google English voices get massive bonus
   // This ensures Google English voices are ALWAYS selected first if available
   const isGoogleVoice = /google/i.test(name);
   const isEnglish = lang.startsWith('en');
-  
+
   if (isGoogleVoice && isEnglish) {
     score += 1000; // Guaranteed top priority
   }
-  
+
   // Prefer English voices
   if (isEnglish) {
     score += 10;
@@ -88,18 +88,18 @@ function scoreVoice(voice: SpeechSynthesisVoice): number {
       score += 5;
     }
   }
-  
+
   // Check if it's a known preferred voice (with priority bonus)
   const preferredMatch = PREFERRED_VOICES.find(pv => name.includes(pv.name));
   if (preferredMatch) {
     score += preferredMatch.priority;
   }
-  
+
   // Extra bonus for Google voices (even non-English)
   if (isGoogleVoice) {
     score += 40;
   }
-  
+
   // Check for premium patterns
   for (const pattern of PREMIUM_VOICE_PATTERNS) {
     if (pattern.test(name)) {
@@ -107,17 +107,17 @@ function scoreVoice(voice: SpeechSynthesisVoice): number {
       break;
     }
   }
-  
+
   // Local service voices are often higher quality on desktop
   if (voice.localService) {
     score += 5;
   }
-  
+
   // Penalize generic/basic voices
   if (/agnes|albert|bad news|bahh|bells|boing|bruce|bubbles|cellos|deranged|fred|good news|hysterical|junior|kathy|organ|princess|ralph|trinoids|whisper|zarvox/i.test(name)) {
     score -= 100;
   }
-  
+
   return score;
 }
 
@@ -126,11 +126,11 @@ function scoreVoice(voice: SpeechSynthesisVoice): number {
  */
 function getBestVoice(voices: SpeechSynthesisVoice[]): SpeechSynthesisVoice | null {
   if (voices.length === 0) return null;
-  
+
   // Score and sort voices
   const scored = voices.map(v => ({ voice: v, score: scoreVoice(v) }));
   scored.sort((a, b) => b.score - a.score);
-  
+
   return scored[0]?.voice ?? null;
 }
 
@@ -163,26 +163,25 @@ export function useSpeech(options: UseSpeechOptions = {}): UseSpeechReturn {
 
     const loadVoices = () => {
       const availableVoices = speechSynthesis.getVoices();
-      
+
       // Sort voices by quality score for the dropdown
       const sortedVoices = [...availableVoices].sort((a, b) => scoreVoice(b) - scoreVoice(a));
       setVoices(sortedVoices);
-      
+
       // Set default voice to the best available
       if (!currentVoice && availableVoices.length > 0) {
         const bestVoice = getBestVoice(availableVoices);
         if (bestVoice) {
           setCurrentVoice(bestVoice);
-          console.log(`[useSpeech] Selected voice: "${bestVoice.name}" (${bestVoice.lang})`);
         }
       }
     };
 
     loadVoices();
-    
+
     // Voices may load asynchronously
     speechSynthesis.addEventListener('voiceschanged', loadVoices);
-    
+
     return () => {
       speechSynthesis.removeEventListener('voiceschanged', loadVoices);
     };
@@ -202,7 +201,7 @@ export function useSpeech(options: UseSpeechOptions = {}): UseSpeechReturn {
     utterance.pitch = pitch;
     utterance.volume = volume;
     utterance.lang = lang;
-    
+
     if (currentVoice) {
       utterance.voice = currentVoice;
     }
