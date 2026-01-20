@@ -215,7 +215,7 @@ export default function KmvVisualization({
         // Calculate intro narration and its duration
         const introNarration = `Before we dive into the demo, let's review the KMV algorithm again. K Minimum Values, keeps only the K smallest hash values in memory, in this case K = ${k}. If the sketch is not full, we add the new hash. If full, we compare with theta: smaller values replace the largest, larger values are ignored. In the demo, N Expected shows the real unique count, while Estimated shows the value calculated from K divided by theta minus 1. Now let's see it in action.`;
         const narrationDuration = estimateNarrationDuration(introNarration, 1.1);
-        const animationStartTime = narrationDuration - 1;
+        const animationStartTime = narrationDuration - 2; // added 2 seconds to the narration duration to ensure animation starts after narration smoothly.
 
         const entries = buildTimelineEntries(streamSize, k);
 
