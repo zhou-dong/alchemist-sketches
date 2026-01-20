@@ -8,7 +8,7 @@ import { type Animatable } from "obelus";
 import { AnimationController } from "../utils/animation-controller";
 import StepTitle from '../components/StepTitle';
 import { axisStyle, textStyle, ringStyle, useSyncObelusTheme } from '../theme/obelusTheme';
-import { useTheme } from '@alchemist/shared';
+import { useTheme, useSpeech } from '@alchemist/shared';
 import { Container, Box, Typography, Fade } from '@mui/material';
 import TimelinePlayer from '../components/TimelinePlayer';
 import { Object3D } from 'three';
@@ -176,6 +176,7 @@ function OrderStatisticsPageContent() {
     const { completeStep, isStepCompleted } = useThetaSketchProgress();
     const [currentNarration, setCurrentNarration] = React.useState<string>('');
     const { mode } = useTheme();
+    const { getCurrentVoice } = useSpeech({ rate: 1.0 });
 
     const lastSpokenStepRef = useRef<number>(-1);
 
@@ -195,9 +196,10 @@ function OrderStatisticsPageContent() {
             speechSynthesis.cancel();
             const utterance = new SpeechSynthesisUtterance(narration);
 
-            const googleVoice = speechSynthesis.getVoices().find(v => v.name.includes('Google US English'));
-            if (googleVoice) {
-                utterance.voice = googleVoice;
+            // Use getCurrentVoice() to always get the latest voice (safe for callbacks)
+            const voice = getCurrentVoice();
+            if (voice) {
+                utterance.voice = voice;
             }
 
             utterance.rate = 1.0;
@@ -206,7 +208,7 @@ function OrderStatisticsPageContent() {
             };
             speechSynthesis.speak(utterance);
         }
-    }, []);
+    }, [getCurrentVoice]);
 
     // Add callbacks to timeline for each step
     useEffect(() => {
