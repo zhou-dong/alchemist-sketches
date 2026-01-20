@@ -592,16 +592,16 @@ export default function ThetaSketchOverview() {
                     {/* Controls */}
                     <Stack direction="row" spacing={1} alignItems="center">
                         <Tooltip title="Restart">
-                            <IconButton onClick={handleRestart} size="small">
-                                <ReplayIcon sx={{ fontSize: 20 }} />
+                            <IconButton onClick={handleRestart} size="large">
+                                <ReplayIcon />
                             </IconButton>
                         </Tooltip>
                         <Tooltip title={isPlaying ? 'Pause' : isPaused ? 'Resume' : 'Play'}>
-                            <IconButton onClick={handlePlayPause} size="medium" color="primary">
+                            <IconButton onClick={handlePlayPause} size="large" color="primary">
                                 {isPlaying ? (
-                                    <PauseIcon sx={{ fontSize: 28 }} />
+                                    <PauseIcon />
                                 ) : (
-                                    <PlayIcon sx={{ fontSize: 28 }} />
+                                    <PlayIcon />
                                 )}
                             </IconButton>
                         </Tooltip>
@@ -615,10 +615,9 @@ export default function ThetaSketchOverview() {
                                         completeStep('theta-sketch');
                                         navigate('/theta-sketch/roadmap');
                                     }}
-                                    size="small"
-                                    disabled={revealedSectionIndex >= NARRATION_SECTIONS.length - 1}
+                                    size="large"
                                 >
-                                    <SkipNextIcon sx={{ fontSize: 20 }} />
+                                    <SkipNextIcon />
                                 </IconButton>
                             </span>
                         </Tooltip>
