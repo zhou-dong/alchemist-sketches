@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { CSS3DRenderer } from "three/examples/jsm/renderers/CSS3DRenderer";
+import { CSS3DRenderer } from "three/addons/renderers/CSS3DRenderer.js";
 import { DualRenderer, DualScene } from 'obelus-three-render';
 
 export function createOrthographicCamera(
