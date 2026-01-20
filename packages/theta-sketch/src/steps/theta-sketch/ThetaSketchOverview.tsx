@@ -4,7 +4,7 @@ export default function ThetaSketchOverview() {
     const theme = useTheme();
 
     return (
-        <Container maxWidth="lg" sx={{ py: 4, marginTop: '60px' }}>
+        <Container maxWidth="lg" sx={{ marginTop: '60px' }}>
             <Stack spacing={5}>
                 {/* Header */}
                 <Box sx={{ textAlign: 'center', mb: 2 }}>
@@ -150,7 +150,10 @@ export default function ThetaSketchOverview() {
                                     variant="h6"
                                     fontWeight="600"
                                     gutterBottom
-                                    sx={{ color: 'success.main' }}
+                                    sx={{
+                                        color: 'primary.main',
+                                        textTransform: 'uppercase',
+                                    }}
                                 >
                                     Theta Sketch
                                 </Typography>
@@ -208,19 +211,19 @@ export default function ThetaSketchOverview() {
                             title="Union (A ∪ B)"
                             description="Combine all unique elements from both sets"
                             formula="θ = min(θ_A, θ_B)"
-                            explanation="Keep values < min threshold, then estimate"
+                            explanation="Merge both hash sets, filter by min(θ), estimate = |merged| / θ"
                         />
                         <SetOperationCard
                             title="Intersection (A ∩ B)"
                             description="Find elements present in both sets"
                             formula="θ = min(θ_A, θ_B)"
-                            explanation="Keep values in both sets that are < min threshold"
+                            explanation="Keep only hashes appearing in both A and B, estimate = |common| / θ"
                         />
                         <SetOperationCard
                             title="Difference (A − B)"
                             description="Elements in A but not in B"
                             formula="θ = min(θ_A, θ_B)"
-                            explanation="Keep A's values not in B, filter by min threshold"
+                            explanation="Keep A's hashes that don't appear in B, estimate = |A−B| / θ"
                         />
                     </Stack>
                 </Box>
@@ -355,7 +358,7 @@ function ComparisonItem({
                 variant="body2"
                 sx={{
                     color: isPositive
-                        ? 'success.main'
+                        ? 'primary.main'
                         : 'text.primary',
                     fontFamily: 'monospace',
                     fontSize: '0.85rem',
@@ -435,7 +438,7 @@ function StepBadge({ step }: { step: number }) {
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                background: `linear-gradient(135deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})`,
+                background: `${theme.palette.primary.main}`,
                 color: 'white',
                 fontSize: '0.8rem',
                 fontWeight: 600,
