@@ -18,8 +18,6 @@ export default function KmvIntroCard({ visible }: KmvIntroCardProps) {
                     transform: 'translate(-50%, -50%)',
                     zIndex: 1100,
                     minWidth: 500,
-                    // maxWidth: 600,
-                    // width: '90%',
                 }}
             >
                 <Box
@@ -63,7 +61,7 @@ export default function KmvIntroCard({ visible }: KmvIntroCardProps) {
                                     fontSize: '1.2rem',
                                 }}
                             >
-                                Algorithm Overview
+                                Algorithm Review
                             </Typography>
                         </Box>
 
@@ -169,11 +167,10 @@ export default function KmvIntroCard({ visible }: KmvIntroCardProps) {
                         <Box
                             sx={{
                                 display: 'flex',
-                                justifyContent: 'center',
-                                gap: 4,
+                                alignItems: 'center',
                             }}
                         >
-                            <Box sx={{ textAlign: 'center', width: '33%' }}>
+                            <Box sx={{ flex: 1, textAlign: 'center' }}>
                                 <Typography
                                     variant="caption"
                                     sx={{
@@ -197,15 +194,24 @@ export default function KmvIntroCard({ visible }: KmvIntroCardProps) {
                             </Box>
                             <Box
                                 sx={{
-                                    width: '33%',
-                                    background: `linear-gradient(to right,
-                                        ${alpha(theme.palette.primary.main, 0.6)}, 
-                                        ${alpha(theme.palette.secondary.main, 0.6)}
-                                    )`,
-                                    borderRadius: 2,
+                                    flex: 1,
+                                    display: 'flex',
+                                    justifyContent: 'center',
                                 }}
-                            />
-                            <Box sx={{ textAlign: 'center', width: '33%' }}>
+                            >
+                                <Box
+                                    sx={{
+                                        width: 50,
+                                        height: 50,
+                                        borderRadius: '50%',
+                                        background: `linear-gradient(to right,
+                                            ${alpha(theme.palette.primary.main, 0.6)}, 
+                                            ${alpha(theme.palette.secondary.main, 0.6)}
+                                        )`,
+                                    }}
+                                />
+                            </Box>
+                            <Box sx={{ flex: 1, textAlign: 'center' }}>
                                 <Typography
                                     variant="caption"
                                     sx={{
