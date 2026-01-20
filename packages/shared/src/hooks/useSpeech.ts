@@ -18,6 +18,11 @@ export interface UseSpeechReturn {
   voices: SpeechSynthesisVoice[];
   setVoice: (voice: SpeechSynthesisVoice) => void;
   currentVoice: SpeechSynthesisVoice | null;
+  /** 
+   * Get the current voice at call-time (safe for use in callbacks/closures)
+   * This avoids stale closure issues when voice loads asynchronously
+   */
+  getCurrentVoice: () => SpeechSynthesisVoice | null;
 }
 
 /**
@@ -154,6 +159,8 @@ export function useSpeech(options: UseSpeechOptions = {}): UseSpeechReturn {
   const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([]);
   const [currentVoice, setCurrentVoice] = useState<SpeechSynthesisVoice | null>(null);
   const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
+  // Ref to always have access to the latest voice (for use in callbacks/closures)
+  const currentVoiceRef = useRef<SpeechSynthesisVoice | null>(null);
 
   const isSupported = typeof window !== 'undefined' && 'speechSynthesis' in window;
 
@@ -247,6 +254,17 @@ export function useSpeech(options: UseSpeechOptions = {}): UseSpeechReturn {
 
   const setVoice = useCallback((voice: SpeechSynthesisVoice) => {
     setCurrentVoice(voice);
+    currentVoiceRef.current = voice;
+  }, []);
+
+  // Keep the ref in sync with state
+  useEffect(() => {
+    currentVoiceRef.current = currentVoice;
+  }, [currentVoice]);
+
+  // Getter function that always returns the latest voice (safe for callbacks)
+  const getCurrentVoice = useCallback((): SpeechSynthesisVoice | null => {
+    return currentVoiceRef.current;
   }, []);
 
   // Cleanup on unmount
@@ -269,6 +287,7 @@ export function useSpeech(options: UseSpeechOptions = {}): UseSpeechReturn {
     voices,
     setVoice,
     currentVoice,
+    getCurrentVoice,
   };
 }
 
