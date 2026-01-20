@@ -9,7 +9,7 @@ export { default as OrderStatisticsPage } from './steps/OrderStatistics';
 export { default as KthSmallestPage } from './steps/kse';
 export { default as KmvPage } from './steps/kmv';
 export { default as SetOperationsPage } from './steps/set-operations';
-export { default as ThetaSketchOverviewPage } from './steps/theta-sketch';
+export { default as ThetaSketchPage } from './steps/ThetaSketch';
 
 // Progress context
 export {

@@ -2,7 +2,7 @@ import { useState, useCallback, useEffect, useRef } from 'react';
 import { Box, Typography, Paper, Stack, Container, alpha, useTheme, IconButton, Tooltip, Fade, Slider } from '@mui/material';
 import { useSpeech } from '@alchemist/shared';
 import { useNavigate } from 'react-router-dom';
-import { useThetaSketchProgress } from '../../contexts/ThetaSketchProgressContext';
+import { useThetaSketchProgress } from '../contexts/ThetaSketchProgressContext';
 
 import * as SkipNext from '@mui/icons-material/SkipNext';
 import * as Replay from '@mui/icons-material/Replay';

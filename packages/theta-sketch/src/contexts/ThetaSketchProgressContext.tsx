@@ -49,7 +49,7 @@ export const THETA_SKETCH_STEPS: RoadmapStep[] = [
         title: 'Theta Sketch',
         description: 'The complete algorithm - combining KMV with theta for efficient set operations.',
         duration: '~12 min',
-        route: '/theta-sketch/theta-sketch-overview',
+        route: '/theta-sketch/theta-sketch',
     },
 ];
 
