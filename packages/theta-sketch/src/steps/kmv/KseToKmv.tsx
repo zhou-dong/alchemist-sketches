@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { Box, Typography, alpha, useTheme, Grid, Container, IconButton, Slider, Stack, Tooltip, Paper, Fade } from '@mui/material';
+import { useSpeech } from '@alchemist/shared';
 
 import * as Tag from '@mui/icons-material/Tag';
 import * as ScatterPlot from '@mui/icons-material/ScatterPlot';
@@ -184,52 +185,15 @@ function StepSection({ title, children, isLast = false, isActive = false }: Step
 }
 
 // Find the best available voice, preferring Google voices
-function getBestVoice(): SpeechSynthesisVoice | null {
-    const voices = speechSynthesis.getVoices();
-    if (voices.length === 0) return null;
-
-    // Prefer Google voices
-    const googleVoice = voices.find(v =>
-        v.name.toLowerCase().includes('google') &&
-        v.lang.startsWith('en')
-    );
-    if (googleVoice) return googleVoice;
-
-    // Fallback to any English voice
-    const englishVoice = voices.find(v => v.lang.startsWith('en'));
-    if (englishVoice) return englishVoice;
-
-    // Fallback to first available
-    return voices[0];
-}
-
 // Section-based narration player
 function useSectionedNarration(sections: NarrationSection[], rate: number = 1.0) {
     const [isPlaying, setIsPlaying] = useState(false);
     const [isPaused, setIsPaused] = useState(false);
     const [currentSectionIndex, setCurrentSectionIndex] = useState(-1);
     const [progress, setProgress] = useState(0);
-    const [voice, setVoice] = useState<SpeechSynthesisVoice | null>(null);
+    const { getCurrentVoice } = useSpeech({ rate });
     const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
     const progressIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
-
-    // Load voices when available
-    useEffect(() => {
-        const loadVoices = () => {
-            const bestVoice = getBestVoice();
-            if (bestVoice) {
-                setVoice(bestVoice);
-            }
-        };
-
-        // Voices may not be immediately available
-        loadVoices();
-        speechSynthesis.onvoiceschanged = loadVoices;
-
-        return () => {
-            speechSynthesis.onvoiceschanged = null;
-        };
-    }, []);
 
     const stopProgressTracking = useCallback(() => {
         if (progressIntervalRef.current) {
@@ -255,7 +219,8 @@ function useSectionedNarration(sections: NarrationSection[], rate: number = 1.0)
         const utterance = new SpeechSynthesisUtterance(section.text);
         utterance.rate = rate;
 
-        // Use Google voice if available
+        // Use getCurrentVoice() to always get the latest voice (safe for callbacks)
+        const voice = getCurrentVoice();
         if (voice) {
             utterance.voice = voice;
         }
@@ -294,7 +259,7 @@ function useSectionedNarration(sections: NarrationSection[], rate: number = 1.0)
         };
 
         speechSynthesis.speak(utterance);
-    }, [sections, rate, voice, stopProgressTracking]);
+    }, [sections, rate, getCurrentVoice, stopProgressTracking]);
 
     const play = useCallback(() => {
         speechSynthesis.cancel();
