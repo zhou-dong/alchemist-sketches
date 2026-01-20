@@ -10,7 +10,7 @@ import StepTitle from '@alchemist/theta-sketch/components/StepTitle';
 import { axisStyle, textStyle, useSyncObelusTheme } from '../../theme/obelusTheme';
 import TimelinePlayer from '@alchemist/theta-sketch/components/TimelinePlayer';
 import { Container, Box, Typography, Fade } from '@mui/material';
-import { useTheme } from '@alchemist/shared';
+import { useTheme, useSpeech } from '@alchemist/shared';
 import { useThetaSketchProgress } from '../../contexts/ThetaSketchProgressContext';
 import { calculateStepTimings } from '../../utils/narration';
 
@@ -143,6 +143,7 @@ function KmvPageContent() {
     const { completeStep, isStepCompleted } = useThetaSketchProgress();
     const [currentNarration, setCurrentNarration] = React.useState<string>('');
     const { mode } = useTheme();
+    const { getCurrentVoice } = useSpeech({ rate: 1.0 });
 
     const lastSpokenStepRef = useRef<number>(-1);
 
@@ -161,9 +162,10 @@ function KmvPageContent() {
             speechSynthesis.cancel();
             const utterance = new SpeechSynthesisUtterance(narration);
 
-            const googleVoice = speechSynthesis.getVoices().find(v => v.name.includes('Google US English'));
-            if (googleVoice) {
-                utterance.voice = googleVoice;
+            // Use getCurrentVoice() to always get the latest voice (safe for callbacks)
+            const voice = getCurrentVoice();
+            if (voice) {
+                utterance.voice = voice;
             }
 
             utterance.rate = 1.0;
@@ -172,7 +174,7 @@ function KmvPageContent() {
             };
             speechSynthesis.speak(utterance);
         }
-    }, []);
+    }, [getCurrentVoice]);
 
     // Add callbacks to timeline for each step
     useEffect(() => {
