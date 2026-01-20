@@ -71,8 +71,17 @@ function scoreVoice(voice: SpeechSynthesisVoice): number {
   const name = voice.name;
   const lang = voice.lang;
   
+  // HIGHEST PRIORITY: Google English voices get massive bonus
+  // This ensures Google English voices are ALWAYS selected first if available
+  const isGoogleVoice = /google/i.test(name);
+  const isEnglish = lang.startsWith('en');
+  
+  if (isGoogleVoice && isEnglish) {
+    score += 1000; // Guaranteed top priority
+  }
+  
   // Prefer English voices
-  if (lang.startsWith('en')) {
+  if (isEnglish) {
     score += 10;
     // Prefer US or UK English
     if (lang === 'en-US' || lang === 'en-GB') {
@@ -86,8 +95,8 @@ function scoreVoice(voice: SpeechSynthesisVoice): number {
     score += preferredMatch.priority;
   }
   
-  // Extra bonus for Google voices
-  if (/^Google /i.test(name)) {
+  // Extra bonus for Google voices (even non-English)
+  if (isGoogleVoice) {
     score += 40;
   }
   
