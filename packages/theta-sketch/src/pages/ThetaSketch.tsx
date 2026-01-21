@@ -802,12 +802,16 @@ export default function ThetaSketchOverview() {
                         {/* Controls */}
                         <Stack direction="row" spacing={1} alignItems="center">
                             <Tooltip title={isPlaying ? 'Pause' : isPaused ? 'Resume' : 'Play'}>
-                                <IconButton onClick={handlePlayPause} size="large" color="primary">
-                                    {isPlaying ? (
-                                        <PauseIcon />
-                                    ) : (
-                                        <PlayIcon />
-                                    )}
+                                <IconButton
+                                    onClick={handlePlayPause}
+                                    size="large"
+                                    sx={{
+                                        backgroundColor: theme.palette.primary.main,
+                                        color: theme.palette.primary.contrastText,
+                                        '&:hover': { backgroundColor: theme.palette.primary.dark },
+                                    }}
+                                >
+                                    {isPlaying ? <PauseIcon /> : <PlayIcon />}
                                 </IconButton>
                             </Tooltip>
                         </Stack>
