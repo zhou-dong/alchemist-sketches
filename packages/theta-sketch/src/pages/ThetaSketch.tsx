@@ -4,7 +4,7 @@ import { useSpeech } from '@alchemist/shared';
 import { useNavigate } from 'react-router-dom';
 import { useThetaSketchProgress } from '../contexts/ThetaSketchProgressContext';
 import StepProgressIndicator from '../components/StepProgressIndicator';
-
+import { slideUp } from '@alchemist/shared';
 import * as PlayArrow from '@mui/icons-material/PlayArrow';
 import * as Pause from '@mui/icons-material/Pause';
 import * as EmojiEvents from '@mui/icons-material/EmojiEvents';
@@ -244,7 +244,6 @@ export default function ThetaSketchOverview() {
         progress,
         play,
         pause,
-        restart,
     } = useSectionedNarration(NARRATION_SECTIONS, 1.0, handleNarrationComplete);
 
     // Track which sections have been revealed
@@ -263,11 +262,6 @@ export default function ThetaSketchOverview() {
         } else {
             play();
         }
-    };
-
-    const handleRestart = () => {
-        setRevealedSectionIndex(-1);
-        restart();
     };
 
     // Check if a section should be visible
@@ -761,62 +755,72 @@ export default function ThetaSketchOverview() {
                 </Stack>
 
                 {/* Narration Controls */}
-                <Paper
-                    elevation={0}
+                <Box
                     sx={{
                         position: 'fixed',
-                        bottom: 24,
-                        left: '50%',
-                        transform: 'translateX(-50%)',
+                        bottom: window.innerHeight / 12,
+                        left: 0,
+                        right: 0,
+                        display: 'flex',
+                        justifyContent: 'center',
                         zIndex: 1000,
-                        p: 1.5,
-                        px: 3,
-                        background: "transparent",
+                        pointerEvents: 'none',
+                        animation: `${slideUp} 1s ease-out 0.25s both`,
                     }}
                 >
-                    <Stack spacing={1} alignItems="center">
-                        {/* Progress Bar */}
-                        <Box sx={{ width: '100%', minWidth: 600 }}>
-                            <Slider
-                                value={progress}
-                                min={0}
-                                max={100}
-                                size="small"
-                                sx={{
-                                    color: 'primary.main',
-                                    height: 2,
-                                    '& .MuiSlider-thumb': {
-                                        width: 12,
-                                        height: 12,
-                                        '&:hover, &.Mui-focusVisible': {
-                                            boxShadow: `0 0 0 8px ${alpha(theme.palette.primary.main, 0.16)}`,
-                                        },
-                                    },
-                                    '& .MuiSlider-rail': {
-                                        opacity: 0.3,
-                                    },
-                                }}
-                            />
-                        </Box>
-
-                        {/* Controls */}
-                        <Stack direction="row" spacing={1} alignItems="center">
-                            <Tooltip title={isPlaying ? 'Pause' : isPaused ? 'Resume' : 'Play'}>
-                                <IconButton
-                                    onClick={handlePlayPause}
-                                    size="large"
+                    <Paper
+                        elevation={0}
+                        sx={{
+                            p: 1.5,
+                            px: 3,
+                            background: "transparent",
+                            pointerEvents: 'auto',
+                        }}
+                    >
+                        <Stack spacing={1} alignItems="center">
+                            {/* Progress Bar */}
+                            <Box sx={{ width: '100%', minWidth: 600 }}>
+                                <Slider
+                                    value={progress}
+                                    min={0}
+                                    max={100}
+                                    size="small"
                                     sx={{
-                                        backgroundColor: theme.palette.primary.main,
-                                        color: theme.palette.primary.contrastText,
-                                        '&:hover': { backgroundColor: theme.palette.primary.dark },
+                                        color: 'primary.main',
+                                        height: 2,
+                                        '& .MuiSlider-thumb': {
+                                            width: 12,
+                                            height: 12,
+                                            '&:hover, &.Mui-focusVisible': {
+                                                boxShadow: `0 0 0 8px ${alpha(theme.palette.primary.main, 0.16)}`,
+                                            },
+                                        },
+                                        '& .MuiSlider-rail': {
+                                            opacity: 0.3,
+                                        },
                                     }}
-                                >
-                                    {isPlaying ? <PauseIcon /> : <PlayIcon />}
-                                </IconButton>
-                            </Tooltip>
+                                />
+                            </Box>
+
+                            {/* Controls */}
+                            <Stack direction="row" spacing={1} alignItems="center">
+                                <Tooltip title={isPlaying ? 'Pause' : isPaused ? 'Resume' : 'Play'}>
+                                    <IconButton
+                                        onClick={handlePlayPause}
+                                        size="large"
+                                        sx={{
+                                            backgroundColor: theme.palette.primary.main,
+                                            color: theme.palette.primary.contrastText,
+                                            '&:hover': { backgroundColor: theme.palette.primary.dark },
+                                        }}
+                                    >
+                                        {isPlaying ? <PauseIcon /> : <PlayIcon />}
+                                    </IconButton>
+                                </Tooltip>
+                            </Stack>
                         </Stack>
-                    </Stack>
-                </Paper>
+                    </Paper>
+                </Box>
             </Container>
         </>
     );
