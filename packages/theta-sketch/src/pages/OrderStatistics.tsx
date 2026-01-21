@@ -15,6 +15,7 @@ import { Object3D } from 'three';
 import { useThetaSketchProgress } from '../contexts/ThetaSketchProgressContext';
 import { calculateStepTimings } from '../utils/narration';
 import StepProgressIndicator from '../components/StepProgressIndicator';
+import { slideUp } from '@alchemist/shared';
 
 // Narration for each timeline step
 const STEP_NARRATIONS: Record<number, string> = {
@@ -278,6 +279,7 @@ function OrderStatisticsPageContent() {
                     left: 0,
                     right: 0,
                     zIndex: 1000,
+                    animation: `${slideUp} 1s ease-out 0.25s both`,
                 }}
             >
                 <TimelinePlayer
