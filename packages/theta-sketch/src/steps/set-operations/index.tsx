@@ -16,6 +16,7 @@ import PlayButton from '../../components/PlayButton';
 import { axisStyle, lineStyle, textStyle } from '../../theme/obelusTheme';
 import StepTitle from '@alchemist/theta-sketch/components/StepTitle';
 import { useThetaSketchProgress } from '../../contexts/ThetaSketchProgressContext';
+import StepProgressIndicator from '@alchemist/theta-sketch/components/StepProgressIndicator';
 
 const renderer = createDualRenderer();
 const camera = createOrthographicCamera();
@@ -482,6 +483,7 @@ function SetOperationsPageContent() {
     return (
         <>
             <StepTitle title="Set Operations" />
+            <StepProgressIndicator currentStepId="set-operations" />
             <KmvSettingsToggle />
             <KmvConfigDialog />
             <StartButton onStart={handleStart} />

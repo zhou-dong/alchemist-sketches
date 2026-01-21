@@ -3,6 +3,7 @@ import { Box, Typography, Paper, Stack, Container, alpha, useTheme, IconButton, 
 import { useSpeech } from '@alchemist/shared';
 import { useNavigate } from 'react-router-dom';
 import { useThetaSketchProgress } from '../contexts/ThetaSketchProgressContext';
+import StepProgressIndicator from '../components/StepProgressIndicator';
 
 import * as SkipNext from '@mui/icons-material/SkipNext';
 import * as Replay from '@mui/icons-material/Replay';
@@ -216,10 +217,14 @@ export default function ThetaSketchOverview() {
     };
 
     return (
-        <Container maxWidth="lg" sx={{ marginTop: '60px', marginBottom: '240px' }}>
-            <Stack spacing={5}>
-                {/* Header - Always visible */}
-                <Box sx={{ textAlign: 'center', mb: 2 }}>
+        <>
+            {/* Step Progress Indicator */}
+            <StepProgressIndicator currentStepId="theta-sketch" />
+
+            <Container maxWidth="lg" sx={{ marginTop: '60px', marginBottom: '240px' }}>
+                <Stack spacing={5}>
+                    {/* Header - Always visible */}
+                    <Box sx={{ textAlign: 'center', mb: 2 }}>
                     <Typography
                         variant="h3"
                         sx={{
@@ -625,6 +630,7 @@ export default function ThetaSketchOverview() {
                 </Stack>
             </Paper>
         </Container>
+        </>
     );
 }
 

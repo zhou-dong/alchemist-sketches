@@ -24,11 +24,11 @@ export const THETA_SKETCH_STEPS: RoadmapStep[] = [
         route: '/theta-sketch/order-statistics',
     },
     {
-        id: 'kth-smallest',
+        id: 'kse',
         title: 'K-th Smallest Estimation',
         description: 'How the k-th smallest value relates to the total count. The key insight behind KMV.',
         duration: '~8 min',
-        route: '/theta-sketch/kth-smallest',
+        route: '/theta-sketch/kse',
     },
     {
         id: 'kmv',

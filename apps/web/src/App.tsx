@@ -8,7 +8,6 @@ import Sketches from './pages/Sketches';
 // Import theta-sketch module
 import {
   ThetaSketchWelcome,
-  ThetaSketchRoadmap,
   ThetaSketchProgressProvider,
   OrderStatisticsPage,
   KthSmallestPage,
@@ -31,10 +30,8 @@ function App() {
               <Route path="/sketches" element={<Sketches />} />
               {/* Theta Sketch module routes */}
               <Route path="/theta-sketch" element={<ThetaSketchWelcome />} />
-              <Route path="/theta-sketch/roadmap" element={<ThetaSketchRoadmap />} />
-
               <Route path="/theta-sketch/order-statistics" element={<OrderStatisticsPage />} />
-              <Route path="/theta-sketch/kth-smallest" element={<KthSmallestPage />} />
+              <Route path="/theta-sketch/kse" element={<KthSmallestPage />} />
               <Route path="/theta-sketch/kmv" element={<KmvPage />} />
               <Route path="/theta-sketch/set-operations" element={<SetOperationsPage />} />
               <Route path="/theta-sketch/theta-sketch" element={<ThetaSketchPage />} />

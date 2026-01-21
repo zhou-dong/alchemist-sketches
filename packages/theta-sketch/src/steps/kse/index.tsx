@@ -13,6 +13,7 @@ import { Container, Box, Typography, Fade } from '@mui/material';
 import { useTheme, useSpeech } from '@alchemist/shared';
 import { useThetaSketchProgress } from '../../contexts/ThetaSketchProgressContext';
 import { calculateStepTimings } from '../../utils/narration';
+import StepProgressIndicator from '@alchemist/theta-sketch/components/StepProgressIndicator';
 
 // Narration for each timeline step
 const STEP_NARRATIONS: Record<number, string> = {
@@ -206,6 +207,7 @@ function KmvPageContent() {
     return (
         <>
             <StepTitle title="K-th Smallest Estimation" />
+            <StepProgressIndicator currentStepId="kse" />
 
             {/* Subtitle Display */}
             <Fade in={!!currentNarration}>

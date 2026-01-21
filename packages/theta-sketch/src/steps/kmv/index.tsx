@@ -8,6 +8,7 @@ import StepTitle from '@alchemist/theta-sketch/components/StepTitle';
 import * as Settings from '@mui/icons-material/Settings';
 import * as TipsAndUpdates from '@mui/icons-material/TipsAndUpdates';
 import * as SportsEsports from '@mui/icons-material/SportsEsports';
+import StepProgressIndicator from '@alchemist/theta-sketch/components/StepProgressIndicator';
 
 const SettingsIcon = Settings.default as unknown as React.ElementType;
 const TipsAndUpdatesIcon = TipsAndUpdates.default as unknown as React.ElementType;
@@ -70,6 +71,7 @@ function ThetaSketchPageContent() {
     return (
         <>
             <StepTitle title="K Minimum Value (KMV)" />
+            <StepProgressIndicator currentStepId="kmv" />
 
             {/* Introduction */}
             {flowStep === 0 && <KseToKmv onClose={() => setFlowStep(1)} />}

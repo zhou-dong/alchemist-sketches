@@ -14,6 +14,7 @@ import TimelinePlayer from '../components/TimelinePlayer';
 import { Object3D } from 'three';
 import { useThetaSketchProgress } from '../contexts/ThetaSketchProgressContext';
 import { calculateStepTimings } from '../utils/narration';
+import StepProgressIndicator from '../components/StepProgressIndicator';
 
 // Narration for each timeline step
 const STEP_NARRATIONS: Record<number, string> = {
@@ -241,6 +242,7 @@ function OrderStatisticsPageContent() {
     return (
         <>
             <StepTitle title="Order Statistics" />
+            <StepProgressIndicator currentStepId="order-statistics" />
 
             {/* Subtitle Display */}
             <Fade in={!!currentNarration}>
