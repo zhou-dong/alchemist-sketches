@@ -143,7 +143,6 @@ export default function TimelinePlayer({
     onMuteChange?.(newMuted);
   };
 
-  const iconSize = size === 'small' ? 20 : size === 'large' ? 28 : 24;
   const buttonSize = size === 'small' ? 'small' : size === 'medium' ? 'medium' : 'large';
 
   const ProgressBar = () => {
@@ -206,7 +205,7 @@ export default function TimelinePlayer({
               size={buttonSize}
               sx={{ color: theme.palette.text.secondary }}
             >
-              <RestartIcon sx={{ fontSize: iconSize }} />
+              <RestartIcon />
             </IconButton>
           </Tooltip>
 
@@ -223,9 +222,9 @@ export default function TimelinePlayer({
               }}
             >
               {isPlaying ? (
-                <PauseIcon sx={{ fontSize: iconSize }} />
+                <PauseIcon />
               ) : (
-                <PlayIcon sx={{ fontSize: iconSize }} />
+                <PlayIcon />
               )}
             </IconButton>
           </Tooltip>
@@ -238,7 +237,7 @@ export default function TimelinePlayer({
                   size={buttonSize}
                   sx={{ color: theme.palette.text.secondary }}
                 >
-                  <SpeedIcon sx={{ fontSize: iconSize }} />
+                  <SpeedIcon />
                 </IconButton>
               </Tooltip>
               <Menu
@@ -275,9 +274,9 @@ export default function TimelinePlayer({
                 sx={{ color: theme.palette.text.secondary }}
               >
                 {isMuted ? (
-                  <VolumeOffIcon sx={{ fontSize: iconSize }} />
+                  <VolumeOffIcon />
                 ) : (
-                  <VolumeUpIcon sx={{ fontSize: iconSize }} />
+                  <VolumeUpIcon />
                 )}
               </IconButton>
             </Tooltip>
@@ -291,7 +290,7 @@ export default function TimelinePlayer({
                 sx={{ color: theme.palette.text.secondary }}
                 disabled={!enableNextButton}
               >
-                <SkipNextIcon sx={{ fontSize: iconSize }} />
+                <SkipNextIcon />
               </IconButton>
             </Tooltip>
           )}
