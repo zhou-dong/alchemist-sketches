@@ -14,6 +14,7 @@ import { useTheme, useSpeech } from '@alchemist/shared';
 import { useThetaSketchProgress } from '../../contexts/ThetaSketchProgressContext';
 import { calculateStepTimings } from '../../utils/narration';
 import StepProgressIndicator from '@alchemist/theta-sketch/components/StepProgressIndicator';
+import { slideUp } from '@alchemist/shared';
 
 // Narration for each timeline step
 const STEP_NARRATIONS: Record<number, string> = {
@@ -243,6 +244,7 @@ function KmvPageContent() {
                     left: 0,
                     right: 0,
                     zIndex: 1000,
+                    animation: `${slideUp} 1s ease-out 0.25s both`,
                 }}
             >
                 <TimelinePlayer
