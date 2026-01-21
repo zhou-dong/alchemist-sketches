@@ -12,6 +12,7 @@ import KmvIntroCard from './KmvIntroCard';
 import { axisStyle, textStyle, circleStyle, lineStyle, useSyncObelusTheme } from '../../theme/obelusTheme';
 import { useThetaSketchProgress } from '../../contexts/ThetaSketchProgressContext';
 import { useSpeech } from '@alchemist/shared';
+import { slideUp } from '@alchemist/shared';
 
 // Scene dimensions
 const axisWidth = window.innerWidth / 2;
@@ -263,6 +264,7 @@ export default function KmvVisualization({
                         left: 0,
                         right: 0,
                         zIndex: 1000,
+                        animation: `${slideUp} 1s ease-out 0.25s both`,
                     }}
                 >
                     <TimelinePlayer
