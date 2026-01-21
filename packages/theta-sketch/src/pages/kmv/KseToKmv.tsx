@@ -501,7 +501,8 @@ export default function KseToKmv({ onClose }: { onClose: () => void }) {
                     display: 'flex',
                     justifyContent: 'center',
                     alignItems: 'center',
-                    zIndex: 1000,
+                    zIndex: 100,
+                    pointerEvents: 'none',
                 }}
             >
                 <Paper
@@ -511,7 +512,8 @@ export default function KseToKmv({ onClose }: { onClose: () => void }) {
                         borderRadius: 3,
                         background: 'transparent',
                         minWidth: 600,
-                        // maxWidth: 500,
+                        pointerEvents: 'auto',
+                        zIndex: 100,
                     }}
                 >
                     <Stack spacing={1.5}>
