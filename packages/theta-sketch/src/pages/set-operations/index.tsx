@@ -163,7 +163,7 @@ function SetOperationsPageContent() {
     const [streamASize, setStreamASize] = React.useState(defaultStreamASize);
     const [streamBSize, setStreamBSize] = React.useState(defaultStreamBSize);
 
-    const [openKmvConfigDialog, setOpenKmvConfigDialog] = React.useState(false);
+    const [openKmvConfigDialog, setOpenKmvConfigDialog] = React.useState(true);
     const [showNextPageButton, setShowNextPageButton] = React.useState(false);
     const [showPlayerButton, setShowPlayerButton] = React.useState(false);
 
@@ -416,11 +416,6 @@ function SetOperationsPageContent() {
         setSteps(animatableSteps);
     }
 
-    const handleStart = () => {
-
-        setOpenKmvConfigDialog(true);
-    }
-
     const KmvConfigDialog = () => (
         <KmvConfigDialogComponent
             open={openKmvConfigDialog}
@@ -486,7 +481,6 @@ function SetOperationsPageContent() {
             <StepProgressIndicator currentStepId="set-operations" />
             <KmvSettingsToggle />
             <KmvConfigDialog />
-            <StartButton onStart={handleStart} />
             {showNextPageButton && <NextPageButton nextPagePath="/theta-sketch/theta-sketch" title="Go to Theta Sketch" />}
             {showPlayerButton && <PlayButton index={index} steps={steps} disabled={disabled} onClick={onClick} />}
             <div ref={containerRef} style={{ width: '100vw', height: '100vh', }} />
