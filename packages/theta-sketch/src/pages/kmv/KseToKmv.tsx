@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { Box, Typography, alpha, useTheme, Grid, Container, IconButton, Slider, Stack, Tooltip, Paper, Fade } from '@mui/material';
 import { useSpeech } from '@alchemist/shared';
-
+import { slideUp } from '@alchemist/shared';
 import * as Tag from '@mui/icons-material/Tag';
 import * as ScatterPlot from '@mui/icons-material/ScatterPlot';
 import * as Memory from '@mui/icons-material/Memory';
@@ -503,6 +503,7 @@ export default function KseToKmv({ onClose }: { onClose: () => void }) {
                     alignItems: 'center',
                     zIndex: 100,
                     pointerEvents: 'none',
+                    animation: `${slideUp} 1s ease-out 0.25s both`,
                 }}
             >
                 <Paper
