@@ -8,7 +8,6 @@ import { useThreeContainer } from "../../hooks/useThreeContainer";
 import { useThreeAutoResize } from "../../hooks/useThreeAutoResize";
 import { buildAnimateSteps, type PlayableStep } from 'obelus-gsap-animator';
 import NextPageButton from '../../components/NextPageButton';
-import StartButton from '../../components/StartButton';
 import KmvConfigDialogComponent from './KmvConfigDialog';
 import { Fab, Tooltip } from '@mui/material';
 import SettingsIcon from '@mui/icons-material/Settings';
