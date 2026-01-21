@@ -19,7 +19,7 @@ export const ThetaSketchWelcome = () => {
 
     const handleDiveIn = useCallback(() => {
         speechSynthesis.cancel();
-        navigate('/theta-sketch/roadmap');
+        navigate('/theta-sketch/order-statistics');
     }, [navigate]);
 
     return (

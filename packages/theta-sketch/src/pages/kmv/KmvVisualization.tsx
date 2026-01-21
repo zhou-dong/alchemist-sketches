@@ -269,8 +269,8 @@ export default function KmvVisualization({
                         timeline={timeline}
                         showNextButton={true}
                         showMuteButton={false}
-                        nextPagePath="/theta-sketch/roadmap"
-                        nextPageTitle="Go to Roadmap"
+                        nextPagePath="/theta-sketch/set-operations"
+                        nextPageTitle="Go to Set Operations"
                         enableNextButton={true}
                         onStart={() => {
                             animationController.startAnimation();

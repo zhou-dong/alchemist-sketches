@@ -487,7 +487,7 @@ function SetOperationsPageContent() {
             <KmvSettingsToggle />
             <KmvConfigDialog />
             <StartButton onStart={handleStart} />
-            {showNextPageButton && <NextPageButton nextPagePath="/theta-sketch/roadmap" title="Go to Roadmap" />}
+            {showNextPageButton && <NextPageButton nextPagePath="/theta-sketch/theta-sketch" title="Go to Theta Sketch" />}
             {showPlayerButton && <PlayButton index={index} steps={steps} disabled={disabled} onClick={onClick} />}
             <div ref={containerRef} style={{ width: '100vw', height: '100vh', }} />
         </>

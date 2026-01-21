@@ -4,11 +4,11 @@ export { ThetaSketchDemo } from './components/ThetaSketchDemo';
 export { ThetaSketchVisualization } from './components/ThetaSketchVisualization';
 
 // Step pages
-export { default as OrderStatisticsPage } from './steps/OrderStatistics';
-export { default as KthSmallestPage } from './steps/kse';
-export { default as KmvPage } from './steps/kmv';
-export { default as SetOperationsPage } from './steps/set-operations';
-export { default as ThetaSketchPage } from './steps/ThetaSketch';
+export { default as OrderStatisticsPage } from './pages/OrderStatistics';
+export { default as KthSmallestPage } from './pages/kse';
+export { default as KmvPage } from './pages/kmv';
+export { default as SetOperationsPage } from './pages/set-operations';
+export { default as ThetaSketchPage } from './pages/ThetaSketch';
 
 // Progress context
 export {

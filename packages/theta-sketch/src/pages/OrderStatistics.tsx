@@ -283,8 +283,8 @@ function OrderStatisticsPageContent() {
                 <TimelinePlayer
                     timeline={timelinePlayer}
                     showNextButton={true}
-                    nextPagePath="/theta-sketch/roadmap"
-                    nextPageTitle="Go to Roadmap"
+                    nextPagePath="/theta-sketch/kse"
+                    nextPageTitle="Go to K-th Smallest Estimation"
                     enableNextButton={isStepCompleted('order-statistics')}
                     onStart={() => {
                         animationController.startAnimation();

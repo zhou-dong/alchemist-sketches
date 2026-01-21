@@ -248,9 +248,9 @@ function KmvPageContent() {
                 <TimelinePlayer
                     timeline={timeline}
                     showNextButton={true}
-                    nextPagePath="/theta-sketch/roadmap"
-                    nextPageTitle="Go to Roadmap"
-                    enableNextButton={isStepCompleted('kth-smallest')}
+                    nextPagePath="/theta-sketch/kmv"
+                    nextPageTitle="Go to KMV Algorithm"
+                    enableNextButton={isStepCompleted('kse')}
                     onStart={() => {
                         animationController.startAnimation();
                     }}
@@ -260,7 +260,7 @@ function KmvPageContent() {
                     }}
                     onComplete={() => {
                         animationController.stopAnimation();
-                        completeStep('kth-smallest');
+                        completeStep('kse');
                     }}
                 />
             </Container>
