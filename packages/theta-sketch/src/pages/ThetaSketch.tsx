@@ -10,11 +10,15 @@ import * as Pause from '@mui/icons-material/Pause';
 import * as EmojiEvents from '@mui/icons-material/EmojiEvents';
 import * as Celebration from '@mui/icons-material/Celebration';
 import * as CloseOutlined from '@mui/icons-material/CloseOutlined';
+import * as RestartAlt from '@mui/icons-material/RestartAlt';
+import * as SkipNext from '@mui/icons-material/SkipNext';
 const CloseOutlinedIcon = CloseOutlined.default as unknown as React.ElementType;
 const PlayIcon = PlayArrow.default as unknown as React.ElementType;
 const PauseIcon = Pause.default as unknown as React.ElementType;
 const TrophyIcon = EmojiEvents.default as unknown as React.ElementType;
 const CelebrationIcon = Celebration.default as unknown as React.ElementType;
+const RestartIcon = RestartAlt.default as unknown as React.ElementType;
+const SkipNextIcon = SkipNext.default as unknown as React.ElementType;
 
 // Confetti animation keyframes
 const confettiFall = keyframes`
@@ -244,7 +248,23 @@ export default function ThetaSketchOverview() {
         progress,
         play,
         pause,
+        restart,
+        stop,
     } = useSectionedNarration(NARRATION_SECTIONS, 1.0, handleNarrationComplete);
+
+    // Skip to end - complete the narration immediately
+    const handleSkipToEnd = useCallback(() => {
+        stop();
+        setRevealedSectionIndex(NARRATION_SECTIONS.length - 1);
+        completeStep('theta-sketch');
+        setShowCelebration(true);
+    }, [stop, completeStep]);
+
+    // Restart narration
+    const handleRestart = useCallback(() => {
+        setRevealedSectionIndex(-1);
+        restart();
+    }, [restart]);
 
     // Track which sections have been revealed
     const [revealedSectionIndex, setRevealedSectionIndex] = useState(-1);
@@ -420,7 +440,7 @@ export default function ThetaSketchOverview() {
                 </Box>
             </Fade>
 
-            <Container maxWidth="lg" sx={{ marginTop: '60px', marginBottom: '240px' }}>
+            <Container maxWidth="lg" sx={{ marginTop: '60px', marginBottom: '300px' }}>
                 <Stack spacing={5}>
                     {/* Header - Always visible */}
                     <Box sx={{ textAlign: 'center', mb: 2 }}>
@@ -804,6 +824,15 @@ export default function ThetaSketchOverview() {
 
                             {/* Controls */}
                             <Stack direction="row" spacing={1} alignItems="center">
+                                <Tooltip title="Restart">
+                                    <IconButton
+                                        onClick={handleRestart}
+                                        size="large"
+                                        sx={{ color: theme.palette.text.secondary }}
+                                    >
+                                        <RestartIcon />
+                                    </IconButton>
+                                </Tooltip>
                                 <Tooltip title={isPlaying ? 'Pause' : isPaused ? 'Resume' : 'Play'}>
                                     <IconButton
                                         onClick={handlePlayPause}
@@ -815,6 +844,15 @@ export default function ThetaSketchOverview() {
                                         }}
                                     >
                                         {isPlaying ? <PauseIcon /> : <PlayIcon />}
+                                    </IconButton>
+                                </Tooltip>
+                                <Tooltip title="Skip to End">
+                                    <IconButton
+                                        onClick={handleSkipToEnd}
+                                        size="large"
+                                        sx={{ color: theme.palette.text.secondary }}
+                                    >
+                                        <SkipNextIcon />
                                     </IconButton>
                                 </Tooltip>
                             </Stack>
