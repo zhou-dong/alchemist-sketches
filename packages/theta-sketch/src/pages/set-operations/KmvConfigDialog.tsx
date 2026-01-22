@@ -1,25 +1,20 @@
 import React, { useState } from 'react';
 import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
+  Box,
   Button,
   TextField,
   Typography,
   Stack,
-  Chip,
   Alert,
   useTheme,
-  IconButton
+  alpha,
+  Paper
 } from '@mui/material';
-import * as Close from '@mui/icons-material/Close';
 import * as RestartAlt from '@mui/icons-material/RestartAlt';
-import * as SportsEsports from '@mui/icons-material/SportsEsports';
+import * as PlayArrow from '@mui/icons-material/PlayArrow';
 
-const CloseIcon = Close.default as unknown as React.ElementType;
 const RestartAltIcon = RestartAlt.default as unknown as React.ElementType;
-const SportsEsportsIcon = SportsEsports.default as unknown as React.ElementType;
+const PlayArrowIcon = PlayArrow.default as unknown as React.ElementType;
 
 interface KmvConfigDialogProps {
   open: boolean;
@@ -49,8 +44,7 @@ export default function KmvConfigDialog({
   defaultK,
   defaultStreamASize,
   defaultStreamBSize
-}: KmvConfigDialogProps
-) {
+}: KmvConfigDialogProps) {
   const theme = useTheme();
 
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -63,11 +57,11 @@ export default function KmvConfigDialog({
     }
 
     if (streamASize < 10 || streamASize > 200) {
-      newErrors.streamASize = 'Stream size must be between 10 and 10,000';
+      newErrors.streamASize = 'Stream size must be between 10 and 200';
     }
 
     if (streamBSize < 10 || streamBSize > 200) {
-      newErrors.streamBSize = 'Stream size must be between 10 and 10,000';
+      newErrors.streamBSize = 'Stream size must be between 10 and 200';
     }
 
     if (k >= streamASize || k >= streamBSize) {
@@ -92,39 +86,61 @@ export default function KmvConfigDialog({
     setErrors({});
   };
 
+  if (!open) return null;
+
+  const accuracyA = Math.round((1 - Math.sqrt(1 / k - 1 / streamASize)) * 100);
+  const accuracyB = Math.round((1 - Math.sqrt(1 / k - 1 / streamBSize)) * 100);
+  const convergenceAccuracy = Math.round((1 - 1 / Math.sqrt(k)) * 100);
+
   return (
-    <Dialog
-      open={open}
-      onClose={onClose}
-      maxWidth="sm"
-      fullWidth
+    <Box
       sx={{
-        '& .MuiDialog-paper': {
-          borderRadius: 3,
-          background: theme.palette.mode === 'dark'
-            ? 'rgba(18, 18, 18, 0.95)'
-            : 'rgba(255, 255, 255, 0.95)',
-          backdropFilter: 'blur(10px)',
-          border: `1px solid ${theme.palette.mode === 'dark'
-            ? 'rgba(255, 255, 255, 0.1)'
-            : 'rgba(0, 0, 0, 0.1)'}`,
-          color: theme.palette.text.primary
-        }
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        p: 3,
       }}
     >
-      <DialogTitle sx={{ pb: 1, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Typography>
-          KMV Animation Configuration
+      <Paper
+        elevation={0}
+        variant="outlined"
+        sx={{
+          maxWidth: 520,
+          width: '100%',
+          p: 4,
+          borderRadius: 3,
+          background: 'transparent',
+        }}
+      >
+        {/* Header */}
+        <Typography
+          variant="h5"
+          sx={{
+            fontWeight: 600,
+            mb: 1,
+            color: 'text.primary',
+            letterSpacing: '-0.01em',
+          }}
+        >
+          Configure Set Operations
         </Typography>
-        <IconButton onClick={onClose}>
-          <CloseIcon />
-        </IconButton>
-      </DialogTitle>
+        <Typography
+          variant="body2"
+          sx={{
+            color: 'text.secondary',
+            mb: 4,
+          }}
+        >
+          Adjust the parameters for two KMV sketches to explore union, intersection, and difference operations.
+        </Typography>
 
-      <DialogContent>
-        <Stack spacing={2} sx={{ mt: 1 }}>
-          {/* K Value Configuration */}
-
+        {/* Form Fields */}
+        <Stack spacing={3}>
           <TextField
             fullWidth
             type="number"
@@ -133,88 +149,210 @@ export default function KmvConfigDialog({
             error={!!errors.k}
             helperText={errors.k || "K: Number of smallest hash values to keep"}
             size="small"
+            sx={{
+              '& .MuiOutlinedInput-root': {
+                borderRadius: 2,
+              },
+            }}
           />
 
-          <TextField
-            fullWidth
-            type="number"
-            value={streamASize}
-            onChange={(e) => setStreamASize(parseInt(e.target.value) || 0)}
-            error={!!errors.streamASize}
-            helperText={errors.streamASize || "Stream A Size: Number of elements to process"}
-            size="small"
-          />
-
-          <TextField
-            fullWidth
-            type="number"
-            value={streamBSize}
-            onChange={(e) => setStreamBSize(parseInt(e.target.value) || 0)}
-            error={!!errors.streamBSize}
-            helperText={errors.streamBSize || "Stream B Size: Number of elements to process"}
-            size="small"
-          />
-
-          {/* Stream A Estimated Accuracy */}
-          <Stack direction="row" spacing={1} alignItems="center" sx={{ mt: 0 }}>
-            <Chip
-              label={`Estimated accuracy: ${Math.round((1 - Math.sqrt(1 / k - 1 / streamASize)) * 100)}%)`}
+          <Stack direction="row" spacing={2}>
+            <TextField
+              fullWidth
+              type="number"
+              value={streamASize}
+              onChange={(e) => setStreamASize(parseInt(e.target.value) || 0)}
+              error={!!errors.streamASize}
+              helperText={errors.streamASize || "Stream A: Elements count"}
               size="small"
-              color="secondary"
-              variant="outlined"
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  borderRadius: 2,
+                },
+              }}
             />
-            <Typography variant="caption" color="text.secondary">
-              {streamASize > k * 100 ?
-                `Note: Accuracy converges to ~${Math.round((1 - 1 / Math.sqrt(k)) * 100)}% when N >> K` :
-                'Accuracy improves as K increases relative to N'
-              }
-            </Typography>
+
+            <TextField
+              fullWidth
+              type="number"
+              value={streamBSize}
+              onChange={(e) => setStreamBSize(parseInt(e.target.value) || 0)}
+              error={!!errors.streamBSize}
+              helperText={errors.streamBSize || "Stream B: Elements count"}
+              size="small"
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  borderRadius: 2,
+                },
+              }}
+            />
           </Stack>
 
-          {/* Stream B Estimated Accuracy */}
-          <Stack direction="row" spacing={1} alignItems="center" sx={{ mt: 0 }}>
-            <Chip
-              label={`Estimated accuracy: ${Math.round((1 - Math.sqrt(1 / k - 1 / streamBSize)) * 100)}%)`}
-              size="small"
-              color="secondary"
-              variant="outlined"
-            />
-            <Typography variant="caption" color="text.secondary">
-              {streamBSize > k * 100 ?
-                `Note: Accuracy converges to ~${Math.round((1 - 1 / Math.sqrt(k)) * 100)}% when N >> K` :
-                'Accuracy improves as K increases relative to N'
-              }
-            </Typography>
-          </Stack>
+          {/* Accuracy Info */}
+          <Box
+            sx={{
+              p: 2,
+              borderRadius: 3,
+              border: `1px solid ${alpha(theme.palette.divider, 0.5)}`,
+            }}
+          >
+
+            <Stack spacing={1.5}>
+              <Stack direction="row" spacing={2} alignItems="stretch">
+                {/* Stream A */}
+                <Box
+                  sx={{
+                    flex: 1,
+                    p: 1.5,
+                    borderRadius: 2,
+                    background: alpha(theme.palette.info.main, 0.08),
+                    border: `1px solid ${alpha(theme.palette.info.main, 0.2)}`,
+                  }}
+                >
+                  <Typography
+                    variant="caption"
+                    sx={{
+                      color: theme.palette.info.main,
+                      fontWeight: 600,
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.05em',
+                      display: 'block',
+                      mb: 0.5,
+                    }}
+                  >
+                    Stream A
+                  </Typography>
+                  <Stack direction="row" alignItems="baseline" spacing={0.5}>
+                    <Typography
+                      sx={{
+                        fontSize: '1.25rem',
+                        fontWeight: 700,
+                        color: 'text.primary',
+                        lineHeight: 1,
+                      }}
+                    >
+                      ~{accuracyA}%
+                    </Typography>
+                    <Typography
+                      variant="caption"
+                      sx={{
+                        color: 'text.secondary',
+                        fontWeight: 500,
+                      }}
+                    >
+                      accuracy
+                    </Typography>
+                  </Stack>
+                </Box>
+
+                {/* Stream B */}
+                <Box
+                  sx={{
+                    flex: 1,
+                    p: 1.5,
+                    borderRadius: 2,
+                    background: alpha(theme.palette.secondary.main, 0.08),
+                    border: `1px solid ${alpha(theme.palette.secondary.main, 0.2)}`,
+                  }}
+                >
+                  <Typography
+                    variant="caption"
+                    sx={{
+                      color: theme.palette.secondary.main,
+                      fontWeight: 600,
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.05em',
+                      display: 'block',
+                      mb: 0.5,
+                    }}
+                  >
+                    Stream B
+                  </Typography>
+                  <Stack direction="row" alignItems="baseline" spacing={0.5}>
+                    <Typography
+                      sx={{
+                        fontSize: '1.25rem',
+                        fontWeight: 700,
+                        color: 'text.primary',
+                        lineHeight: 1,
+                      }}
+                    >
+                      ~{accuracyB}%
+                    </Typography>
+                    <Typography
+                      variant="caption"
+                      sx={{
+                        color: 'text.secondary',
+                        fontWeight: 500,
+                      }}
+                    >
+                      accuracy
+                    </Typography>
+                  </Stack>
+                </Box>
+              </Stack>
+
+              <Typography
+                variant="caption"
+                sx={{
+                  color: 'text.secondary',
+                  display: 'block',
+                  textAlign: 'center',
+                }}
+              >
+                {(streamASize > k * 100 || streamBSize > k * 100)
+                  ? `Converges to ~${convergenceAccuracy}% when N >> K`
+                  : 'Accuracy improves as K increases relative to N'}
+              </Typography>
+            </Stack>
+          </Box>
 
           {/* Validation Alert */}
           {Object.keys(errors).length > 0 && (
-            <Alert severity="error" sx={{ mt: 1 }}>
-              Please fix the configuration errors above before starting the animation.
+            <Alert severity="error" sx={{ borderRadius: 2 }}>
+              Please fix the configuration errors above before starting.
             </Alert>
           )}
         </Stack>
-      </DialogContent>
 
-      <DialogActions sx={{ p: 3, pt: 1 }}>
-        <Button
-          onClick={handleReset}
-          variant="outlined"
-          startIcon={<RestartAltIcon />}
-          sx={{ textTransform: 'none' }}
-        >
-          Reset
-        </Button>
+        {/* Actions */}
+        <Stack direction="row" spacing={2} justifyContent="center" sx={{ mt: 4 }}>
+          <Button
+            onClick={handleReset}
+            variant="text"
+            startIcon={<RestartAltIcon />}
+            sx={{
+              textTransform: 'none',
+              color: 'text.secondary',
+              '&:hover': {
+                backgroundColor: alpha(theme.palette.divider, 0.1),
+              },
+            }}
+          >
+            Reset
+          </Button>
 
-        <Button
-          onClick={handleStart}
-          variant="contained"
-          startIcon={<SportsEsportsIcon />}
-          disabled={Object.keys(errors).length > 0}
-        >
-          Start
-        </Button>
-      </DialogActions>
-    </Dialog>
+          <Button
+            onClick={handleStart}
+            variant="contained"
+            endIcon={<PlayArrowIcon />}
+            disabled={Object.keys(errors).length > 0}
+            sx={{
+              px: 4,
+              py: 1,
+              borderRadius: 2,
+              textTransform: 'none',
+              fontWeight: 600,
+              boxShadow: `0 4px 14px ${alpha(theme.palette.primary.main, 0.3)}`,
+              '&:hover': {
+                boxShadow: `0 6px 20px ${alpha(theme.palette.primary.main, 0.4)}`,
+              },
+            }}
+          >
+            Start Demo
+          </Button>
+        </Stack>
+      </Paper>
+    </Box>
   );
-} 
+}
