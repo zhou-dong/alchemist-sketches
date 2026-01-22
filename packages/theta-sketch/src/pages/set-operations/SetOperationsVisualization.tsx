@@ -10,7 +10,6 @@ import { buildAnimateSteps, type PlayableStep } from 'obelus-gsap-animator';
 import PlayButton from '../../components/PlayButton';
 import { axisStyle, lineStyle, textStyle } from '../../theme/obelusTheme';
 import { useThetaSketchProgress } from '../../contexts/ThetaSketchProgressContext';
-import NextPageButton from '../../components/NextPageButton';
 
 const renderer = createDualRenderer();
 const camera = createOrthographicCamera();
@@ -433,7 +432,6 @@ export default function SetOperationsVisualization({
 
     return (
         <>
-            {showNextPageButton && <NextPageButton nextPagePath="/theta-sketch/theta-sketch" title="Go to Theta Sketch" />}
             {showPlayerButton && <PlayButton index={index} steps={steps} disabled={disabled} onClick={onClick} />}
             <div ref={containerRef} style={{ width: '100vw', height: '100vh' }} />
         </>
