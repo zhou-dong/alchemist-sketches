@@ -1,22 +1,31 @@
 import React from 'react';
 import * as THREE from 'three';
+import { Container } from '@mui/material';
+import gsap from 'gsap';
 import { clearScene, createDualRenderer, createOrthographicCamera } from "../../utils/threeUtils";
-import { animate, parallel } from 'obelus';
-import { axis, circle, DualScene, latex, line, render, text, type StepSceneThree } from 'obelus-three-render';
+import { at } from 'obelus';
+import { axis, circle, DualScene, latex, line, render, text, type TimelineSceneThree } from 'obelus-three-render';
 import { AnimationController } from "../../utils/animation-controller";
 import { useThreeContainer } from "../../hooks/useThreeContainer";
 import { useThreeAutoResize } from "../../hooks/useThreeAutoResize";
-import { buildAnimateSteps, type PlayableStep } from 'obelus-gsap-animator';
-import PlayButton from '../../components/PlayButton';
+import { buildAnimateTimeline } from 'obelus-gsap-animator';
+import TimelinePlayer from '../../components/TimelinePlayer';
 import { axisStyle, lineStyle, textStyle } from '../../theme/obelusTheme';
 import { useThetaSketchProgress } from '../../contexts/ThetaSketchProgressContext';
+import { slideUp, useSpeech } from '@alchemist/shared';
 
 const renderer = createDualRenderer();
 const camera = createOrthographicCamera();
 const scene = new DualScene();
 const animationController = new AnimationController(renderer, scene, camera);
 
-let componentLevelShowNextPageButton: boolean = false;
+// Narration texts for each section
+const NARRATIONS = {
+    intro: `Let's explore the three fundamental set operations on KMV sketches: Union, Intersection, and Difference. Each operation leverages the probabilistic properties of hash values to estimate cardinality.`,
+    union: `For Union, we combine both sketches and keep only the K smallest hash values. The new theta becomes the maximum of these K values. We then estimate the union size using K divided by theta minus one.`,
+    intersection: `For Intersection, we use the smaller theta from both sketches as our threshold. We count elements that appear in both sets below this threshold, then divide by theta to get the estimated intersection size.`,
+    difference: `For Difference, we again use the smaller theta. We count elements that appear in set A but not in set B, below the threshold. Dividing by theta gives us the estimated difference size.`,
+};
 
 const unionFormula = (k: number, theta: number) => {
     const estimated = (k / theta - 1).toFixed(2);
@@ -99,11 +108,12 @@ const buildBaseAxis = (
     ];
 };
 
-const moveAxis = (id: string) => {
-    const moveAxisAnim = animate(`${id}_axis`, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 });
-    const moveStart = animate(`${id}_start`, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 });
-    const moveEnd = animate(`${id}_end`, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 });
-    return parallel([moveAxisAnim, moveStart, moveEnd]);
+const moveAxis = (id: string, t: number) => {
+    return [
+        at(t).animate(`${id}_axis`, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 }),
+        at(t).animate(`${id}_start`, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 }),
+        at(t).animate(`${id}_end`, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 }),
+    ];
 };
 
 const buildThetaMarker = (id: string, x: number, y: number, value: number) => {
@@ -114,11 +124,12 @@ const buildThetaMarker = (id: string, x: number, y: number, value: number) => {
     ];
 };
 
-const moveThetaMarkers = (id: string) => {
-    const moveLine = animate(`${id}_theta_line`, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 });
-    const moveSign = animate(`${id}_theta_sign`, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 });
-    const moveValue = animate(`${id}_theta_value`, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 });
-    return parallel([moveLine, moveSign, moveValue]);
+const moveThetaMarkers = (id: string, t: number) => {
+    return [
+        at(t).animate(`${id}_theta_line`, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 }),
+        at(t).animate(`${id}_theta_sign`, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 }),
+        at(t).animate(`${id}_theta_value`, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 }),
+    ];
 };
 
 const green = '#4CAF50';
@@ -158,27 +169,50 @@ export default function SetOperationsVisualization({
     streamBSize,
 }: SetOperationsVisualizationProps) {
     const { completeStep } = useThetaSketchProgress();
+    const { getCurrentVoice } = useSpeech({ rate: 1.0 });
 
-    const [showNextPageButton, setShowNextPageButton] = React.useState(false);
-    const [showPlayerButton, setShowPlayerButton] = React.useState(false);
-    const [index, setIndex] = React.useState(0);
-    const [disabled, setDisabled] = React.useState(false);
-    const [steps, setSteps] = React.useState<PlayableStep[]>([]);
+    const [timeline, setTimeline] = React.useState<any>(null);
+    const hasBuiltRef = React.useRef(false);
 
     const { containerRef } = useThreeContainer(renderer);
     useThreeAutoResize(containerRef, renderer, scene, camera);
 
+    // Speak narration text
+    const speak = React.useCallback((text: string) => {
+        if (!text) return;
+
+        speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.rate = 1.0;
+
+        const voice = getCurrentVoice();
+        if (voice) {
+            utterance.voice = voice;
+        }
+
+        speechSynthesis.speak(utterance);
+    }, [getCurrentVoice]);
+
+    // Cleanup on unmount
     React.useEffect(() => {
-        setShowNextPageButton(componentLevelShowNextPageButton);
-        buildAnimatableSteps();
         return () => {
             animationController.stopAnimation();
+            speechSynthesis.cancel();
         };
     }, []);
 
-    const buildScene = (): StepSceneThree => {
+    React.useEffect(() => {
+        if (!hasBuiltRef.current) {
+            hasBuiltRef.current = true;
+            buildAndSetTimeline();
+        }
+    }, [k, streamASize, streamBSize]);
+
+    const buildScene = (): TimelineSceneThree => {
         animationController.stopAnimation();
+        gsap.globalTimeline.clear();
         clearScene(scene);
+        animationController.renderAnimationOnce();
 
         const axisWidth = window.innerWidth / 2;
         const height = window.innerHeight / 6;
@@ -191,16 +225,16 @@ export default function SetOperationsVisualization({
 
         const smallKth = kthHashA.value < kthHashB.value ? kthHashA : kthHashB;
 
-        const hashesACircles = hashesA.map((hash, index) => {
+        const hashesACircles = hashesA.map((hash, idx) => {
             const { location } = hash;
             const style = new THREE.MeshBasicMaterial({ color: green });
-            return circle(`a_circle_${index}`, radius, { x: location, y: height * 2, z: 1 }, style as any);
+            return circle(`a_circle_${idx}`, radius, { x: location, y: height * 2, z: 1 }, style as any);
         });
 
-        const hashesBCircles = hashesB.map((hash, index) => {
+        const hashesBCircles = hashesB.map((hash, idx) => {
             const { location } = hash;
             const style = new THREE.MeshBasicMaterial({ color: blue });
-            return circle(`b_circle_${index}`, radius, { x: location, y: height, z: 1 }, style as any);
+            return circle(`b_circle_${idx}`, radius, { x: location, y: height, z: 1 }, style as any);
         });
 
         const kthUnionHash = () => {
@@ -211,140 +245,153 @@ export default function SetOperationsVisualization({
             const kthValue = array[k - 1];
             const kthIndex = unionHashes.findIndex((hash) => hash.value === kthValue);
             return { value: kthValue, location: unionHashes[kthIndex].location };
-        }
+        };
 
         const kthUnion = kthUnionHash();
 
-        const unionCircles = () => {
-            const result: any[] = [];
+        // Union circles
+        const unionCirclesA = hashesA
+            .filter((hash) => hash.value <= kthHashA.value)
+            .map((hash, idx) => {
+                const style = new THREE.MeshBasicMaterial({ color: green });
+                return circle(`union_a_circle_${idx}`, radius, { x: hash.location, y: height * 2, z: 1 }, style as any);
+            });
 
-            hashesA
-                .filter((hash) => hash.value <= kthHashA.value)
-                .forEach((hash, idx) => {
-                    const { location } = hash;
-                    const style = new THREE.MeshBasicMaterial({ color: green });
-                    result.push(circle(`union_a_circle_${idx}`, radius, { x: location, y: height * 2, z: 1 }, style as any));
-                });
+        const unionCirclesB = hashesB
+            .filter((hash) => hash.value <= kthHashB.value)
+            .map((hash, idx) => {
+                const style = new THREE.MeshBasicMaterial({ color: blue });
+                return circle(`union_b_circle_${idx}`, radius, { x: hash.location, y: height, z: 1 }, style as any);
+            });
 
-            hashesB
-                .filter((hash) => hash.value <= kthHashB.value)
-                .forEach((hash, idx) => {
-                    const { location } = hash;
-                    const style = new THREE.MeshBasicMaterial({ color: blue });
-                    result.push(circle(`union_b_circle_${idx}`, radius, { x: location, y: height, z: 1 }, style as any));
-                });
-
-            return result;
-        }
-
-        const moveUnionCircles = () => {
-            const moveAHashes = hashesA
-                .filter((hash) => hash.value <= kthHashA.value)
-                .map((_, idx) => animate(`union_a_circle_${idx}`, { position: { y: `-=${height * 2}` } }, { duration: 1 }));
-
-            const moveBHashes = hashesB
-                .filter((hash) => hash.value <= kthHashB.value)
-                .map((_, idx) => animate(`union_b_circle_${idx}`, { position: { y: `-=${height}` } }, { duration: 1 }));
-
-            return [parallel(moveAHashes), parallel(moveBHashes)];
-        }
-
+        // Intersection data
         const hashesAWithSmallerKth = hashesA.filter((hash) => hash.value <= smallKth.value);
         const hashesBWithSmallerKth = hashesB.filter((hash) => hash.value <= smallKth.value);
-
         const intersectionsSet = new Set(hashesAWithSmallerKth.map((hash) => hash.value));
         const intersections = hashesBWithSmallerKth.filter(item => intersectionsSet.has(item.value));
 
-        const intersectionCircles = () => {
-            const result: any[] = [];
+        // Intersection circles
+        const intersectionCirclesA = hashesAWithSmallerKth.map((hash, idx) => {
+            const style = new THREE.MeshBasicMaterial({ color: green });
+            return circle(`intersection_a_circle_${idx}`, radius, { x: hash.location, y: height * 2, z: 1 }, style as any);
+        });
 
-            hashesAWithSmallerKth
-                .forEach((hash, idx) => {
-                    const { location } = hash;
-                    const style = new THREE.MeshBasicMaterial({ color: green });
-                    result.push(circle(`intersection_a_circle_${idx}`, radius, { x: location, y: height * 2, z: 1 }, style as any));
-                });
+        const intersectionCirclesB = hashesBWithSmallerKth.map((hash, idx) => {
+            const style = new THREE.MeshBasicMaterial({ color: blue });
+            return circle(`intersection_b_circle_${idx}`, radius, { x: hash.location, y: height, z: 1 }, style as any);
+        });
 
-            hashesBWithSmallerKth
-                .forEach((hash, idx) => {
-                    const { location } = hash;
-                    const style = new THREE.MeshBasicMaterial({ color: blue });
-                    result.push(circle(`intersection_b_circle_${idx}`, radius, { x: location, y: height, z: 1 }, style as any));
-                });
+        const intersectionResultCircles = intersections.map((hash, idx) => {
+            const style = new THREE.MeshBasicMaterial({ color: yellow });
+            return circle(`intersection_theta_${idx}`, radius, { x: hash.location, y: -height - window.innerHeight, z: 1 }, style as any);
+        });
 
-            intersections.forEach((hash, idx) => {
-                const { location } = hash;
-                const style = new THREE.MeshBasicMaterial({ color: yellow });
-                result.push(circle(`intersection_theta_${idx}`, radius, { x: location, y: -height - window.innerHeight, z: 1 }, style as any));
-            });
-
-            return result;
-        }
-
-        const moveIntersectionCircles = () => {
-            const moveAHashes = hashesAWithSmallerKth
-                .map((_, idx) => animate(`intersection_a_circle_${idx}`, { position: { y: `-=${height * 3 - 10}` } }, { duration: 1 }));
-
-            const moveBHashes = hashesBWithSmallerKth
-                .map((_, idx) => animate(`intersection_b_circle_${idx}`, { position: { y: `-=${height * 2 + 10}` } }, { duration: 1 }));
-
-            const moveIntersectionThetas = intersections.map((_, idx) => {
-                return animate(`intersection_theta_${idx}`, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 });
-            });
-
-            return [parallel(moveAHashes), parallel(moveBHashes), parallel(moveIntersectionThetas)];
-        }
-
+        // Difference data
         const differencesSet = new Set(hashesBWithSmallerKth.map((hash) => hash.value));
         const differences = hashesAWithSmallerKth.filter(item => !differencesSet.has(item.value));
 
-        const differenceCircles = () => {
-            const result: any[] = [];
+        // Difference circles
+        const differenceCirclesA = hashesAWithSmallerKth.map((hash, idx) => {
+            const style = new THREE.MeshBasicMaterial({ color: green });
+            return circle(`difference_a_circle_${idx}`, radius, { x: hash.location, y: height * 2, z: 1 }, style as any);
+        });
 
-            hashesAWithSmallerKth
-                .forEach((hash, idx) => {
-                    const { location } = hash;
-                    const style = new THREE.MeshBasicMaterial({ color: green });
-                    result.push(circle(`difference_a_circle_${idx}`, radius, { x: location, y: height * 2, z: 1 }, style as any));
-                });
+        const differenceCirclesB = hashesBWithSmallerKth.map((hash, idx) => {
+            const style = new THREE.MeshBasicMaterial({ color: blue });
+            return circle(`difference_b_circle_${idx}`, radius, { x: hash.location, y: height, z: 1 }, style as any);
+        });
 
-            hashesBWithSmallerKth
-                .forEach((hash, idx) => {
-                    const { location } = hash;
-                    const style = new THREE.MeshBasicMaterial({ color: blue });
-                    result.push(circle(`difference_b_circle_${idx}`, radius, { x: location, y: height, z: 1 }, style as any));
-                });
+        const differenceResultCircles = differences.map((hash, idx) => {
+            const style = new THREE.MeshBasicMaterial({ color: yellow });
+            return circle(`difference_theta_${idx}`, radius, { x: hash.location, y: -height * 2 - window.innerHeight, z: 1 }, style as any);
+        });
 
-            differences
-                .forEach((hash, idx) => {
-                    const { location } = hash;
-                    const style = new THREE.MeshBasicMaterial({ color: yellow });
-                    result.push(circle(`difference_theta_${idx}`, radius, { x: location, y: -height * 2 - window.innerHeight, z: 1 }, style as any));
-                });
-
-            return result;
-        }
-
-        const moveDifferenceCircles = () => {
-            const moveAHashes = hashesAWithSmallerKth
-                .map((_, idx) => animate(`difference_a_circle_${idx}`, { position: { y: `-=${height * 4 - 10}` } }, { duration: 1 }));
-
-            const moveBHashes = hashesBWithSmallerKth
-                .map((_, idx) => animate(`difference_b_circle_${idx}`, { position: { y: `-=${height * 3 + 10}` } }, { duration: 1 }));
-
-            const moveDifferenceThetas = differences.map((_, idx) => {
-                return animate(`difference_theta_${idx}`, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 })
-            });
-
-            return [parallel(moveAHashes), parallel(moveBHashes), parallel(moveDifferenceThetas)];
-        }
-
+        // Titles and formulas
         const unionTitle = text("union_title", "Union", { x: -window.innerWidth / 8 * 3, y: 0 - window.innerHeight }, textStyle);
         const intersectionTitle = text("intersection_title", "Intersection", { x: -window.innerWidth / 8 * 3, y: -height - window.innerHeight }, textStyle);
         const differenceTitle = text("difference_title", "Difference", { x: -window.innerWidth / 8 * 3, y: -height * 2 - window.innerHeight }, textStyle);
         const unionFormulaLatex = latex("union_formula", unionFormula(k, kthUnion.value), { x: window.innerWidth / 8 * 3, y: 0 - window.innerHeight }, textStyle);
         const intersectionFormulaLatex = latex("intersection_formula", intersectionFormula(intersections.length, smallKth.value), { x: window.innerWidth / 8 * 3, y: -height - window.innerHeight }, textStyle);
         const differenceFormulaLatex = latex("difference_formula", differenceFormula(differences.length, smallKth.value), { x: window.innerWidth / 8 * 3, y: -height * 2 - window.innerHeight }, textStyle);
+
+        // Build timeline animations
+        let t = 0;
+        const timeline: any[] = [];
+
+        // Union section (t = 0-5)
+        timeline.push(at(t).animate("union_title", { position: { y: `+=${window.innerHeight}` } }, { duration: 1 }));
+        timeline.push(at(t).animate("union_formula", { position: { y: `+=${window.innerHeight}` } }, { duration: 1 }));
+        t += 1;
+
+        timeline.push(...moveAxis("union", t));
+        t += 1;
+
+        // Move union circles
+        hashesA.filter((hash) => hash.value <= kthHashA.value).forEach((_, idx) => {
+            timeline.push(at(t).animate(`union_a_circle_${idx}`, { position: { y: `-=${height * 2}` } }, { duration: 1 }));
+        });
+        t += 1;
+
+        hashesB.filter((hash) => hash.value <= kthHashB.value).forEach((_, idx) => {
+            timeline.push(at(t).animate(`union_b_circle_${idx}`, { position: { y: `-=${height}` } }, { duration: 1 }));
+        });
+        t += 1;
+
+        timeline.push(...moveThetaMarkers("union_theta", t));
+        t += 2; // Extra pause before intersection
+
+        // Intersection section (t = 6-12)
+        timeline.push(at(t).animate("intersection_title", { position: { y: `+=${window.innerHeight}` } }, { duration: 1 }));
+        timeline.push(at(t).animate("intersection_formula", { position: { y: `+=${window.innerHeight}` } }, { duration: 1 }));
+        t += 1;
+
+        timeline.push(...moveAxis("intersection", t));
+        t += 1;
+
+        timeline.push(...moveThetaMarkers("intersection_theta", t));
+        t += 1;
+
+        // Move intersection circles
+        hashesAWithSmallerKth.forEach((_, idx) => {
+            timeline.push(at(t).animate(`intersection_a_circle_${idx}`, { position: { y: `-=${height * 3 - 10}` } }, { duration: 1 }));
+        });
+        t += 1;
+
+        hashesBWithSmallerKth.forEach((_, idx) => {
+            timeline.push(at(t).animate(`intersection_b_circle_${idx}`, { position: { y: `-=${height * 2 + 10}` } }, { duration: 1 }));
+        });
+        t += 1;
+
+        intersections.forEach((_, idx) => {
+            timeline.push(at(t).animate(`intersection_theta_${idx}`, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 }));
+        });
+        t += 2; // Extra pause before difference
+
+        // Difference section (t = 14-20)
+        timeline.push(at(t).animate("difference_title", { position: { y: `+=${window.innerHeight}` } }, { duration: 1 }));
+        timeline.push(at(t).animate("difference_formula", { position: { y: `+=${window.innerHeight}` } }, { duration: 1 }));
+        t += 1;
+
+        timeline.push(...moveAxis("difference", t));
+        t += 1;
+
+        timeline.push(...moveThetaMarkers("difference_theta", t));
+        t += 1;
+
+        // Move difference circles
+        hashesAWithSmallerKth.forEach((_, idx) => {
+            timeline.push(at(t).animate(`difference_a_circle_${idx}`, { position: { y: `-=${height * 4 - 10}` } }, { duration: 1 }));
+        });
+        t += 1;
+
+        hashesBWithSmallerKth.forEach((_, idx) => {
+            timeline.push(at(t).animate(`difference_b_circle_${idx}`, { position: { y: `-=${height * 3 + 10}` } }, { duration: 1 }));
+        });
+        t += 1;
+
+        differences.forEach((_, idx) => {
+            timeline.push(at(t).animate(`difference_theta_${idx}`, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 }));
+        });
 
         return {
             objects: [
@@ -359,80 +406,92 @@ export default function SetOperationsVisualization({
                 ...hashesBCircles,
                 unionTitle,
                 unionFormulaLatex,
-                ...unionCircles(),
+                ...unionCirclesA,
+                ...unionCirclesB,
                 ...buildThetaMarker("union_theta", kthUnion.location, 0 - window.innerHeight, kthUnion.value),
                 intersectionTitle,
                 intersectionFormulaLatex,
-                ...intersectionCircles(),
+                ...intersectionCirclesA,
+                ...intersectionCirclesB,
+                ...intersectionResultCircles,
                 ...buildThetaMarker("intersection_theta", smallKth.location, 0 - window.innerHeight - height, smallKth.value),
                 differenceTitle,
                 differenceFormulaLatex,
-                ...differenceCircles(),
+                ...differenceCirclesA,
+                ...differenceCirclesB,
+                ...differenceResultCircles,
                 ...buildThetaMarker("difference_theta", smallKth.location, 0 - window.innerHeight - height * 2, smallKth.value),
             ],
-            steps: [
-                parallel([
-                    animate("union_title", { position: { y: `+=${window.innerHeight}` } }, { duration: 1 }),
-                    animate("union_formula", { position: { y: `+=${window.innerHeight}` } }, { duration: 1 }),
-                ]),
-                moveAxis("union"),
-                ...moveUnionCircles(),
-                moveThetaMarkers("union_theta"),
-                parallel([
-                    animate("intersection_title", { position: { y: `+=${window.innerHeight}` } }, { duration: 1 }),
-                    animate("intersection_formula", { position: { y: `+=${window.innerHeight}` } }, { duration: 1 }),
-                ]),
-                moveAxis("intersection"),
-                moveThetaMarkers("intersection_theta"),
-                ...moveIntersectionCircles(),
-                parallel([
-                    animate("difference_title", { position: { y: `+=${window.innerHeight}` } }, { duration: 1 }),
-                    animate("difference_formula", { position: { y: `+=${window.innerHeight}` } }, { duration: 1 }),
-                ]),
-                moveAxis("difference"),
-                moveThetaMarkers("difference_theta"),
-                ...moveDifferenceCircles(),
-            ],
+            timeline,
         };
     };
 
-    const buildAnimatableSteps = () => {
-        const { objects, steps: sceneSteps } = buildScene();
+    const buildAndSetTimeline = () => {
+        const { objects, timeline: timelineData } = buildScene();
         const record = render(objects, scene as any);
-        const animatableSteps = buildAnimateSteps(
-            sceneSteps,
+        const newTimeline = buildAnimateTimeline(
+            timelineData,
             record,
             animationController.startAnimation,
             animationController.stopAnimation
         );
-        setSteps(animatableSteps);
-        setShowPlayerButton(true);
-        setIndex(0);
-        setDisabled(false);
-    };
 
-    const onClick = async () => {
-        if (index === steps.length) {
-            return;
-        }
+        // Add speech callbacks synced with animation sections
+        // Intro narration at the start
+        newTimeline.call(() => speak(NARRATIONS.intro), [], 0);
 
-        setDisabled(true);
-        await steps[index].play();
+        // Union narration when union section starts (t ≈ 0)
+        newTimeline.call(() => speak(NARRATIONS.union), [], 0.5);
 
-        if (index === steps.length - 1) {
-            setShowNextPageButton(true);
-            componentLevelShowNextPageButton = true;
-            completeStep('set-operations');
-        } else {
-            setDisabled(false);
-        }
+        // Intersection narration when intersection section starts (t ≈ 6)
+        newTimeline.call(() => speak(NARRATIONS.intersection), [], 6);
 
-        setIndex(index + 1);
+        // Difference narration when difference section starts (t ≈ 14)
+        newTimeline.call(() => speak(NARRATIONS.difference), [], 14);
+
+        setTimeline(newTimeline);
     };
 
     return (
         <>
-            {showPlayerButton && <PlayButton index={index} steps={steps} disabled={disabled} onClick={onClick} />}
+            {/* Timeline Player */}
+            {timeline && (
+                <Container
+                    maxWidth="sm"
+                    sx={{
+                        position: 'fixed',
+                        bottom: window.innerHeight / 12,
+                        left: 0,
+                        right: 0,
+                        zIndex: 1000,
+                        animation: `${slideUp} 1s ease-out 0.25s both`,
+                    }}
+                >
+                    <TimelinePlayer
+                        timeline={timeline}
+                        showNextButton={true}
+                        showMuteButton={true}
+                        nextPagePath="/theta-sketch/theta-sketch"
+                        nextPageTitle="Go to Theta Sketch"
+                        enableNextButton={true}
+                        onStart={() => {
+                            animationController.startAnimation();
+                            speechSynthesis.resume();
+                        }}
+                        onPause={() => {
+                            animationController.stopAnimation();
+                            speechSynthesis.pause();
+                        }}
+                        onComplete={() => {
+                            animationController.stopAnimation();
+                            speechSynthesis.cancel();
+                            completeStep('set-operations');
+                        }}
+                    />
+                </Container>
+            )}
+
+            {/* Three.js Canvas Container */}
             <div ref={containerRef} style={{ width: '100vw', height: '100vh' }} />
         </>
     );
