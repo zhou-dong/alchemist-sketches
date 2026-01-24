@@ -147,7 +147,7 @@ export default function TimelinePlayer({
 
   const ProgressBar = () => {
     return (
-      <Box sx={{ mt: -0.5 }}>
+      <Box sx={{ mt: -0.5, width: '100%' }}>
         <Slider
           value={progress}
           onChange={(_, value) => handleProgressChange(value as number)}
@@ -192,7 +192,9 @@ export default function TimelinePlayer({
         p: 2,
         borderRadius: 3,
         background: 'transparent',
-        color: theme.palette.text.primary
+        color: theme.palette.text.primary,
+        width: 600,
+        maxWidth: '100%',
       }}
     >
       <Stack spacing={1.5}>
