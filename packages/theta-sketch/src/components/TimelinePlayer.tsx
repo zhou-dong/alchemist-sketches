@@ -195,6 +195,7 @@ export default function TimelinePlayer({
         color: theme.palette.text.primary,
         width: 600,
         maxWidth: '100%',
+        mx: 'auto',
       }}
     >
       <Stack spacing={1.5}>
