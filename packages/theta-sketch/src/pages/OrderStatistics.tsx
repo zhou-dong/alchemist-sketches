@@ -44,26 +44,6 @@ const { startTimes: STEP_START_TIMES } = calculateStepTimings(STEP_NARRATIONS);
 // Animation duration is shorter than narration - animations complete while speaking continues
 const ANIMATION_DURATION = 0.8;
 
-const scaleYAdjector = -35;
-const scaleNumeratorYAdjector = scaleYAdjector + 15;
-const scaleDenominatorYAdjector = scaleYAdjector - 13;
-
-const z = 0;
-const height = window.innerHeight / 6;
-const width = Math.min(window.innerWidth / 4, 800);
-const scale0 = (y: number) => ({ x: -width, y, z });
-const scale1 = (y: number) => ({ x: width, y, z });
-
-function scaleK(dotCount: number, k: number) {
-    const startX = 0 - width;
-    const endX = width;
-
-    const axisWidth = endX - startX;
-    const step = axisWidth / (dotCount + 1);
-    const x = startX + step * k;
-    return x;
-}
-
 const OrderStatisticsExpression = `\\mathbb{E}[X_{(k)}] = \\frac{k}{n+1}`;
 const BetaDistributionExpectedValueExpression = `
 \\mathbb{E}[\\text{Beta}(\\alpha, \\beta)] = \\frac{\\alpha}{\\alpha + \\beta}
@@ -77,42 +57,67 @@ const BetaDistributionExpectedValueExpression = `
 
 const kTh = (k: number, n: string) => `\\frac{${k}}{\\text{${n}}}`;
 
-const stepSceneObjects: Animatable<Object3D>[] = [
-    latex("order_statistics_expression", OrderStatisticsExpression, { x: scaleK(1, 1), y: height + height / 2 - window.innerHeight, z }, { ...textStyle, fontSize: "20px" }),
+const buildStepSceneObjects = (): Animatable<Object3D>[] => {
 
-    axis("axis_1", { x: -width, y: height - window.innerHeight, z }, { x: width, y: height - window.innerHeight, z }, { ...axisStyle, dotCount: 3 }),
-    text("axis_1_start", "0", scale0(height + scaleYAdjector - window.innerHeight), textStyle),
-    text("axis_1_end", "1", scale1(height + scaleYAdjector - window.innerHeight), textStyle),
-    latex("axis_1_k_1", "\\frac{1}{2}", { x: scaleK(1, 1), y: height + scaleYAdjector - window.innerHeight, z }, textStyle),
+    const scaleYAdjector = -35;
+    const scaleNumeratorYAdjector = scaleYAdjector + 15;
+    const scaleDenominatorYAdjector = scaleYAdjector - 13;
 
-    axis("axis_2", { x: -width, y: 0 - window.innerHeight, z }, { x: width, y: 0 - window.innerHeight, z }, { ...axisStyle, dotCount: 4 }),
-    text("axis_2_start", "0", scale0(0 + scaleYAdjector - window.innerHeight), textStyle),
-    text("axis_2_end", "1", scale1(0 + scaleYAdjector - window.innerHeight), textStyle),
-    latex("axis_2_k_1", "\\frac{1}{3}", { x: scaleK(2, 1), y: 0 + scaleYAdjector - window.innerHeight, z }, textStyle),
-    latex("axis_2_k_2", "\\frac{2}{3}", { x: scaleK(2, 2), y: 0 + scaleYAdjector - window.innerHeight, z }, textStyle),
+    const z = 0;
+    const height = window.innerHeight / 6;
+    const width = Math.min(window.innerWidth / 4, 800);
+    const scale0 = (y: number) => ({ x: -width, y, z });
+    const scale1 = (y: number) => ({ x: width, y, z });
 
-    // expression
-    latex("axis_1_k_1_expression_1", `= ${kTh(1, '1 + 1')}`, { x: scaleK(1, 1) + 50, y: height + scaleYAdjector - window.innerHeight, z }, textStyle),
-    latex("axis_2_k_1_expression_1", `= ${kTh(1, '2 + 1')}`, { x: scaleK(2, 1) + 50, y: 0 + scaleYAdjector - window.innerHeight, z }, textStyle),
-    latex("axis_2_k_2_expression_1", `= ${kTh(2, '2 + 1')}`, { x: scaleK(2, 2) + 50, y: 0 + scaleYAdjector - window.innerHeight, z }, textStyle),
+    function scaleK(dotCount: number, k: number) {
+        const startX = 0 - width;
+        const endX = width;
 
-    // rings
-    ring("axis_1_k_1_ring_1", 10, 1.5, { x: scaleK(1, 1) + 43, y: height + scaleDenominatorYAdjector - window.innerHeight, z }, ringStyle),
-    latex("axis_1_k_1_ring_1_k", "n = 1", { x: scaleK(1, 1) + 115, y: height + scaleDenominatorYAdjector - window.innerHeight, z }, textStyle),
-    ring("axis_1_k_1_ring_2", 10, 1.5, { x: scaleK(1, 1) + 60, y: height + scaleNumeratorYAdjector - window.innerHeight, z }, ringStyle),
-    latex("axis_1_k_1_ring_2_k", "k = 1", { x: scaleK(1, 1) + 115, y: height + scaleNumeratorYAdjector - 5 - window.innerHeight, z }, textStyle),
+        const axisWidth = endX - startX;
+        const step = axisWidth / (dotCount + 1);
+        const x = startX + step * k;
+        return x;
+    }
 
-    ring("axis_2_k_1_ring_1", 10, 1, { x: scaleK(2, 1) + 43, y: 0 + scaleDenominatorYAdjector - window.innerHeight, z }, ringStyle),
-    latex("axis_2_k_1_ring_1_k", "n = 2", { x: scaleK(2, 1) + 115, y: 0 + scaleDenominatorYAdjector - window.innerHeight, z }, textStyle),
-    ring("axis_2_k_1_ring_2", 10, 1, { x: scaleK(2, 1) + 60, y: 0 + scaleNumeratorYAdjector - window.innerHeight, z }, ringStyle),
-    latex("axis_2_k_1_ring_2_k", "k = 1", { x: scaleK(2, 1) + 115, y: 0 + scaleNumeratorYAdjector - 5 - window.innerHeight, z }, textStyle),
-    ring("axis_2_k_2_ring_1", 10, 1, { x: scaleK(2, 2) + 43, y: 0 + scaleDenominatorYAdjector - window.innerHeight, z }, ringStyle),
-    latex("axis_2_k_2_ring_1_k", "n = 2", { x: scaleK(2, 2) + 115, y: 0 + scaleDenominatorYAdjector - window.innerHeight, z }, textStyle),
-    ring("axis_2_k_2_ring_2", 10, 1, { x: scaleK(2, 2) + 60, y: 0 + scaleNumeratorYAdjector - window.innerHeight, z }, ringStyle),
-    latex("axis_2_k_2_ring_2_k", "k = 2", { x: scaleK(2, 2) + 115, y: 0 + scaleNumeratorYAdjector - 5 - window.innerHeight, z }, textStyle),
+    const stepSceneObjects: Animatable<Object3D>[] = [
+        latex("order_statistics_expression", OrderStatisticsExpression, { x: scaleK(1, 1), y: height + height / 2 - window.innerHeight, z }, { ...textStyle, fontSize: "20px" }),
 
-    latex("beta_distribution_expected_value_expression", BetaDistributionExpectedValueExpression, { x: scaleK(1, 1), y: 0 - height - window.innerHeight, z }, { ...textStyle })
-];
+        axis("axis_1", { x: -width, y: height - window.innerHeight, z }, { x: width, y: height - window.innerHeight, z }, { ...axisStyle, dotCount: 3 }),
+        text("axis_1_start", "0", scale0(height + scaleYAdjector - window.innerHeight), textStyle),
+        text("axis_1_end", "1", scale1(height + scaleYAdjector - window.innerHeight), textStyle),
+        latex("axis_1_k_1", "\\frac{1}{2}", { x: scaleK(1, 1), y: height + scaleYAdjector - window.innerHeight, z }, textStyle),
+
+        axis("axis_2", { x: -width, y: 0 - window.innerHeight, z }, { x: width, y: 0 - window.innerHeight, z }, { ...axisStyle, dotCount: 4 }),
+        text("axis_2_start", "0", scale0(0 + scaleYAdjector - window.innerHeight), textStyle),
+        text("axis_2_end", "1", scale1(0 + scaleYAdjector - window.innerHeight), textStyle),
+        latex("axis_2_k_1", "\\frac{1}{3}", { x: scaleK(2, 1), y: 0 + scaleYAdjector - window.innerHeight, z }, textStyle),
+        latex("axis_2_k_2", "\\frac{2}{3}", { x: scaleK(2, 2), y: 0 + scaleYAdjector - window.innerHeight, z }, textStyle),
+
+        // expression
+        latex("axis_1_k_1_expression_1", `= ${kTh(1, '1 + 1')}`, { x: scaleK(1, 1) + 50, y: height + scaleYAdjector - window.innerHeight, z }, textStyle),
+        latex("axis_2_k_1_expression_1", `= ${kTh(1, '2 + 1')}`, { x: scaleK(2, 1) + 50, y: 0 + scaleYAdjector - window.innerHeight, z }, textStyle),
+        latex("axis_2_k_2_expression_1", `= ${kTh(2, '2 + 1')}`, { x: scaleK(2, 2) + 50, y: 0 + scaleYAdjector - window.innerHeight, z }, textStyle),
+
+        // rings
+        ring("axis_1_k_1_ring_1", 10, 1.5, { x: scaleK(1, 1) + 43, y: height + scaleDenominatorYAdjector - window.innerHeight, z }, ringStyle),
+        latex("axis_1_k_1_ring_1_k", "n = 1", { x: scaleK(1, 1) + 115, y: height + scaleDenominatorYAdjector - window.innerHeight, z }, textStyle),
+        ring("axis_1_k_1_ring_2", 10, 1.5, { x: scaleK(1, 1) + 60, y: height + scaleNumeratorYAdjector - window.innerHeight, z }, ringStyle),
+        latex("axis_1_k_1_ring_2_k", "k = 1", { x: scaleK(1, 1) + 115, y: height + scaleNumeratorYAdjector - 5 - window.innerHeight, z }, textStyle),
+
+        ring("axis_2_k_1_ring_1", 10, 1, { x: scaleK(2, 1) + 43, y: 0 + scaleDenominatorYAdjector - window.innerHeight, z }, ringStyle),
+        latex("axis_2_k_1_ring_1_k", "n = 2", { x: scaleK(2, 1) + 115, y: 0 + scaleDenominatorYAdjector - window.innerHeight, z }, textStyle),
+        ring("axis_2_k_1_ring_2", 10, 1, { x: scaleK(2, 1) + 60, y: 0 + scaleNumeratorYAdjector - window.innerHeight, z }, ringStyle),
+        latex("axis_2_k_1_ring_2_k", "k = 1", { x: scaleK(2, 1) + 115, y: 0 + scaleNumeratorYAdjector - 5 - window.innerHeight, z }, textStyle),
+        ring("axis_2_k_2_ring_1", 10, 1, { x: scaleK(2, 2) + 43, y: 0 + scaleDenominatorYAdjector - window.innerHeight, z }, ringStyle),
+        latex("axis_2_k_2_ring_1_k", "n = 2", { x: scaleK(2, 2) + 115, y: 0 + scaleDenominatorYAdjector - window.innerHeight, z }, textStyle),
+        ring("axis_2_k_2_ring_2", 10, 1, { x: scaleK(2, 2) + 60, y: 0 + scaleNumeratorYAdjector - window.innerHeight, z }, ringStyle),
+        latex("axis_2_k_2_ring_2_k", "k = 2", { x: scaleK(2, 2) + 115, y: 0 + scaleNumeratorYAdjector - 5 - window.innerHeight, z }, textStyle),
+
+        latex("beta_distribution_expected_value_expression", BetaDistributionExpectedValueExpression, { x: scaleK(1, 1), y: 0 - height - window.innerHeight, z }, { ...textStyle })
+    ];
+
+    return stepSceneObjects;
+};
 
 // Helper to get step start time
 const t = (step: number) => STEP_START_TIMES[step] ?? 0;
@@ -166,7 +171,7 @@ const scene = new DualScene();
 const camera = createOrthographicCamera();
 const animationController = new AnimationController(renderer, scene, camera);
 
-const records = render(stepSceneObjects, scene as any);
+const records = render(buildStepSceneObjects(), scene);
 let timelinePlayer = buildAnimateTimeline(
     timelineSteps,
     records,
@@ -227,6 +232,11 @@ function OrderStatisticsPageContent() {
             speechSynthesis.cancel();
         };
     }, [speakStep]);
+
+    // Redraw the scene when component mounts to ensure visibility
+    React.useEffect(() => {
+        animationController.renderAnimationOnce();
+    }, []);
 
     // Re-render the scene when mode changes to apply new colors
     React.useEffect(() => {
