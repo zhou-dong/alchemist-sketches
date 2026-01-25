@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Box,
   Button,
@@ -8,13 +8,21 @@ import {
   Alert,
   useTheme,
   alpha,
-  Paper
+  Paper,
+  Tooltip
 } from '@mui/material';
 import * as RestartAlt from '@mui/icons-material/RestartAlt';
 import * as PlayArrow from '@mui/icons-material/PlayArrow';
+import * as VolumeUp from '@mui/icons-material/VolumeUp';
+import * as VolumeOff from '@mui/icons-material/VolumeOff';
+import { useSpeech } from '@alchemist/shared';
 
 const RestartAltIcon = RestartAlt.default as unknown as React.ElementType;
 const PlayArrowIcon = PlayArrow.default as unknown as React.ElementType;
+const VolumeUpIcon = VolumeUp.default as unknown as React.ElementType;
+const VolumeOffIcon = VolumeOff.default as unknown as React.ElementType;
+
+const INTRO_NARRATION = `Welcome to Set Operations! In this demo, we'll explore how KMV sketches enable powerful set operations: Union, Intersection, and Difference. You can configure two separate data streams, Stream A and Stream B, each with their own size. The K parameter determines how many minimum hash values each sketch retains. Once configured, you'll see how these probabilistic data structures can estimate the cardinality of combined, overlapping, or differing sets. Adjust the parameters below and click Start Demo when you're ready.`;
 
 interface KmvConfigDialogProps {
   open: boolean;
@@ -46,8 +54,67 @@ export default function KmvConfigDialog({
   defaultStreamBSize
 }: KmvConfigDialogProps) {
   const theme = useTheme();
+  const { getCurrentVoice } = useSpeech({ rate: 1.0 });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [isPaused, setIsPaused] = useState(false);
+  const [hasStarted, setHasStarted] = useState(false);
+
+  // Speak narration
+  const speak = useCallback((text: string) => {
+    if (!text) return;
+
+    speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.rate = 1.0;
+
+    const voice = getCurrentVoice();
+    if (voice) {
+      utterance.voice = voice;
+    }
+
+    utterance.onend = () => {
+      setIsPlaying(false);
+      setIsPaused(false);
+      setHasStarted(false);
+    };
+
+    utterance.onerror = () => {
+      setIsPlaying(false);
+      setIsPaused(false);
+      setHasStarted(false);
+    };
+
+    speechSynthesis.speak(utterance);
+    setIsPlaying(true);
+    setIsPaused(false);
+    setHasStarted(true);
+  }, [getCurrentVoice]);
+
+  // Cleanup speech on unmount or close
+  useEffect(() => {
+    return () => {
+      speechSynthesis.cancel();
+    };
+  }, []);
+
+  const handlePlayPause = () => {
+    if (isPlaying) {
+      // Currently playing -> pause
+      speechSynthesis.pause();
+      setIsPlaying(false);
+      setIsPaused(true);
+    } else if (isPaused) {
+      // Currently paused -> resume
+      speechSynthesis.resume();
+      setIsPlaying(true);
+      setIsPaused(false);
+    } else {
+      // Not started -> start fresh
+      speak(INTRO_NARRATION);
+    }
+  };
 
   const validateConfig = (): boolean => {
     const newErrors: Record<string, string> = {};
@@ -74,6 +141,7 @@ export default function KmvConfigDialog({
 
   const handleStart = () => {
     if (validateConfig()) {
+      speechSynthesis.cancel(); // Stop any ongoing narration
       onStart();
       onClose();
     }
@@ -316,7 +384,7 @@ export default function KmvConfigDialog({
         </Stack>
 
         {/* Actions */}
-        <Stack direction="row" spacing={2} justifyContent="center" sx={{ mt: 4 }}>
+        <Stack direction="row" spacing={2} justifyContent="center" alignItems="center" sx={{ mt: 4 }}>
           <Button
             onClick={handleReset}
             variant="text"
@@ -331,6 +399,19 @@ export default function KmvConfigDialog({
           >
             Reset
           </Button>
+
+          <Tooltip title={isPlaying ? 'Pause introduction' : isPaused ? 'Resume introduction' : 'Listen to introduction'}>
+            <Button
+              onClick={handlePlayPause}
+              variant={hasStarted ? 'contained' : 'outlined'}
+              startIcon={isPlaying ? <VolumeUpIcon /> : <VolumeOffIcon />}
+              sx={{
+                textTransform: 'none',
+              }}
+            >
+              {isPlaying ? 'Playing...' : isPaused ? 'Paused' : 'Introduction'}
+            </Button>
+          </Tooltip>
 
           <Button
             onClick={handleStart}
