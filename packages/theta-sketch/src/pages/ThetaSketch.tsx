@@ -71,7 +71,7 @@ const NARRATION_SECTIONS: NarrationSection[] = [
     },
     {
         id: 'adaptive',
-        text: 'Adaptive Threshold. Theta Sketch adapts its threshold dynamically. Step 1: Start with theta equals 1.0, initially accepting all hash values. Step 2: When the count exceeds nominal K, set theta to the K-th smallest normalized hash value. Step 3: Remove all values greater than or equal to theta, keeping only values strictly less than the new threshold. Step 4: Continue processing, new values are only added if they are less than theta.',
+        text: 'Adaptive Threshold. Theta Sketch adapts its threshold dynamically. Step 1: Start with theta equals 1.0, initially accepting all hash values. Step 2: When the count exceeds nominal K, which is the target number of values similar to K in KMV, set theta to the K-th smallest normalized hash value. Note that nominal K is a trigger point, not a strict limit like in KMV. Step 3: Remove all values greater than or equal to theta, keeping only values strictly less than the new threshold. After removal, the retained count may be less than K. Step 4: Continue processing, new values are only added if they are less than theta.',
     },
     {
         id: 'summary',
@@ -502,6 +502,75 @@ export default function ThetaSketchOverview() {
                         </Paper>
                     </Fade>
 
+                    {/* Single vs Multiple Sketches */}
+                    <Fade in={isSectionVisible('insight')} timeout={600}>
+                        <Paper
+                            variant="outlined"
+                            sx={{
+                                p: 3,
+                                mt: 3,
+                                borderColor: alpha(theme.palette.secondary.main, 0.3),
+                                background: alpha(theme.palette.secondary.main, 0.02),
+                            }}
+                        >
+                            <Typography
+                                variant="subtitle1"
+                                sx={{
+                                    color: 'secondary.main',
+                                    fontWeight: 600,
+                                    mb: 2,
+                                    textTransform: 'uppercase',
+                                    letterSpacing: 1,
+                                    fontSize: '1rem',
+                                }}
+                            >
+                                Single Sketch vs. Multiple Sketches
+                            </Typography>
+                            <Stack spacing={2}>
+                                <Box>
+                                    <Typography variant="body1" sx={{ fontWeight: 600, mb: 1, color: 'text.primary' }}>
+                                        For a Single Sketch:
+                                    </Typography>
+                                    <Typography variant="body2" sx={{ color: 'text.secondary', lineHeight: 1.8 }}>
+                                        KMV and Theta Sketch are <strong>functionally similar</strong>. Both estimate cardinality using the same mathematical principle. 
+                                        The main difference is implementation: KMV always stores exactly K values, while Theta Sketch stores all values &lt; θ (which may be fewer or more than K).
+                                        For estimation purposes on a single sketch, they produce similar results.
+                                    </Typography>
+                                </Box>
+                                <Box>
+                                    <Typography variant="body1" sx={{ fontWeight: 600, mb: 1, color: 'text.primary' }}>
+                                        For Multiple Sketches (Cloud Merge/Set Operations):
+                                    </Typography>
+                                    <Typography variant="body2" sx={{ color: 'text.secondary', lineHeight: 1.8 }}>
+                                        This is where the <strong>major difference</strong> appears:
+                                    </Typography>
+                                    <Box component="ul" sx={{ mt: 1, pl: 3, color: 'text.secondary' }}>
+                                        <li>
+                                            <strong>KMV:</strong> Requires recalculating which K values to keep after merging. 
+                                            You must combine all values, sort them, and select the K smallest.
+                                        </li>
+                                        <li>
+                                            <strong>Theta Sketch:</strong> Simply use <code style={{ backgroundColor: alpha(theme.palette.divider, 0.2), padding: '2px 4px', borderRadius: '2px' }}>min(θ_A, θ_B)</code> and filter both sets. 
+                                            No recalculation needed—much more efficient!
+                                        </li>
+                                    </Box>
+                                </Box>
+                                <Box sx={{ 
+                                    mt: 1, 
+                                    p: 1.5, 
+                                    borderRadius: 1, 
+                                    backgroundColor: alpha(theme.palette.primary.main, 0.1),
+                                    borderLeft: `3px solid ${theme.palette.primary.main}`
+                                }}>
+                                    <Typography variant="body2" sx={{ color: 'text.primary', fontSize: '0.9rem' }}>
+                                        <strong>Key Takeaway:</strong> For single sketches, they're essentially the same. 
+                                        The real advantage of Theta Sketch shines when merging multiple sketches in distributed systems.
+                                    </Typography>
+                                </Box>
+                            </Stack>
+                        </Paper>
+                    </Fade>
+
                     {/* KMV vs Theta Sketch Comparison */}
                     <Fade in={isSectionVisible('comparison')} timeout={600}>
                         <Box>
@@ -707,10 +776,10 @@ export default function ThetaSketchOverview() {
                                         <StepBadge step={2} />
                                         <Box>
                                             <Typography variant="body1" sx={{ fontWeight: 500 }}>
-                                                When count exceeds nominal K
+                                                When count exceeds nominal K (target size)
                                             </Typography>
                                             <Typography variant="body2" sx={{ color: 'text.secondary', mt: 0.5 }}>
-                                                Set θ to the K-th smallest normalized hash value
+                                                Set θ to the K-th smallest normalized hash value. "Nominal K" is the target number of values (like K in KMV), but it's a trigger point, not a strict limit.
                                             </Typography>
                                         </Box>
                                     </Box>
@@ -738,6 +807,171 @@ export default function ThetaSketchOverview() {
                                     </Box>
                                 </Stack>
                             </Paper>
+
+                            {/* Concrete Example */}
+                            <Paper
+                                variant="outlined"
+                                sx={{
+                                    p: 3,
+                                    mt: 3,
+                                    borderColor: alpha(theme.palette.primary.main, 0.3),
+                                    background: alpha(theme.palette.primary.main, 0.02),
+                                }}
+                            >
+                                <Typography
+                                    variant="h6"
+                                    sx={{
+                                        fontWeight: 600,
+                                        color: 'primary.main',
+                                        mb: 2,
+                                    }}
+                                >
+                                    Concrete Example: Nominal K = 10
+                                </Typography>
+                                
+                                <Stack spacing={2}>
+                                    <Box>
+                                        <Typography variant="body2" sx={{ fontWeight: 600, mb: 1, color: 'text.primary' }}>
+                                            Step 1: Process 15 hash values (θ = 1.0, accept all)
+                                        </Typography>
+                                        <Typography variant="body2" sx={{ color: 'text.secondary', fontFamily: 'monospace', fontSize: '0.85rem' }}>
+                                            Hashes: 0.12, 0.34, 0.05, 0.78, 0.23, 0.56, 0.09, 0.67, 0.41, 0.88, 0.15, 0.72, 0.03, 0.91, 0.28
+                                        </Typography>
+                                        <Typography variant="body2" sx={{ color: 'text.secondary', mt: 0.5, fontSize: '0.85rem' }}>
+                                            Count: 15 (exceeds nominal K = 10) → Trigger adjustment
+                                        </Typography>
+                                    </Box>
+
+                                    <Box>
+                                        <Typography variant="body2" sx={{ fontWeight: 600, mb: 1, color: 'text.primary' }}>
+                                            Step 2: Sort and find the 10th smallest value
+                                        </Typography>
+                                        <Typography variant="body2" sx={{ color: 'text.secondary', fontFamily: 'monospace', fontSize: '0.85rem' }}>
+                                            Sorted: 0.03, 0.05, 0.09, 0.12, 0.15, 0.23, 0.28, 0.34, 0.41, <strong style={{ color: theme.palette.primary.main }}>0.56</strong>, 0.67, 0.72, 0.78, 0.88, 0.91
+                                        </Typography>
+                                        <Typography variant="body2" sx={{ color: 'primary.main', mt: 0.5, fontSize: '0.85rem', fontWeight: 600 }}>
+                                            → Set θ = 0.56 (the 10th smallest value)
+                                        </Typography>
+                                    </Box>
+
+                                    <Box>
+                                        <Typography variant="body2" sx={{ fontWeight: 600, mb: 1, color: 'text.primary' }}>
+                                            Step 3: Remove all values ≥ θ (0.56)
+                                        </Typography>
+                                        <Typography variant="body2" sx={{ color: 'text.secondary', fontFamily: 'monospace', fontSize: '0.85rem' }}>
+                                            Removed: <span style={{ textDecoration: 'line-through', opacity: 0.5 }}>0.56, 0.67, 0.72, 0.78, 0.88, 0.91</span>
+                                        </Typography>
+                                        <Typography variant="body2" sx={{ color: 'success.main', fontFamily: 'monospace', fontSize: '0.85rem', mt: 0.5, fontWeight: 600 }}>
+                                            Retained: 0.03, 0.05, 0.09, 0.12, 0.15, 0.23, 0.28, 0.34, 0.41
+                                        </Typography>
+                                        <Typography variant="body2" sx={{ color: 'text.secondary', mt: 0.5, fontSize: '0.85rem' }}>
+                                            Retained count: <strong>9 values</strong> (less than nominal K = 10!)
+                                        </Typography>
+                                    </Box>
+
+                                    <Box sx={{ 
+                                        mt: 1, 
+                                        p: 1.5, 
+                                        borderRadius: 1, 
+                                        backgroundColor: alpha(theme.palette.info.main, 0.1),
+                                        borderLeft: `3px solid ${theme.palette.info.main}`
+                                    }}>
+                                        <Typography variant="body2" sx={{ color: 'text.primary', fontSize: '0.85rem' }}>
+                                            <strong>Key Insight:</strong> Unlike KMV which always keeps exactly 10 values, Theta Sketch retained only 9 values after adjustment. This is why "nominal K" is a target, not a strict limit. The actual retained count depends on the distribution of hash values.
+                                        </Typography>
+                                    </Box>
+                                </Stack>
+                            </Paper>
+                        </Box>
+                    </Fade>
+
+                    {/* Benefits of Nominal K */}
+                    <Fade in={isSectionVisible('summary')} timeout={600}>
+                        <Box>
+                            <Typography
+                                variant="h5"
+                                sx={{
+                                    fontWeight: 500,
+                                    color: 'text.primary',
+                                    mb: 3,
+                                }}
+                            >
+                                Why Nominal K Instead of Strict K?
+                            </Typography>
+                            <Stack spacing={2}>
+                                <Paper
+                                    variant="outlined"
+                                    sx={{
+                                        p: 3,
+                                        borderColor: alpha(theme.palette.success.main, 0.3),
+                                        background: alpha(theme.palette.success.main, 0.02),
+                                    }}
+                                >
+                                    <Typography variant="h6" sx={{ fontWeight: 600, mb: 2, color: 'success.main' }}>
+                                        1. Simplified Set Operations
+                                    </Typography>
+                                    <Typography variant="body2" sx={{ color: 'text.secondary', lineHeight: 1.8, mb: 1.5 }}>
+                                        <strong>With Strict K (KMV):</strong> When merging two sketches, you must recalculate which K values to keep from the combined set. This requires sorting and selecting the K smallest values.
+                                    </Typography>
+                                    <Typography variant="body2" sx={{ color: 'text.secondary', lineHeight: 1.8 }}>
+                                        <strong>With Nominal K (Theta Sketch):</strong> Simply use <code style={{ backgroundColor: alpha(theme.palette.divider, 0.2), padding: '2px 4px', borderRadius: '2px' }}>min(θ_A, θ_B)</code> and filter both sets. No recalculation needed!
+                                    </Typography>
+                                </Paper>
+
+                                <Paper
+                                    variant="outlined"
+                                    sx={{
+                                        p: 3,
+                                        borderColor: alpha(theme.palette.info.main, 0.3),
+                                        background: alpha(theme.palette.info.main, 0.02),
+                                    }}
+                                >
+                                    <Typography variant="h6" sx={{ fontWeight: 600, mb: 2, color: 'info.main' }}>
+                                        2. Compatibility Across Different Configurations
+                                    </Typography>
+                                    <Typography variant="body2" sx={{ color: 'text.secondary', lineHeight: 1.8 }}>
+                                        Sketches created with different nominal K values (e.g., K=10 and K=20) can be combined directly. 
+                                        With strict K, you'd need both sketches to have the same K value, or perform complex recalculation.
+                                    </Typography>
+                                </Paper>
+
+                                <Paper
+                                    variant="outlined"
+                                    sx={{
+                                        p: 3,
+                                        borderColor: alpha(theme.palette.warning.main, 0.3),
+                                        background: alpha(theme.palette.warning.main, 0.02),
+                                    }}
+                                >
+                                    <Typography variant="h6" sx={{ fontWeight: 600, mb: 2, color: 'warning.main' }}>
+                                        3. Adaptive to Data Distribution
+                                    </Typography>
+                                    <Typography variant="body2" sx={{ color: 'text.secondary', lineHeight: 1.8, mb: 1.5 }}>
+                                        If hash values are clustered (many small values), Theta Sketch naturally retains fewer values, 
+                                        potentially saving memory. If values are spread out, it may retain more values.
+                                    </Typography>
+                                    <Typography variant="body2" sx={{ color: 'text.secondary', lineHeight: 1.8 }}>
+                                        Strict K always uses exactly K slots, regardless of data distribution.
+                                    </Typography>
+                                </Paper>
+
+                                <Paper
+                                    variant="outlined"
+                                    sx={{
+                                        p: 3,
+                                        borderColor: alpha(theme.palette.secondary.main, 0.3),
+                                        background: alpha(theme.palette.secondary.main, 0.02),
+                                    }}
+                                >
+                                    <Typography variant="h6" sx={{ fontWeight: 600, mb: 2, color: 'secondary.main' }}>
+                                        4. Explicit Threshold Enables Better Estimation
+                                    </Typography>
+                                    <Typography variant="body2" sx={{ color: 'text.secondary', lineHeight: 1.8 }}>
+                                        With explicit θ, the estimation formula <code style={{ backgroundColor: alpha(theme.palette.divider, 0.2), padding: '2px 4px', borderRadius: '2px' }}>N ≈ |retained| / θ</code> is straightforward. 
+                                        The threshold is always known and doesn't need to be derived from the stored values.
+                                    </Typography>
+                                </Paper>
+                            </Stack>
                         </Box>
                     </Fade>
 
