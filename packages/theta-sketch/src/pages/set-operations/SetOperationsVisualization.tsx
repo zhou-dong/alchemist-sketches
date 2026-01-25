@@ -7,12 +7,12 @@ import { at } from 'obelus';
 import { axis, circle, DualScene, latex, line, render, text, type TimelineSceneThree } from 'obelus-three-render';
 import { AnimationController } from "../../utils/animation-controller";
 import { useThreeContainer } from "../../hooks/useThreeContainer";
-import { useThreeAutoResize } from "../../hooks/useThreeAutoResize";
 import { buildAnimateTimeline } from 'obelus-gsap-animator';
 import TimelinePlayer from '../../components/TimelinePlayer';
 import { axisStyle, lineStyle, textStyle } from '../../theme/obelusTheme';
 import { useThetaSketchProgress } from '../../contexts/ThetaSketchProgressContext';
 import { slideUp, useSpeech } from '@alchemist/shared';
+import SetOperationsIntroCard from './SetOperationsIntroCard';
 
 const renderer = createDualRenderer();
 const camera = createOrthographicCamera();
@@ -81,14 +81,17 @@ const buildBaseAxis = (
         expected,
         k,
         theta,
+        yOffset = 0,
     }: {
         title: string;
         expected: number;
         k: number;
         theta: number;
+        yOffset?: number;
     }) => {
     const leftX = -width / 2;
     const rightX = width / 2;
+    const adjustedY = y - yOffset;
 
     const estimated = (k / theta - 1).toFixed(2);
 
@@ -100,11 +103,11 @@ const buildBaseAxis = (
     `;
 
     return [
-        axis(`${id}_axis`, { x: leftX, y }, { x: rightX, y }, { ...axisStyle, dotCount: 2 }),
-        text(`${id}_start`, "0", { x: leftX, y: y - 15 }, textStyle),
-        text(`${id}_end`, "1", { x: rightX, y: y - 15 }, textStyle),
-        text(`${id}_title`, title, { x: -window.innerWidth / 8 * 3, y }, textStyle),
-        latex(`${id}_formula`, formula, { x: window.innerWidth / 8 * 3, y }, textStyle),
+        axis(`${id}_axis`, { x: leftX, y: adjustedY }, { x: rightX, y: adjustedY }, { ...axisStyle, dotCount: 2 }),
+        text(`${id}_start`, "0", { x: leftX, y: adjustedY - 15 }, textStyle),
+        text(`${id}_end`, "1", { x: rightX, y: adjustedY - 15 }, textStyle),
+        text(`${id}_title`, title, { x: -window.innerWidth / 8 * 3, y: adjustedY }, textStyle),
+        latex(`${id}_formula`, formula, { x: window.innerWidth / 8 * 3, y: adjustedY }, textStyle),
     ];
 };
 
@@ -116,11 +119,12 @@ const moveAxis = (id: string, t: number) => {
     ];
 };
 
-const buildThetaMarker = (id: string, x: number, y: number, value: number) => {
+const buildThetaMarker = (id: string, x: number, y: number, value: number, yOffset: number = 0) => {
+    const adjustedY = y - yOffset;
     return [
-        line(`${id}_theta_line`, { x, y: y + 20 }, { x, y }, 2, lineStyle),
-        text(`${id}_theta_sign`, 'θ', { x, y: y + 30 }, textStyle),
-        text(`${id}_theta_value`, value.toFixed(2), { x, y: y - 25 }, textStyle),
+        line(`${id}_theta_line`, { x, y: adjustedY + 20 }, { x, y: adjustedY }, 2, lineStyle),
+        text(`${id}_theta_sign`, 'θ', { x, y: adjustedY + 30 }, textStyle),
+        text(`${id}_theta_value`, value.toFixed(2), { x, y: adjustedY - 25 }, textStyle),
     ];
 };
 
@@ -172,10 +176,10 @@ export default function SetOperationsVisualization({
     const { getCurrentVoice } = useSpeech({ rate: 1.0 });
 
     const [timeline, setTimeline] = React.useState<any>(null);
+    const [showIntro, setShowIntro] = React.useState(false);
     const hasBuiltRef = React.useRef(false);
 
     const { containerRef } = useThreeContainer(renderer);
-    useThreeAutoResize(containerRef, renderer, scene, camera);
 
     // Speak narration text
     const speak = React.useCallback((text: string) => {
@@ -216,6 +220,7 @@ export default function SetOperationsVisualization({
 
         const axisWidth = window.innerWidth / 2;
         const height = window.innerHeight / 6;
+        const offscreenOffset = window.innerHeight; // Start sketches off-screen
 
         const hashesA = buildHashes(streamASize, axisWidth, -axisWidth / 2);
         const hashesB = buildHashes(streamBSize, axisWidth, -axisWidth / 2);
@@ -225,10 +230,11 @@ export default function SetOperationsVisualization({
 
         const smallKth = kthHashA.value < kthHashB.value ? kthHashA : kthHashB;
 
+        // Sketch A and B circles - start off-screen (below viewport)
         const hashesACircles = hashesA.map((hash, idx) => {
             const { location } = hash;
             const style = new THREE.MeshBasicMaterial({ color: green });
-            return circle(`a_circle_${idx}`, radius, { x: location, y: height * 2, z: 1 }, style as any);
+            return circle(`a_circle_${idx}`, radius, { x: location, y: height * 2 - offscreenOffset, z: 1 }, style as any);
         });
 
         const hashesBCircles = hashesB.map((hash, idx) => {
@@ -489,6 +495,10 @@ export default function SetOperationsVisualization({
                         }}
                     />
                 </Container>
+            )}
+
+            {showIntro && (
+                <SetOperationsIntroCard visible={showIntro} />
             )}
 
             {/* Three.js Canvas Container */}
