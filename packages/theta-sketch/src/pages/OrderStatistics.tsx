@@ -63,7 +63,7 @@ const buildStepSceneObjects = (): Animatable<THREE.Object3D>[] => {
 
     const z = 0;
     const height = window.innerHeight / 6;
-    const width = Math.min(window.innerWidth / 4, 800);
+    const width = Math.min(window.innerWidth / 4, 600);
     const scale0 = (y: number) => ({ x: -width, y, z });
     const scale1 = (y: number) => ({ x: width, y, z });
 
