@@ -621,7 +621,7 @@ export default function ThetaSketchOverview() {
                                             />
                                             <ComparisonItem
                                                 label="Estimate"
-                                                value="N ≈ (K − 1) / θ"
+                                                value="N ≈ K / θ - 1"
                                             />
                                             <ComparisonItem
                                                 label="Set Operations"
