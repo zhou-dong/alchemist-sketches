@@ -1,4 +1,4 @@
-import React, { useCallback, useRef, useEffect } from 'react';
+import React, { useCallback, useRef } from 'react';
 import { at } from 'obelus';
 import { createDualRenderer, createOrthographicCamera } from "../utils/threeUtils";
 import { buildAnimateTimeline } from 'obelus-gsap-animator';
@@ -218,7 +218,7 @@ function OrderStatisticsPageContent() {
     }, [getCurrentVoice]);
 
     // Add callbacks to timeline for each step
-    useEffect(() => {
+    React.useEffect(() => {
         if (!timelinePlayer) return;
 
         // Add labels and callbacks for each step at their calculated start times
