@@ -41,9 +41,6 @@ const STEP_NARRATIONS: Record<number, string> = {
 // Calculate step durations and cumulative start times
 const { startTimes: STEP_START_TIMES } = calculateStepTimings(STEP_NARRATIONS);
 
-// Animation duration is shorter than narration - animations complete while speaking continues
-const ANIMATION_DURATION = 0.8;
-
 const OrderStatisticsExpression = `\\mathbb{E}[X_{(k)}] = \\frac{k}{n+1}`;
 const BetaDistributionExpectedValueExpression = `
 \\mathbb{E}[\\text{Beta}(\\alpha, \\beta)] = \\frac{\\alpha}{\\alpha + \\beta}
@@ -119,51 +116,53 @@ const buildStepSceneObjects = (): Animatable<Object3D>[] => {
     return stepSceneObjects;
 };
 
-// Helper to get step start time
-const t = (step: number) => STEP_START_TIMES[step] ?? 0;
-const d = ANIMATION_DURATION;
+const moveUp = (step: number, id: string) => {
+    const time = STEP_START_TIMES[step] ?? step;
+    return at(time).animate(id, { position: { y: `+=${window.innerHeight}` } }, { duration: 0.8 });
+};
 
 const timelineSteps = [
-    at(t(0)).animate("axis_1", { position: { y: `+=${window.innerHeight}` } }, { duration: d }),
-    at(t(0)).animate("axis_1_start", { position: { y: `+=${window.innerHeight}` } }, { duration: d }),
-    at(t(0)).animate("axis_1_end", { position: { y: `+=${window.innerHeight}` } }, { duration: d }),
+    moveUp(0, "axis_1"),
+    moveUp(0, "axis_1_start"),
+    moveUp(0, "axis_1_end"),
 
-    at(t(1)).animate("axis_1_k_1", { position: { y: `+=${window.innerHeight}` } }, { duration: d }),
+    moveUp(1, "axis_1_k_1"),
 
-    at(t(2)).animate("axis_2", { position: { y: `+=${window.innerHeight}` } }, { duration: d }),
-    at(t(2)).animate("axis_2_start", { position: { y: `+=${window.innerHeight}` } }, { duration: d }),
-    at(t(2)).animate("axis_2_end", { position: { y: `+=${window.innerHeight}` } }, { duration: d }),
+    moveUp(2, "axis_2"),
+    moveUp(2, "axis_2_start"),
+    moveUp(2, "axis_2_end"),
 
-    at(t(3)).animate("axis_2_k_1", { position: { y: `+=${window.innerHeight}` } }, { duration: d }),
-    at(t(4)).animate("axis_2_k_2", { position: { y: `+=${window.innerHeight}` } }, { duration: d }),
+    moveUp(3, "axis_2_k_1"),
+    moveUp(4, "axis_2_k_2"),
+
     // expression
-    at(t(5)).animate("axis_1_k_1_expression_1", { position: { y: `+=${window.innerHeight}` } }, { duration: d }),
-    at(t(6)).animate("axis_2_k_1_expression_1", { position: { y: `+=${window.innerHeight}` } }, { duration: d }),
-    at(t(7)).animate("axis_2_k_2_expression_1", { position: { y: `+=${window.innerHeight}` } }, { duration: d }),
+    moveUp(5, "axis_1_k_1_expression_1"),
+    moveUp(6, "axis_2_k_1_expression_1"),
+    moveUp(7, "axis_2_k_2_expression_1"),
 
     // rings axis_1
-    at(t(8)).animate("axis_1_k_1_ring_1", { position: { y: `+=${window.innerHeight}` } }, { duration: d }),
-    at(t(8)).animate("axis_1_k_1_ring_1_k", { position: { y: `+=${window.innerHeight}` } }, { duration: d }),
+    moveUp(8, "axis_1_k_1_ring_1"),
+    moveUp(8, "axis_1_k_1_ring_1_k"),
 
-    at(t(9)).animate("axis_1_k_1_ring_2", { position: { y: `+=${window.innerHeight}` } }, { duration: d }),
-    at(t(9)).animate("axis_1_k_1_ring_2_k", { position: { y: `+=${window.innerHeight}` } }, { duration: d }),
+    moveUp(9, "axis_1_k_1_ring_2"),
+    moveUp(9, "axis_1_k_1_ring_2_k"),
 
     // rings axis_2
-    at(t(10)).animate("axis_2_k_1_ring_1", { position: { y: `+=${window.innerHeight}` } }, { duration: d }),
-    at(t(10)).animate("axis_2_k_1_ring_1_k", { position: { y: `+=${window.innerHeight}` } }, { duration: d }),
+    moveUp(10, "axis_2_k_1_ring_1"),
+    moveUp(10, "axis_2_k_1_ring_1_k"),
 
-    at(t(11)).animate("axis_2_k_1_ring_2", { position: { y: `+=${window.innerHeight}` } }, { duration: d }),
-    at(t(11)).animate("axis_2_k_1_ring_2_k", { position: { y: `+=${window.innerHeight}` } }, { duration: d }),
+    moveUp(11, "axis_2_k_1_ring_2"),
+    moveUp(11, "axis_2_k_1_ring_2_k"),
 
-    at(t(12)).animate("axis_2_k_2_ring_1", { position: { y: `+=${window.innerHeight}` } }, { duration: d }),
-    at(t(12)).animate("axis_2_k_2_ring_1_k", { position: { y: `+=${window.innerHeight}` } }, { duration: d }),
+    moveUp(12, "axis_2_k_2_ring_1"),
+    moveUp(12, "axis_2_k_2_ring_1_k"),
 
-    at(t(13)).animate("axis_2_k_2_ring_2", { position: { y: `+=${window.innerHeight}` } }, { duration: d }),
-    at(t(13)).animate("axis_2_k_2_ring_2_k", { position: { y: `+=${window.innerHeight}` } }, { duration: d }),
+    moveUp(13, "axis_2_k_2_ring_2"),
+    moveUp(13, "axis_2_k_2_ring_2_k"),
 
     // equations
-    at(t(14)).animate("order_statistics_expression", { position: { y: `+=${window.innerHeight}` } }, { duration: d }),
-    at(t(15)).animate("beta_distribution_expected_value_expression", { position: { y: `+=${window.innerHeight}` } }, { duration: d }),
+    moveUp(14, "order_statistics_expression"),
+    moveUp(15, "beta_distribution_expected_value_expression"),
 ];
 
 const renderer = createDualRenderer();
