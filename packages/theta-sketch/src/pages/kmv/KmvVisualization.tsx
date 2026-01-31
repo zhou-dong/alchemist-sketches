@@ -13,6 +13,8 @@ import { axisStyle, textStyle, circleStyle, lineStyle, useSyncObelusTheme } from
 import { useThetaSketchProgress } from '../../contexts/ThetaSketchProgressContext';
 import { useSpeech } from '@alchemist/shared';
 import { slideUp } from '@alchemist/shared';
+import { useOrthographicImmediateResize } from '@alchemist/theta-sketch/hooks/useOrthographicResize';
+import * as THREE from 'three';
 
 // Scene dimensions
 const axisWidth = window.innerWidth / 2;
@@ -206,6 +208,10 @@ export default function KmvVisualization({
             buildAndSetTimeline();
         }
     }, [k, streamSize]);
+
+    useOrthographicImmediateResize(renderer, camera as THREE.OrthographicCamera, {
+        onResize: () => animationController.renderAnimationOnce(),
+    });
 
     const buildAndSetTimeline = () => {
         animationController.stopAnimation();
