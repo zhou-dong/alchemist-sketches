@@ -25,6 +25,27 @@ export function createOrthographicCamera(
     return camera;
 };
 
+/**
+ * Updates dual renderer size and orthographic camera bounds so the scene
+ * stays centered when the viewport is resized. Call from a window resize listener.
+ */
+export function updateOrthographicResize(
+    renderer: DualRenderer,
+    camera: THREE.OrthographicCamera,
+    width: number,
+    height: number
+): void {
+    renderer.webglRenderer.setSize(width, height);
+    renderer.webglRenderer.setPixelRatio(window.devicePixelRatio);
+    renderer.css3dRenderer.setSize(width, height);
+
+    camera.left = -width / 2;
+    camera.right = width / 2;
+    camera.top = height / 2;
+    camera.bottom = -height / 2;
+    camera.updateProjectionMatrix();
+}
+
 function createWebglRenderer(
     width: number,
     height: number,
