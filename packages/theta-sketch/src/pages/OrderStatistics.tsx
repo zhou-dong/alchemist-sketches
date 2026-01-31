@@ -63,13 +63,13 @@ const buildStepSceneObjects = (): Animatable<THREE.Object3D>[] => {
 
     const z = 0;
     const height = window.innerHeight / 6;
-    const width = Math.min(window.innerWidth / 4, 600);
-    const scale0 = (y: number) => ({ x: -width, y, z });
-    const scale1 = (y: number) => ({ x: width, y, z });
+    const halfWidth = Math.min(window.innerWidth / 4, 600);
+    const scale0 = (y: number) => ({ x: -halfWidth, y, z });
+    const scale1 = (y: number) => ({ x: halfWidth, y, z });
 
     function scaleK(dotCount: number, k: number) {
-        const startX = 0 - width;
-        const endX = width;
+        const startX = 0 - halfWidth;
+        const endX = halfWidth;
 
         const axisWidth = endX - startX;
         const step = axisWidth / (dotCount + 1);
@@ -80,12 +80,12 @@ const buildStepSceneObjects = (): Animatable<THREE.Object3D>[] => {
     const stepSceneObjects: Animatable<THREE.Object3D>[] = [
         latex("order_statistics_expression", OrderStatisticsExpression, { x: scaleK(1, 1), y: height + height / 2 - window.innerHeight, z }, { ...textStyle, fontSize: "20px" }),
 
-        axis("axis_1", { x: -width, y: height - window.innerHeight, z }, { x: width, y: height - window.innerHeight, z }, { ...axisStyle, dotCount: 3 }),
+        axis("axis_1", { x: -halfWidth, y: height - window.innerHeight, z }, { x: halfWidth, y: height - window.innerHeight, z }, { ...axisStyle, dotCount: 3 }),
         text("axis_1_start", "0", scale0(height + scaleYAdjector - window.innerHeight), textStyle),
         text("axis_1_end", "1", scale1(height + scaleYAdjector - window.innerHeight), textStyle),
         latex("axis_1_k_1", "\\frac{1}{2}", { x: scaleK(1, 1), y: height + scaleYAdjector - window.innerHeight, z }, textStyle),
 
-        axis("axis_2", { x: -width, y: 0 - window.innerHeight, z }, { x: width, y: 0 - window.innerHeight, z }, { ...axisStyle, dotCount: 4 }),
+        axis("axis_2", { x: -halfWidth, y: 0 - window.innerHeight, z }, { x: halfWidth, y: 0 - window.innerHeight, z }, { ...axisStyle, dotCount: 4 }),
         text("axis_2_start", "0", scale0(0 + scaleYAdjector - window.innerHeight), textStyle),
         text("axis_2_end", "1", scale1(0 + scaleYAdjector - window.innerHeight), textStyle),
         latex("axis_2_k_1", "\\frac{1}{3}", { x: scaleK(2, 1), y: 0 + scaleYAdjector - window.innerHeight, z }, textStyle),
