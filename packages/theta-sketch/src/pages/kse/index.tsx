@@ -1,4 +1,4 @@
-import React, { useCallback, useRef, useEffect } from 'react';
+import React, { useCallback, useRef } from 'react';
 import { at, type TimelineEvent } from 'obelus';
 import { createDualRenderer, createOrthographicCamera } from "../../utils/threeUtils";
 import { buildAnimateTimeline } from 'obelus-gsap-animator';
@@ -15,6 +15,8 @@ import { useThetaSketchProgress } from '../../contexts/ThetaSketchProgressContex
 import { calculateStepTimings } from '../../utils/narration';
 import StepProgressIndicator from '@alchemist/theta-sketch/components/StepProgressIndicator';
 import { slideUp } from '@alchemist/shared';
+import { useOrthographicImmediateResize } from '@alchemist/theta-sketch/hooks/useOrthographicResize';
+import * as THREE from 'three';
 
 // Narration for each timeline step
 const STEP_NARRATIONS: Record<number, string> = {
@@ -72,7 +74,7 @@ n = \\frac{k}{\\theta} - 1
 `;
 
 const buildAxis = () => {
-    const halfWidth = Math.min(window.innerWidth / 4, 800);
+    const halfWidth = Math.min(window.innerWidth / 4, 600);
     const y = window.innerHeight / 16 * 2 - window.innerHeight;
     const start = { x: -halfWidth, y: y, z: 0, };
     const end = { x: halfWidth, y: y, z: 0, };
@@ -179,7 +181,7 @@ function KmvPageContent() {
     }, [getCurrentVoice]);
 
     // Add callbacks to timeline for each step
-    useEffect(() => {
+    React.useEffect(() => {
         if (!timeline) return;
 
         Object.keys(STEP_NARRATIONS).forEach((stepKey) => {
@@ -204,6 +206,10 @@ function KmvPageContent() {
     React.useEffect(() => {
         animationController.renderAnimationOnce();
     }, [mode]);
+
+    useOrthographicImmediateResize(renderer, camera as THREE.OrthographicCamera, {
+        onResize: () => animationController.renderAnimationOnce(),
+    });
 
     return (
         <>
