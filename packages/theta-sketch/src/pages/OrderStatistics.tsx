@@ -223,7 +223,7 @@ function OrderStatisticsPageContent() {
         // Add labels and callbacks for each step at their calculated start times
         Object.keys(STEP_NARRATIONS).forEach((stepKey) => {
             const stepIndex = parseInt(stepKey);
-            const startTime = STEP_START_TIMES[stepIndex] ?? 0;
+            const startTime = STEP_START_TIMES[stepIndex] ?? stepIndex;
             timelinePlayer.call(() => speakStep(stepIndex), [], startTime);
         });
 
