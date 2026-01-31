@@ -3,6 +3,7 @@ import { at } from 'obelus';
 import { createDualRenderer, createOrthographicCamera } from "../utils/threeUtils";
 import { buildAnimateTimeline } from 'obelus-gsap-animator';
 import { useThreeContainer } from "../hooks/useThreeContainer";
+import { useOrthographicImmediateResize } from "../hooks/useOrthographicResize";
 import { render, axis, latex, ring, text, DualScene } from 'obelus-three-render';
 import { type Animatable } from "obelus";
 import { AnimationController } from "../utils/animation-controller";
@@ -11,7 +12,7 @@ import { axisStyle, textStyle, ringStyle, useSyncObelusTheme } from '../theme/ob
 import { useTheme, useSpeech } from '@alchemist/shared';
 import { Container, Box, Typography, Fade } from '@mui/material';
 import TimelinePlayer from '../components/TimelinePlayer';
-import { Object3D } from 'three';
+import * as THREE from 'three';
 import { useThetaSketchProgress } from '../contexts/ThetaSketchProgressContext';
 import { calculateStepTimings } from '../utils/narration';
 import StepProgressIndicator from '../components/StepProgressIndicator';
@@ -54,7 +55,7 @@ const BetaDistributionExpectedValueExpression = `
 
 const kTh = (k: number, n: string) => `\\frac{${k}}{\\text{${n}}}`;
 
-const buildStepSceneObjects = (): Animatable<Object3D>[] => {
+const buildStepSceneObjects = (): Animatable<THREE.Object3D>[] => {
 
     const scaleYAdjector = -35;
     const scaleNumeratorYAdjector = scaleYAdjector + 15;
@@ -76,7 +77,7 @@ const buildStepSceneObjects = (): Animatable<Object3D>[] => {
         return x;
     }
 
-    const stepSceneObjects: Animatable<Object3D>[] = [
+    const stepSceneObjects: Animatable<THREE.Object3D>[] = [
         latex("order_statistics_expression", OrderStatisticsExpression, { x: scaleK(1, 1), y: height + height / 2 - window.innerHeight, z }, { ...textStyle, fontSize: "20px" }),
 
         axis("axis_1", { x: -width, y: height - window.innerHeight, z }, { x: width, y: height - window.innerHeight, z }, { ...axisStyle, dotCount: 3 }),
@@ -241,6 +242,11 @@ function OrderStatisticsPageContent() {
     React.useEffect(() => {
         animationController.renderAnimationOnce();
     }, [mode]);
+
+    // Keep scene centered on window resize (camera + renderer only; no object position changes)
+    useOrthographicImmediateResize(renderer, camera as THREE.OrthographicCamera, {
+        onResize: () => animationController.renderAnimationOnce(),
+    });
 
     React.useEffect(() => {
         return () => {
