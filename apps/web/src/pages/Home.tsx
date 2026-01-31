@@ -79,7 +79,7 @@ export const Home = () => {
               px: 3,
             }}
           >
-            Master HyperLogLog, Theta Sketch, Bloom Filters, and more through
+            Master Bloom Filters, HyperLogLog, Theta Sketch, and more through
             interactive visualizations and guided learning.
           </Typography>
         </Fade>
