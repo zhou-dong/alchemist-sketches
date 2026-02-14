@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Box,
   Button,
@@ -54,6 +55,7 @@ export default function KmvConfigDialog({
   defaultStreamBSize
 }: KmvConfigDialogProps) {
   const theme = useTheme();
+  const navigate = useNavigate();
   const { getCurrentVoice } = useSpeech({ rate: 1.0 });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -413,6 +415,13 @@ export default function KmvConfigDialog({
             </Button>
           </Tooltip>
 
+          <Button
+            variant="outlined"
+            onClick={() => navigate('/theta-sketch/set-operations-demo')}
+            sx={{ textTransform: 'none' }}
+          >
+            View simple demo
+          </Button>
           <Button
             onClick={handleStart}
             variant="contained"

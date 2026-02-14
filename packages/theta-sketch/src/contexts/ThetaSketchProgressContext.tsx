@@ -17,39 +17,53 @@ export interface RoadmapStep {
 // Step definitions (without status - status is computed dynamically)
 export const THETA_SKETCH_STEPS: RoadmapStep[] = [
     {
+        id: 'introduction',
+        title: 'Introduction',
+        description: 'What we’re building toward, and why sketches matter.',
+        duration: '~2 min',
+        route: '/theta-sketch',
+    },
+    {
         id: 'order-statistics',
-        title: 'Order Statistics',
+        title: 'Order statistics',
         description: 'Understanding sorted values and their properties. The foundation for minimum-based estimation.',
         duration: '~5 min',
         route: '/theta-sketch/order-statistics',
     },
     {
         id: 'kse',
-        title: 'K-th Smallest Estimation',
+        title: 'k-th smallest estimation',
         description: 'How the k-th smallest value relates to the total count. The key insight behind KMV.',
         duration: '~8 min',
         route: '/theta-sketch/kse',
     },
     {
         id: 'kmv',
-        title: 'KMV Algorithm',
+        title: 'KMV algorithm',
         description: 'K Minimum Values - tracking the k smallest hashed values to estimate cardinality.',
         duration: '~10 min',
         route: '/theta-sketch/kmv',
     },
     {
         id: 'set-operations',
-        title: 'Set Operations',
+        title: 'Set operation',
         description: 'Union, intersection, and difference. Combining sketches while preserving accuracy.',
         duration: '~8 min',
         route: '/theta-sketch/set-operations',
     },
     {
-        id: 'theta-sketch',
-        title: 'Theta Sketch',
-        description: 'The complete algorithm - combining KMV with theta for efficient set operations.',
-        duration: '~12 min',
+        id: 'theta-sketch-intro',
+        title: 'Theta sketch intro',
+        description: 'Make θ explicit to remove the KMV set-operation limit.',
+        duration: '~10 min',
         route: '/theta-sketch/theta-sketch',
+    },
+    {
+        id: 'theta-sketch-set-ops',
+        title: 'Theta sketch set ops',
+        description: 'How Theta Sketch performs union, intersection, and difference.',
+        duration: '~8 min',
+        route: '/theta-sketch/theta-sketch/set-operations',
     },
 ];
 
@@ -101,7 +115,31 @@ export const ThetaSketchProgressProvider: React.FC<ThetaSketchProgressProviderPr
     const [completedStepsArray, setCompletedStepsArray] = React.useState<string[]>(() => {
         try {
             const saved = localStorage.getItem(STORAGE_KEY);
-            return saved ? JSON.parse(saved) : [];
+            const parsed: unknown = saved ? JSON.parse(saved) : [];
+            const raw = Array.isArray(parsed) ? parsed.filter((v): v is string => typeof v === 'string') : [];
+
+            // -----------------------------------------------------------------
+            // Migration / compatibility
+            // -----------------------------------------------------------------
+            // - Old step ID: "theta-sketch"  -> new: "theta-sketch-intro"
+            // - New step 1: "introduction" at "/theta-sketch"
+            //
+            // If a user already completed later steps, auto-complete "introduction"
+            // so the new first step doesn't re-lock their existing progress.
+            const migrated = new Set<string>(raw);
+
+            if (migrated.has('theta-sketch') && !migrated.has('theta-sketch-intro')) {
+                migrated.add('theta-sketch-intro');
+            }
+
+            const hasNonIntroProgress = THETA_SKETCH_STEPS.some(
+                (s) => s.id !== 'introduction' && migrated.has(s.id)
+            );
+            if (hasNonIntroProgress) {
+                migrated.add('introduction');
+            }
+
+            return Array.from(migrated);
         } catch {
             return [];
         }

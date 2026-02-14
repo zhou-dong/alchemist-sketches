@@ -8,7 +8,12 @@ export { default as OrderStatisticsPage } from './pages/OrderStatistics';
 export { default as KthSmallestPage } from './pages/kse';
 export { default as KmvPage } from './pages/kmv';
 export { default as SetOperationsPage } from './pages/set-operations';
+export { default as SetOperationsDemoPage } from './pages/set-operations/SetOperationsDemoPage';
+export { default as SetOperationsUnionPage } from './pages/set-operations/SetOperationsUnionPage';
+export { default as SetOperationsIntersectionPage } from './pages/set-operations/SetOperationsIntersectionPage';
+export { default as SetOperationsDifferencePage } from './pages/set-operations/SetOperationsDifferencePage';
 export { default as ThetaSketchPage } from './pages/ThetaSketch';
+export { default as ThetaSketchSetOperationsPage } from './pages/ThetaSketchSetOperations';
 
 // Progress context
 export {

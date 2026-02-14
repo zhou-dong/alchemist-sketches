@@ -176,7 +176,7 @@ export default function SetOperationsVisualization({
     const { getCurrentVoice } = useSpeech({ rate: 1.0 });
 
     const [timeline, setTimeline] = React.useState<any>(null);
-    const [showIntro, setShowIntro] = React.useState(false);
+    const [showIntro, setShowIntro] = React.useState(true);
     const hasBuiltRef = React.useRef(false);
 
     const { containerRef } = useThreeContainer(renderer);
@@ -483,6 +483,7 @@ export default function SetOperationsVisualization({
                         onStart={() => {
                             animationController.startAnimation();
                             speechSynthesis.resume();
+                            setShowIntro(false);
                         }}
                         onPause={() => {
                             animationController.stopAnimation();

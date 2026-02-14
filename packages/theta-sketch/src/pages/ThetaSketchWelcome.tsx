@@ -4,23 +4,27 @@ import { useNavigate } from 'react-router-dom';
 import { slideUp } from '@alchemist/shared';
 import EastIcon from '@mui/icons-material/East';
 import NarrationPlayer from '../components/NarrationPlayer';
+import StepProgressIndicator from '../components/StepProgressIndicator';
+import { useThetaSketchProgress } from '../contexts/ThetaSketchProgressContext';
 
 // Narration content
 const NARRATION_CONTENT = `
-Welcome to the math behind Theta Sketch. We'll explore KMV, or K Minimum Values, the foundation that makes Theta Sketch work. Once you understand KMV, Theta Sketch becomes intuitive.
+Welcome to the math behind Theta Sketch. We'll build up from the statistical idea all the way to a sketch that supports set operations cleanly.
 
-We'll build up step by step: first, Order Statistics, then K-th Smallest Estimation, followed by the KMV algorithm, and finally, Theta Sketch itself.
+We'll build up step by step: Order statistics, k-th smallest estimation, the KMV algorithm, set operations (and the KMV limit), then Theta sketch with explicit theta, and finally how Theta sketch solves set operations.
 
 Don't be intimidated by the math, the ideas are surprisingly straightforward, requiring only elementary math knowledge. When you're ready, click begin to start the journey.
 `.trim();
 
 export const ThetaSketchWelcome = () => {
     const navigate = useNavigate();
+    const { completeStep } = useThetaSketchProgress();
 
     const handleDiveIn = useCallback(() => {
         speechSynthesis.cancel();
+        completeStep('introduction');
         navigate('/theta-sketch/order-statistics');
-    }, [navigate]);
+    }, [completeStep, navigate]);
 
     return (
         <Box
@@ -33,6 +37,8 @@ export const ThetaSketchWelcome = () => {
                 position: 'relative',
             }}
         >
+            <StepProgressIndicator currentStepId="introduction" />
+
             {/* Main Content - Slightly above center for better visual balance */}
             <Box
                 sx={{

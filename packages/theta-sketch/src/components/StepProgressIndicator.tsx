@@ -29,7 +29,10 @@ export default function StepProgressIndicator({
 
     const currentIndex = THETA_SKETCH_STEPS.findIndex(s => s.id === currentStepId);
     const totalSteps = THETA_SKETCH_STEPS.length;
-    const completedCount = completedSteps.size;
+    const completedCount = THETA_SKETCH_STEPS.reduce(
+        (count, step) => (completedSteps.has(step.id) ? count + 1 : count),
+        0
+    );
     const progressPercent = (completedCount / totalSteps) * 100;
 
     return (
