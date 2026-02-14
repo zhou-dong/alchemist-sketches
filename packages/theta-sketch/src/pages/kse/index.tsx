@@ -33,10 +33,10 @@ const STEP_NARRATIONS: Record<number, string> = {
     10: "And yes this is the formula we've been looking for!",
     11: "Let's see this in action with an axis from 0 to 1, with two nodes to split into three equal parts.",
     12: "For the first node, k equals 1.",
-    13: "And theta equals one-third.",
+    13: "And theta of first node equals one-third.",
     14: "Plugging into our formula: n equals 1 divided by one-third, minus 1, which equals 2.",
     15: "For the second node, k equals 2.",
-    16: "And theta equals two-thirds.",
+    16: "And theta of second node equals two-thirds.",
     17: "Using our formula: n equals 2 divided by two-thirds, minus 1, which also equals 2.",
     18: "As above, both estimates tell us there are 2 nodes, so we can use this formula to estimate the total number of nodes in a set.",
 };
