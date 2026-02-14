@@ -11,20 +11,27 @@ import { useThetaSketchProgress } from '../contexts/ThetaSketchProgressContext';
 const NARRATION_CONTENT = `
 Welcome to the math behind Theta Sketch. We'll build up from the statistical idea all the way to a sketch that supports set operations cleanly.
 
-We'll build up step by step: Order statistics, k-th smallest estimation, the KMV algorithm, set operations (and the KMV limit), then Theta sketch with explicit theta, and finally how Theta sketch solves set operations.
+We'll build up step by step: Order statistics, k-th smallest estimation, the KMV algorithm, set operations (with KMV limit). 
 
-Don't be intimidated by the math, the ideas are surprisingly straightforward, requiring only elementary math knowledge. When you're ready, click begin to start the journey.
+Then we'll build Theta sketch with explicit theta that solves set operations.
+
+Don't be intimidated by the math, the ideas are surprisingly straightforward, requiring only elementary math knowledge. 
+
+When you're ready, click begin to start the journey.
 `.trim();
 
 export const ThetaSketchWelcome = () => {
     const navigate = useNavigate();
     const { completeStep } = useThetaSketchProgress();
 
-    const handleDiveIn = useCallback(() => {
-        speechSynthesis.cancel();
-        completeStep('introduction');
-        navigate('/theta-sketch/order-statistics');
-    }, [completeStep, navigate]);
+    const handleDiveIn = useCallback(
+        () => {
+            speechSynthesis.cancel();
+            completeStep('introduction');
+            navigate('/theta-sketch/order-statistics');
+        },
+        [completeStep, navigate]
+    );
 
     return (
         <Box
@@ -112,12 +119,10 @@ export const ThetaSketchWelcome = () => {
                         animation: `${slideUp} 1s ease-out 0.5s both`,
                     }}
                 >
-                    A journey through Order Statistics, K-th Smallest Estimation, KMV, and beyond.
+                    A journey from Order Statistics, K-th Smallest Estimation, and KMV, then on to Theta Sketch.
                 </Typography>
 
-                {/* Controls with built-in subtitles */}
                 <Box sx={{ animation: `${slideUp} 1s ease-out 0.7s both` }}>
-                    {/* Begin Button */}
                     <Button
                         variant="contained"
                         size="large"
@@ -144,7 +149,6 @@ export const ThetaSketchWelcome = () => {
                     content={NARRATION_CONTENT}
                     rate={1}
                     showSubtitles
-                    subtitleMaxWidth={600}
                 />
             </Box>
         </Box>
