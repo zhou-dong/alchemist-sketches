@@ -20,23 +20,24 @@ import { slideUp } from '@alchemist/shared';
 
 // Narration for each timeline step
 const STEP_NARRATIONS: Record<number, string> = {
-    0: "Let's start with a simple case: if we want to split a line into two equal parts, we can use one node to do it.",
-    1: "The expected value of that node is one half.",
-    2: "Similarly, if we want to split a line into three equal parts, we will need two nodes.",
-    3: "The first node's value is one third.",
-    4: "The second node's value is two thirds.",
-    5: "We can rewrite the first node's value as 1 over 1 plus 1.",
-    6: "Similarly, one-third can be rewritten as 1 over 2 plus 1.",
-    7: "And two-thirds can be rewritten as 2 over 2 plus 1.",
-    8: "What does this mean? In 1 over 1 plus 1, the total number of nodes is 1.",
-    9: "And the index of the node is 1.",
-    10: "In 1 over 2 plus 1, the total number of nodes is 2.",
-    11: "And the index of the node is 1.",
-    12: "In 2 over 2 plus 1, the total number of nodes is also 2.",
-    13: "And the index of the node is 2.",
-    14: "What does this mean? We can generalize the formula as k over n plus 1, which gives the expected value of the k-th node out of n nodes. This is called order statistics.",
-    15: "This can be proven using the Beta distribution. However, the Beta distribution is beyond the scope of this sketch, so we'll skip the proof.",
-    16: "On the next page, we'll see how to use order statistics to estimate the k-th smallest estimation.",
+    0: "What is order statistics? Let's start with a simple case.",
+    1: "If we want to split a line into two equal parts, we can use one node to do it.",
+    2: "The expected value of that node is one half.",
+    3: "Similarly, if we want to split a line into three equal parts, we will need two nodes.",
+    4: "The first node's value is one third.",
+    5: "The second node's value is two thirds.",
+    6: "We can rewrite the first node's value as 1 over 1 plus 1.",
+    7: "Similarly, one-third can be rewritten as 1 over 2 plus 1.",
+    8: "And two-thirds can be rewritten as 2 over 2 plus 1.",
+    9: "What does this mean? In 1 over 1 plus 1, the total number of nodes is 1.",
+    10: "And the index of the node is 1.",
+    11: "In 1 over 2 plus 1, the total number of nodes is 2.",
+    12: "And the index of the node is 1.",
+    13: "In 2 over 2 plus 1, the total number of nodes is also 2.",
+    14: "And the index of the node is 2.",
+    15: "What does this mean? We can generalize the formula as k over n plus 1, which gives the expected value of the k-th node out of n nodes. This is called order statistics.",
+    16: "This can be proven using the Beta distribution. However, the Beta distribution is beyond the scope of this sketch, so we'll skip the proof.",
+    17: "On the next page, we'll see how to use order statistics to estimate the k-th smallest estimation.",
 };
 
 // Calculate step durations and cumulative start times
@@ -123,47 +124,47 @@ const moveUp = (step: number, id: string) => {
 };
 
 const timelineSteps = [
-    moveUp(0, "axis_1"),
-    moveUp(0, "axis_1_start"),
-    moveUp(0, "axis_1_end"),
+    moveUp(0 + 1, "axis_1"),
+    moveUp(0 + 1, "axis_1_start"),
+    moveUp(0 + 1, "axis_1_end"),
 
-    moveUp(1, "axis_1_k_1"),
+    moveUp(1 + 1, "axis_1_k_1"),
 
-    moveUp(2, "axis_2"),
-    moveUp(2, "axis_2_start"),
-    moveUp(2, "axis_2_end"),
+    moveUp(2 + 1, "axis_2"),
+    moveUp(2 + 1, "axis_2_start"),
+    moveUp(2 + 1, "axis_2_end"),
 
-    moveUp(3, "axis_2_k_1"),
-    moveUp(4, "axis_2_k_2"),
+    moveUp(3 + 1, "axis_2_k_1"),
+    moveUp(4 + 1, "axis_2_k_2"),
 
     // expression
-    moveUp(5, "axis_1_k_1_expression_1"),
-    moveUp(6, "axis_2_k_1_expression_1"),
-    moveUp(7, "axis_2_k_2_expression_1"),
+    moveUp(5 + 1, "axis_1_k_1_expression_1"),
+    moveUp(6 + 1, "axis_2_k_1_expression_1"),
+    moveUp(7 + 1, "axis_2_k_2_expression_1"),
 
     // rings axis_1
-    moveUp(8, "axis_1_k_1_ring_1"),
-    moveUp(8, "axis_1_k_1_ring_1_k"),
+    moveUp(8 + 1, "axis_1_k_1_ring_1"),
+    moveUp(8 + 1, "axis_1_k_1_ring_1_k"),
 
-    moveUp(9, "axis_1_k_1_ring_2"),
-    moveUp(9, "axis_1_k_1_ring_2_k"),
+    moveUp(9 + 1, "axis_1_k_1_ring_2"),
+    moveUp(9 + 1, "axis_1_k_1_ring_2_k"),
 
     // rings axis_2
-    moveUp(10, "axis_2_k_1_ring_1"),
-    moveUp(10, "axis_2_k_1_ring_1_k"),
+    moveUp(10 + 1, "axis_2_k_1_ring_1"),
+    moveUp(10 + 1, "axis_2_k_1_ring_1_k"),
 
-    moveUp(11, "axis_2_k_1_ring_2"),
-    moveUp(11, "axis_2_k_1_ring_2_k"),
+    moveUp(11 + 1, "axis_2_k_1_ring_2"),
+    moveUp(11 + 1, "axis_2_k_1_ring_2_k"),
 
-    moveUp(12, "axis_2_k_2_ring_1"),
-    moveUp(12, "axis_2_k_2_ring_1_k"),
+    moveUp(12 + 1, "axis_2_k_2_ring_1"),
+    moveUp(12 + 1, "axis_2_k_2_ring_1_k"),
 
-    moveUp(13, "axis_2_k_2_ring_2"),
-    moveUp(13, "axis_2_k_2_ring_2_k"),
+    moveUp(13 + 1, "axis_2_k_2_ring_2"),
+    moveUp(13 + 1, "axis_2_k_2_ring_2_k"),
 
     // equations
-    moveUp(14, "order_statistics_expression"),
-    moveUp(15, "beta_distribution_expected_value_expression"),
+    moveUp(14 + 1, "order_statistics_expression"),
+    moveUp(15 + 1, "beta_distribution_expected_value_expression"),
 ];
 
 const renderer = createDualRenderer();
