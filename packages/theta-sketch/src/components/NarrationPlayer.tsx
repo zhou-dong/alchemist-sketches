@@ -32,6 +32,8 @@ export interface NarrationPlayerProps {
   showSubtitles?: boolean;
   /** Maximum width for subtitle text */
   subtitleMaxWidth?: number | string;
+  /** Progress bar width */
+  progressBarWidth?: number | string;
 }
 
 export default function NarrationPlayer({
@@ -41,7 +43,8 @@ export default function NarrationPlayer({
   onComplete,
   onPlayingChange,
   showSubtitles = false,
-  subtitleMaxWidth = 600,
+  subtitleMaxWidth = 800,
+  progressBarWidth = 600,
 }: NarrationPlayerProps) {
   const theme = useTheme();
   const { isSupported, getCurrentVoice } = useSpeech({ rate });
@@ -242,7 +245,7 @@ export default function NarrationPlayer({
         p: 2,
         borderRadius: 3,
         background: 'transparent',
-        width: subtitleMaxWidth,
+        // width: 600,
         maxWidth: '100%',
       }}
     >
@@ -276,7 +279,7 @@ export default function NarrationPlayer({
         )}
 
         {/* Progress Bar */}
-        <Box sx={{ width: '100%' }}>
+        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
           <Slider
             value={progress}
             disabled
@@ -295,7 +298,8 @@ export default function NarrationPlayer({
               },
               '&.Mui-disabled': {
                 color: theme.palette.primary.main,
-              }
+              },
+              width: { xs: '100%', md: progressBarWidth },
             }}
           />
         </Box>
