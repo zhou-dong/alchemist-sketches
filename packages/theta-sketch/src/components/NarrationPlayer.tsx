@@ -311,7 +311,7 @@ export default function NarrationPlayer({
                 color: theme.palette.primary.contrastText,
                 '&:hover': {
                   backgroundColor: theme.palette.primary.dark,
-                }
+                },
               }}
             >
               {buttonState.icon}

@@ -43,6 +43,7 @@ export default function StepProgressIndicator({
                     bottom: 15,
                     left: 20,
                     minWidth: 200,
+                    zIndex: 100,
                 }}
             >
                 {/* Collapsed View - Compact circle */}
