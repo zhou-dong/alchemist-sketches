@@ -31,7 +31,11 @@ interface NarrationSection {
 const NARRATION_SECTIONS: NarrationSection[] = [
     {
         id: 'insight',
-        text: 'The Core Insight. From Order Statistics, we know that among N uniformly distributed values between 0 and 1, the K-th smallest has an expected value of K divided by N plus 1. K-th Smallest Estimation flips this relationship: by observing theta, the K-th smallest value, we can estimate the total count N, approximately equal to K divided by theta, minus 1.',
+        text: "Quick recap. Order statistics tells us among N uniformly distributed values between 0 and 1, the K-th smallest item has an expected value of θ = K divided by N plus 1. K-th smallest estimation flips that relationship: observe theta, the K-th smallest value, and estimate value N approximately equals K divided by theta, minus 1.",
+    },
+    {
+        id: 'core-insight',
+        text: "Core insight. To use this in a data stream, we only need to maintain the K smallest hashes.",
     },
     {
         id: 'requirements',
@@ -39,7 +43,7 @@ const NARRATION_SECTIONS: NarrationSection[] = [
     },
     {
         id: 'kmv',
-        text: 'KMV: The Implementation. KMV, which stands for K Minimum Values, stores only K hash values in memory, regardless of stream size. The algorithm has three steps. Initialize: create a container for K smallest hash values, initially empty. Process: hash each element to a value between 0 and 1. If it is smaller than the K-th smallest, add it and remove the largest. Estimate: calculate N approximately equal to K divided by theta minus 1, using the K-th smallest value.',
+        text: 'KMV Implementation. KMV, which stands for K Minimum Values, stores only K hash values in memory, regardless of stream size. The algorithm has three steps. Initialize: create a container for K smallest hash values, initially empty. Process: hash each element to a value between 0 and 1. If it is smaller than the K-th smallest, add it and remove the largest. Estimate: calculate N approximately equal to K divided by theta minus 1, using the K-th smallest value.',
     },
     {
         id: 'cta',
@@ -165,7 +169,7 @@ function StepSection({ title, children, isLast = false, isActive = false }: Step
             </Box>
 
             {/* Content */}
-            <Box sx={{ flex: 1, pb: isLast ? 0 : 4 }}>
+            <Box sx={{ flex: 1, pb: isLast ? 0 : 0, mb: isLast ? 0 : 0 }}>
                 <Typography
                     variant="h6"
                     sx={{
@@ -373,19 +377,20 @@ export default function KseToKmv({ onClose }: { onClose: () => void }) {
                 left: 0,
                 right: 0,
                 bottom: 0,
-                width: "100%",
+                width: "100vw",
                 height: "100vh",
                 display: "flex",
                 flexDirection: "column",
                 justifyContent: "center",
                 padding: 2,
+                gap: 1,
             }}
         >
             {/* Section 1: The Core Insight */}
             <Fade in={isSectionVisible(0)} timeout={600}>
                 <Box>
                     <StepSection
-                        title="The Core Insight"
+                        title="Quick Recap"
                         isActive={isSectionActive('insight')}
                     >
                         <Typography
@@ -395,10 +400,29 @@ export default function KseToKmv({ onClose }: { onClose: () => void }) {
                                 color: 'text.secondary',
                             }}
                         >
-                            From <strong>Order Statistics</strong>, we know that among N uniformly distributed values in (0,1),
-                            the K-th smallest has an expected value of <strong>K / (N + 1)</strong>.
-                            <strong> K-th Smallest Estimation</strong> flips this relationship: by observing <strong>θ</strong>,
-                            the K-th smallest value, we can estimate the total count <strong>N ≈ (K / θ) − 1</strong>.
+                            <strong> Order statistics</strong> tells us among N uniformly distributed values between 0 and 1, the K-th smallest has an expected value of <strong>θ = K / (N + 1)</strong>. <br />
+                            <strong> K-th smallest estimation</strong> flips that relationship: observe <strong>θ</strong>, the K-th smallest value,
+                            and estimate the total count <strong>N ≈ (K / θ) − 1</strong>.
+                        </Typography>
+                    </StepSection>
+                </Box>
+            </Fade>
+
+            {/* Section 2: Core Insight */}
+            <Fade in={isSectionVisible(1)} timeout={600}>
+                <Box>
+                    <StepSection
+                        title="Core Insight"
+                        isActive={isSectionActive('core-insight')}
+                    >
+                        <Typography
+                            variant="body1"
+                            sx={{
+                                lineHeight: 1.8,
+                                color: 'text.secondary',
+                            }}
+                        >
+                            To use this in a data stream, we only need to maintain the K smallest hashes.
                         </Typography>
                     </StepSection>
                 </Box>
