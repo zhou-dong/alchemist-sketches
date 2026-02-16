@@ -86,6 +86,7 @@ function ThetaSketchPageContent() {
                     setStreamSize={setStreamSize}
                     defaultK={defaultK}
                     defaultStreamSize={defaultStreamSize}
+                    onStart={() => setFlowStep(2)}
                 />
             )}
 
