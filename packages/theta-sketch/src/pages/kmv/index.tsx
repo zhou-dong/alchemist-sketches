@@ -1,7 +1,7 @@
 import React from 'react';
 import { Tooltip, IconButton, Stack } from '@mui/material';
 import Recap from './Recap';
-import Config from './Config';
+import Config from './KmvConfig';
 import StepTitle from '@alchemist/theta-sketch/components/StepTitle';
 
 import * as Settings from '@mui/icons-material/Settings';
