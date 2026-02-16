@@ -13,9 +13,13 @@ import { useSpeech } from '@alchemist/shared';
 
 import * as PlayArrow from '@mui/icons-material/PlayArrow';
 import * as Pause from '@mui/icons-material/Pause';
+import * as Refresh from '@mui/icons-material/Refresh';
+import * as SkipNext from '@mui/icons-material/SkipNext';
 
 const PlayIcon = PlayArrow.default as unknown as React.ElementType;
 const PauseIcon = Pause.default as unknown as React.ElementType;
+const RefreshIcon = Refresh.default as unknown as React.ElementType;
+const SkipNextIcon = SkipNext.default as unknown as React.ElementType;
 
 export interface NarrationPlayerProps {
   /** The narration content - spoken as whole paragraph */
@@ -34,6 +38,13 @@ export interface NarrationPlayerProps {
   subtitleMaxWidth?: number | string;
   /** Progress bar width */
   progressBarWidth?: number | string;
+
+  /** Optional next action (e.g. continue to next step) */
+  onNext?: () => void;
+  /** Next button tooltip */
+  nextTooltip?: string;
+  /** Next button disabled */
+  nextDisabled?: boolean;
 }
 
 export default function NarrationPlayer({
@@ -45,6 +56,9 @@ export default function NarrationPlayer({
   showSubtitles = false,
   subtitleMaxWidth = 800,
   progressBarWidth = 600,
+  onNext,
+  nextTooltip = 'Next',
+  nextDisabled = false,
 }: NarrationPlayerProps) {
   const theme = useTheme();
   const { isSupported, getCurrentVoice } = useSpeech({ rate });
@@ -61,7 +75,7 @@ export default function NarrationPlayer({
   const estimatedDurationRef = useRef<number>(0);
   const progressIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  const iconSize = size === 'small' ? 20 : size === 'large' ? 28 : 24;
+  const iconSize = size === 'small' ? 20 : size === 'large' ? 26 : 24;
   const buttonSize = size === 'small' ? 'small' : size === 'medium' ? 'medium' : 'large';
 
   // Estimate duration based on word count and rate
@@ -209,6 +223,10 @@ export default function NarrationPlayer({
     }
   }, [isPlaying, isPaused, speak, startProgressTracking, stopProgressTracking]);
 
+  const handleRestart = useCallback(() => {
+    speak();
+  }, [speak]);
+
   // Cleanup on unmount
   useEffect(() => {
     return () => {
@@ -304,8 +322,25 @@ export default function NarrationPlayer({
           />
         </Box>
 
-        {/* Control Button */}
-        <Stack direction="row" justifyContent="center" alignItems="center" sx={{ py: 0.5 }}>
+        {/* Controls */}
+        <Stack direction="row" justifyContent="center" alignItems="center" spacing={1.5} sx={{ py: 0.5 }}>
+          {onNext && (
+            <Tooltip title="Restart">
+              <IconButton
+                onClick={handleRestart}
+                size={buttonSize as 'small' | 'medium' | 'large'}
+                sx={{
+                  color: 'text.secondary',
+                  '&:hover': {
+                    backgroundColor: 'action.hover',
+                  },
+                }}
+              >
+                <RefreshIcon sx={{ fontSize: iconSize }} />
+              </IconButton>
+            </Tooltip>
+          )}
+
           <Tooltip title={buttonState.tooltip}>
             <IconButton
               onClick={handlePlayPause}
@@ -321,6 +356,29 @@ export default function NarrationPlayer({
               {buttonState.icon}
             </IconButton>
           </Tooltip>
+
+          {onNext && (
+            <Tooltip title={nextTooltip}>
+              <span>
+                <IconButton
+                  onClick={onNext}
+                  disabled={nextDisabled}
+                  size={buttonSize as 'small' | 'medium' | 'large'}
+                  sx={{
+                    color: 'text.secondary',
+                    '&:hover': {
+                      backgroundColor: 'action.hover',
+                    },
+                    '&.Mui-disabled': {
+                      opacity: 0.4,
+                    },
+                  }}
+                >
+                  <SkipNextIcon sx={{ fontSize: iconSize }} />
+                </IconButton>
+              </span>
+            </Tooltip>
+          )}
         </Stack>
       </Stack>
     </Paper>
