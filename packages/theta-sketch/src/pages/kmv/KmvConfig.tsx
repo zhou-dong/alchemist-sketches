@@ -151,13 +151,11 @@ export default function Config({
         const narration = `
 Let's build a KMV sketch and demonstrate how it works.
 
-First, a short review of how KMV is implemented: we keep only the K smallest hash values, update theta as the K-th smallest, and estimate N as K divided by theta, minus 1.
+First, the kmv implementation consists of three steps: initialize, process, and estimate.
 
-In each step, we hash an item to (0, 1) and place it on the number line. If it is smaller than theta, we add it to the sketch and remove the largest stored value.
-
-If it is larger than theta, we ignore it.
-
-Finally, the estimate updates as N-hat equals K divided by theta, minus 1.
+Initialize: we keep only the K smallest hash values.
+Process: we hash an item into a value between 0 and 1, and place it on the number line. If the new value is smaller than theta, we add it to the sketch and remove the largest stored value. If the new value is larger than theta, we ignore it.
+Estimate: we estimate N as K divided by theta, minus 1.
 
 Please choose and configure the K and stream size, then press Start demo to watch the sketch update on the number line.
 `;
@@ -190,7 +188,7 @@ Please choose and configure the K and stream size, then press Start demo to watc
                             variant="h4"
                             sx={{
                                 mt: 1,
-                                fontWeight: 500,
+                                fontWeight: 400,
                                 letterSpacing: '-0.02em',
                                 fontSize: { xs: '1.1rem', sm: '1.2rem' },
                             }}
@@ -227,18 +225,6 @@ Please choose and configure the K and stream size, then press Start demo to watc
                                 height: '100%',
                             }}
                         >
-                            <Box
-                                sx={{
-                                    position: 'absolute',
-                                    top: 0,
-                                    left: 0,
-                                    right: 0,
-                                    height: 2,
-                                    background: `linear-gradient(90deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})`,
-                                    opacity: 0.85,
-                                }}
-                            />
-
                             <Stack spacing={2.5}>
                                 <Typography
                                     variant="overline"
@@ -291,18 +277,6 @@ Please choose and configure the K and stream size, then press Start demo to watc
                                 height: '100%',
                             }}
                         >
-                            <Box
-                                sx={{
-                                    position: 'absolute',
-                                    top: 0,
-                                    left: 0,
-                                    right: 0,
-                                    height: 2,
-                                    background: `linear-gradient(90deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})`,
-                                    opacity: 0.85,
-                                }}
-                            />
-
                             <Stack spacing={2.5}>
                                 <Typography
                                     variant="overline"
@@ -418,7 +392,7 @@ Please choose and configure the K and stream size, then press Start demo to watc
                         content={SETUP_NARRATION}
                         rate={1}
                         showSubtitles
-                        subtitleMaxWidth={760}
+                        // subtitleMaxWidth={760}
                         onNext={startDemo}
                         nextTooltip={isConfigValidLive ? 'Start demo' : 'Fix config to start demo'}
                         nextDisabled={!isConfigValidLive}
