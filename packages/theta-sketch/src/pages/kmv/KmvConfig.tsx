@@ -395,7 +395,7 @@ Please choose and configure the K and stream size, then press Start demo to watc
                                         <Stack direction="row" spacing={2} justifyContent="center" sx={{ pt: 0.5 }}>
                                             <Button
                                                 onClick={handleReset}
-                                                variant="text"
+                                                variant="outlined"
                                                 startIcon={<RestartAltIcon />}
                                                 sx={{
                                                     textTransform: 'none',
@@ -409,7 +409,6 @@ Please choose and configure the K and stream size, then press Start demo to watc
                                                 onClick={startDemo}
                                                 variant="contained"
                                                 disabled={!isConfigValidLive}
-                                                sx={{ textTransform: 'none', fontWeight: 700, px: 3 }}
                                             >
                                                 Start demo
                                             </Button>
