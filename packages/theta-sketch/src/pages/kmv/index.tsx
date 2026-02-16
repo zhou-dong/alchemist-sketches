@@ -23,8 +23,6 @@ function ThetaSketchPageContent() {
 
     // Progressive flow step: 0 = intro/recap, 1 = setup (implementation + config), 2 = demo
     const [flowStep, setFlowStep] = React.useState<number>(0);
-
-    const activeStep = flowStep >= 0 ? flowStep : -1;
     const iconColor = (step: number) => (flowStep === step ? theme.palette.primary.main : theme.palette.text.disabled);
 
     return (
@@ -57,7 +55,7 @@ function ThetaSketchPageContent() {
             {/* Stepper navigation */}
             <Stepper
                 nonLinear
-                activeStep={activeStep}
+                activeStep={flowStep}
                 orientation="vertical"
                 sx={{
                     '& .MuiStepConnector-line': {
@@ -69,12 +67,11 @@ function ThetaSketchPageContent() {
                     transform: 'translateY(-50%)',
                 }}
             >
-                <Step completed={false}>
+                <Step>
                     <StepButton
                         onClick={() => setFlowStep(0)}
                         icon={<TipsAndUpdatesIcon sx={{ color: iconColor(0) }} />}
                         sx={{
-                            borderRadius: 2,
                             '& .MuiStepLabel-label': {
                                 color: flowStep === 0 ? theme.palette.primary.main : theme.palette.text.disabled,
                                 fontWeight: flowStep === 0 ? 700 : 500,
@@ -84,34 +81,32 @@ function ThetaSketchPageContent() {
                         Recap
                     </StepButton>
                 </Step>
-                <Step completed={false}>
+                <Step>
                     <StepButton
                         onClick={() => setFlowStep(1)}
                         icon={<SettingsIcon sx={{ color: iconColor(1) }} />}
                         sx={{
-                            borderRadius: 2,
                             '& .MuiStepLabel-label': {
                                 color: flowStep === 1 ? theme.palette.primary.main : theme.palette.text.disabled,
                                 fontWeight: flowStep === 1 ? 700 : 500,
                             },
                         }}
                     >
-                        Configure
+                        Config
                     </StepButton>
                 </Step>
-                <Step completed={false}>
+                <Step>
                     <StepButton
                         onClick={() => setFlowStep(2)}
                         icon={<RocketLaunchIcon sx={{ color: iconColor(2) }} />}
                         sx={{
-                            borderRadius: 2,
                             '& .MuiStepLabel-label': {
                                 color: flowStep === 2 ? theme.palette.primary.main : theme.palette.text.disabled,
                                 fontWeight: flowStep === 2 ? 700 : 500,
                             },
                         }}
                     >
-                        Run demo
+                        Demo
                     </StepButton>
                 </Step>
             </Stepper>
