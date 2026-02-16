@@ -2,7 +2,7 @@ import React from 'react';
 import { Tooltip, IconButton, Stack } from '@mui/material';
 import Recap from './Recap';
 import KmvConfig from './KmvConfigDialog';
-import KmvVisualization from './KmvVisualization';
+import Demo from './Demo';
 import StepTitle from '@alchemist/theta-sketch/components/StepTitle';
 
 import * as Settings from '@mui/icons-material/Settings';
@@ -90,7 +90,7 @@ function ThetaSketchPageContent() {
             )}
 
             {/* Visualization with Timeline Player */}
-            {flowStep === 2 && <KmvVisualization k={k} streamSize={streamSize} />}
+            {flowStep === 2 && <Demo k={k} streamSize={streamSize} />}
 
             {/* Toggle buttons */}
             <Stack

@@ -4,9 +4,6 @@ import { useSpeech } from '@alchemist/shared';
 import { slideUp } from '@alchemist/shared';
 import * as Tag from '@mui/icons-material/Tag';
 import * as ScatterPlot from '@mui/icons-material/ScatterPlot';
-import * as Memory from '@mui/icons-material/Memory';
-import * as PlaylistAdd from '@mui/icons-material/PlaylistAdd';
-import * as Functions from '@mui/icons-material/Functions';
 import * as SkipNext from '@mui/icons-material/SkipNext';
 import * as Replay from '@mui/icons-material/Replay';
 import * as PlayArrow from '@mui/icons-material/PlayArrow';
@@ -16,9 +13,6 @@ const SkipNextIcon = SkipNext.default as unknown as React.ElementType;
 const ReplayIcon = Replay.default as unknown as React.ElementType;
 const TagIcon = Tag.default as unknown as React.ElementType;
 const ScatterPlotIcon = ScatterPlot.default as unknown as React.ElementType;
-const MemoryIcon = Memory.default as unknown as React.ElementType;
-const PlaylistAddIcon = PlaylistAdd.default as unknown as React.ElementType;
-const FunctionsIcon = Functions.default as unknown as React.ElementType;
 const PlayIcon = PlayArrow.default as unknown as React.ElementType;
 const PauseIcon = Pause.default as unknown as React.ElementType;
 
@@ -42,12 +36,8 @@ const NARRATION_SECTIONS: NarrationSection[] = [
         text: 'Requirements for Practice. To apply this in big data scenarios, we need two conditions. First, a Uniform Hash Function: hash values must be uniformly distributed between 0 and 1, ensuring equal probability for any value. Second, Sufficient Sample Size: N must be large enough for hash values to be evenly distributed across the interval.',
     },
     {
-        id: 'kmv',
-        text: 'KMV Implementation. KMV, which stands for K Minimum Values, stores only K hash values in memory, regardless of stream size. The algorithm has three steps. Initialize: create a container for K smallest hash values, initially empty. Process: hash each element to a value between 0 and 1. If it is smaller than the K-th smallest, add it and remove the largest. Estimate: calculate N approximately equal to K divided by theta minus 1, using the K-th smallest value.',
-    },
-    {
         id: 'demo',
-        text: 'On the next section, we will build a KMV sketch and demonstrate how it works.',
+        text: 'Next, we will build a KMV sketch and demonstrate how it works.',
     }
 ];
 
@@ -383,7 +373,7 @@ export default function KseToKmv({ onClose }: { onClose: () => void }) {
                 flexDirection: "column",
                 justifyContent: "center",
                 padding: 2,
-                gap: 1,
+                gap: 5,
             }}
         >
             {/* Section 1: The Core Insight */}
@@ -460,54 +450,6 @@ export default function KseToKmv({ onClose }: { onClose: () => void }) {
                                     title="Sufficient Sample Size"
                                     description="N large enough for hash values to be evenly distributed across the interval."
                                     isActive={isSectionActive('requirements')}
-                                />
-                            </Grid>
-                        </Grid>
-                    </StepSection>
-                </Box>
-            </Fade>
-
-            {/* Section 3: KMV Algorithm */}
-            <Fade in={isSectionVisible(3)} timeout={600}>
-                <Box>
-                    <StepSection
-                        title="KMV: The Implementation"
-                        isLast
-                        isActive={isSectionActive('kmv')}
-                    >
-                        <Typography
-                            variant="subtitle1"
-                            sx={{
-                                color: 'text.secondary',
-                                mb: 2,
-                            }}
-                        >
-                            KMV stores <strong>only</strong> K hash values in memory, regardless of stream size:
-                        </Typography>
-
-                        <Grid container spacing={2}>
-                            <Grid size={{ xs: 12, md: 4 }}>
-                                <InfoCard
-                                    icon={<MemoryIcon sx={{ fontSize: 22 }} />}
-                                    title="Initialize"
-                                    description="Container for K smallest hash values (initially empty)."
-                                    isActive={isSectionActive('kmv')}
-                                />
-                            </Grid>
-                            <Grid size={{ xs: 12, md: 4 }}>
-                                <InfoCard
-                                    icon={<PlaylistAddIcon sx={{ fontSize: 22 }} />}
-                                    title="Process"
-                                    description="Hash to (0,1). If smaller than K-th, add and remove largest."
-                                    isActive={isSectionActive('kmv')}
-                                />
-                            </Grid>
-                            <Grid size={{ xs: 12, md: 4 }}>
-                                <InfoCard
-                                    icon={<FunctionsIcon sx={{ fontSize: 22 }} />}
-                                    title="Estimate"
-                                    description="Calculate N ≈ (K / θ) − 1 using K-th smallest value."
-                                    isActive={isSectionActive('kmv')}
                                 />
                             </Grid>
                         </Grid>
