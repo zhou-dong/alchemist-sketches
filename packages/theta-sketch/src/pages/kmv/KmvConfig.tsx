@@ -36,7 +36,7 @@ function ImplementationCard({
 }) {
     const theme = useTheme();
     const border = alpha(theme.palette.primary.main, 0.22);
-    const bg = alpha(theme.palette.primary.main, 0.04);
+    const bg = 'transparent';
 
     return (
         <Paper
@@ -347,7 +347,7 @@ Please choose and configure the K and stream size, then press Start demo to watc
                                             error={!!errors.k}
                                             helperText={errors.k || 'K: number of smallest hash values to keep'}
                                             size="small"
-                                            sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
+                                            sx={{ '& .MuiOutlinedInput-root': { borderRadius: 1.5 } }}
                                         />
 
                                         <TextField
@@ -358,7 +358,7 @@ Please choose and configure the K and stream size, then press Start demo to watc
                                             error={!!errors.streamSize}
                                             helperText={errors.streamSize || 'Stream size: number of elements to process'}
                                             size="small"
-                                            sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
+                                            sx={{ '& .MuiOutlinedInput-root': { borderRadius: 1.5 } }}
                                         />
 
                                         <Box
