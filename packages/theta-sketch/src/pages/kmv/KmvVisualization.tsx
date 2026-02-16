@@ -299,14 +299,14 @@ export default function KmvVisualization({
         speechSynthesis.speak(utterance);
     }, [getCurrentVoice, startSubtitleTracking, stopSubtitleTracking]);
 
-    // Cleanup on unmount
+    // Cleanup on unmount: stop animation + cancel any ongoing speech.
+    // (Avoid setState in cleanup to prevent updates on unmounted component.)
     React.useEffect(() => {
         return () => {
             animationController.stopAnimation();
             speechSynthesis.cancel();
             isNarratingRef.current = false;
             stopSubtitleTracking();
-            setCurrentSubtitle('');
         };
     }, [stopSubtitleTracking]);
 

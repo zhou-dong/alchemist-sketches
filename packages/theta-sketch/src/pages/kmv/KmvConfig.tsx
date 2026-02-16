@@ -174,251 +174,228 @@ Please choose and configure the K and stream size, then press Start demo to watc
                     display: 'flex',
                     flexDirection: 'column',
                     position: 'relative',
+                    alignItems: 'center',
+                    justifyContent: 'center',
                 }}
             >
-                <Box
+                <Container
+                    maxWidth="lg"
                     sx={{
-                        flex: 1,
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        px: { xs: 2, sm: 3, md: 4 },
-                        pb: { xs: 26, sm: 24 }, // space for the fixed narration player
-                        position: 'relative',
-                        zIndex: 10,
+                        animation: `${slideUp} 0.8s ease-out 0.1s both`,
                     }}
                 >
-                    <Container
-                        maxWidth="lg"
-                        sx={{
-                            animation: `${slideUp} 0.8s ease-out 0.1s both`,
-                        }}
-                    >
-                        {/* Page header */}
-                        <Box sx={{ textAlign: 'center', mb: 2.5 }}>
-                            <Typography
-                                variant="overline"
-                                sx={{
-                                    color: 'primary.main',
-                                    letterSpacing: 3,
-                                    fontWeight: 500,
-                                    fontSize: '1.1rem',
-                                }}
-                            >
-                                KMV Demo
-                            </Typography>
-                            <Typography
-                                variant="h4"
-                                sx={{
-                                    mt: 1,
-                                    fontWeight: 800,
-                                    letterSpacing: '-0.02em',
-                                    fontSize: { xs: '1.6rem', sm: '2rem' },
-                                }}
-                            >
-                                Implementation + setup
-                            </Typography>
-                            <Typography variant="body2" color="text.secondary" sx={{ mt: 1, fontWeight: 300, lineHeight: 1.7 }}>
-                                Review the core steps, then configure parameters to run the demo.
-                            </Typography>
-                        </Box>
-
-                        <Box
+                    {/* Page header */}
+                    <Box sx={{ textAlign: 'center', mb: 2.5 }}>
+                        <Typography
+                            variant="h4"
                             sx={{
-                                display: { xs: 'flex', md: 'grid' },
-                                flexDirection: 'column',
-                                gridTemplateColumns: { md: '1.2fr 0.8fr' },
-                                gap: 2.5,
-                                alignItems: 'start',
+                                mt: 1,
+                                fontWeight: 500,
+                                letterSpacing: '-0.02em',
+                                fontSize: { xs: '1.1rem', sm: '1.2rem' },
                             }}
                         >
-                            {/* Implementation */}
-                            <Paper
-                                elevation={0}
-                                variant="outlined"
+                            Review the core steps, then configure parameters to run the demo.
+                        </Typography>
+                    </Box>
+
+                    <Box
+                        sx={{
+                            display: { xs: 'flex', md: 'grid' },
+                            flexDirection: 'column',
+                            gridTemplateColumns: { md: '1fr 1fr' },
+                            gap: 2.5,
+                            alignItems: 'stretch',
+                        }}
+                    >
+                        {/* Implementation */}
+                        <Paper
+                            elevation={0}
+                            variant="outlined"
+                            sx={{
+                                position: 'relative',
+                                p: { xs: 3, sm: 4 },
+                                borderRadius: 3,
+                                background: 'transparent',
+                                backdropFilter: 'blur(1px)',
+                                border: `1px solid ${alpha(theme.palette.primary.main, theme.palette.mode === 'dark' ? 0.15 : 0.1)}`,
+                                boxShadow:
+                                    theme.palette.mode === 'dark'
+                                        ? `0 0 60px ${alpha(theme.palette.primary.main, 0.06)}`
+                                        : `0 16px 50px ${alpha(theme.palette.common.black, 0.06)}`,
+                                overflow: 'hidden',
+                                height: '100%',
+                            }}
+                        >
+                            <Box
                                 sx={{
-                                    position: 'relative',
-                                    p: { xs: 3, sm: 4 },
-                                    borderRadius: 3,
-                                    background: 'transparent',
-                                    backdropFilter: 'blur(1px)',
-                                    border: `1px solid ${alpha(theme.palette.primary.main, theme.palette.mode === 'dark' ? 0.15 : 0.1)}`,
-                                    boxShadow:
-                                        theme.palette.mode === 'dark'
-                                            ? `0 0 60px ${alpha(theme.palette.primary.main, 0.06)}`
-                                            : `0 16px 50px ${alpha(theme.palette.common.black, 0.06)}`,
-                                    overflow: 'hidden',
+                                    position: 'absolute',
+                                    top: 0,
+                                    left: 0,
+                                    right: 0,
+                                    height: 2,
+                                    background: `linear-gradient(90deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})`,
+                                    opacity: 0.85,
                                 }}
-                            >
-                                <Box
+                            />
+
+                            <Stack spacing={2.5}>
+                                <Typography
+                                    variant="overline"
                                     sx={{
-                                        position: 'absolute',
-                                        top: 0,
-                                        left: 0,
-                                        right: 0,
-                                        height: 2,
-                                        background: `linear-gradient(90deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})`,
-                                        opacity: 0.85,
+                                        color: 'text.secondary',
+                                        letterSpacing: 1,
+                                        display: 'block',
+                                        fontWeight: 400,
                                     }}
-                                />
+                                >
+                                    KMV steps
+                                </Typography>
 
-                                <Stack spacing={2.5}>
-                                    <Typography
-                                        variant="overline"
-                                        sx={{
-                                            color: 'text.secondary',
-                                            letterSpacing: 1,
-                                            display: 'block',
-                                            fontWeight: 400,
-                                        }}
-                                    >
-                                        KMV steps
-                                    </Typography>
-
-                                    <Stack direction="column" spacing={2}>
-                                        <ImplementationCard
-                                            icon={<MemoryIcon sx={{ fontSize: 22 }} />}
-                                            title="Initialize"
-                                            description="Maintain a container holding the K smallest hash values (initially empty)."
-                                        />
-                                        <ImplementationCard
-                                            icon={<PlaylistAddIcon sx={{ fontSize: 22 }} />}
-                                            title="Process"
-                                            description="Hash each item to (0, 1). If it is smaller than the current K-th smallest, insert it and evict the largest."
-                                        />
-                                        <ImplementationCard
-                                            icon={<FunctionsIcon sx={{ fontSize: 22 }} />}
-                                            title="Estimate"
-                                            description="Let θ be the K-th smallest hash. Estimate N ≈ (K / θ) − 1."
-                                        />
-                                    </Stack>
+                                <Stack direction="column" spacing={2}>
+                                    <ImplementationCard
+                                        icon={<MemoryIcon sx={{ fontSize: 22 }} />}
+                                        title="Initialize"
+                                        description="Maintain a container holding the K smallest hash values (initially empty)."
+                                    />
+                                    <ImplementationCard
+                                        icon={<PlaylistAddIcon sx={{ fontSize: 22 }} />}
+                                        title="Process"
+                                        description="Hash each item to (0, 1). If it is smaller than the current K-th smallest, insert it and evict the largest."
+                                    />
+                                    <ImplementationCard
+                                        icon={<FunctionsIcon sx={{ fontSize: 22 }} />}
+                                        title="Estimate"
+                                        description="Let θ be the K-th smallest hash. Estimate N ≈ (K / θ) − 1."
+                                    />
                                 </Stack>
-                            </Paper>
+                            </Stack>
+                        </Paper>
 
-                            {/* Config */}
-                            <Paper
-                                elevation={0}
-                                variant="outlined"
+                        {/* Config */}
+                        <Paper
+                            elevation={0}
+                            variant="outlined"
+                            sx={{
+                                position: 'relative',
+                                p: { xs: 3, sm: 4 },
+                                borderRadius: 3,
+                                background: 'transparent',
+                                backdropFilter: 'blur(1px)',
+                                border: `1px solid ${alpha(theme.palette.primary.main, theme.palette.mode === 'dark' ? 0.15 : 0.1)}`,
+                                boxShadow:
+                                    theme.palette.mode === 'dark'
+                                        ? `0 0 60px ${alpha(theme.palette.primary.main, 0.06)}`
+                                        : `0 16px 50px ${alpha(theme.palette.common.black, 0.06)}`,
+                                overflow: 'hidden',
+                                height: '100%',
+                            }}
+                        >
+                            <Box
                                 sx={{
-                                    position: 'relative',
-                                    p: { xs: 3, sm: 4 },
-                                    borderRadius: 3,
-                                    background: 'transparent',
-                                    backdropFilter: 'blur(1px)',
-                                    border: `1px solid ${alpha(theme.palette.primary.main, theme.palette.mode === 'dark' ? 0.15 : 0.1)}`,
-                                    boxShadow:
-                                        theme.palette.mode === 'dark'
-                                            ? `0 0 60px ${alpha(theme.palette.primary.main, 0.06)}`
-                                            : `0 16px 50px ${alpha(theme.palette.common.black, 0.06)}`,
-                                    overflow: 'hidden',
+                                    position: 'absolute',
+                                    top: 0,
+                                    left: 0,
+                                    right: 0,
+                                    height: 2,
+                                    background: `linear-gradient(90deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})`,
+                                    opacity: 0.85,
                                 }}
-                            >
-                                <Box
+                            />
+
+                            <Stack spacing={2.5}>
+                                <Typography
+                                    variant="overline"
                                     sx={{
-                                        position: 'absolute',
-                                        top: 0,
-                                        left: 0,
-                                        right: 0,
-                                        height: 2,
-                                        background: `linear-gradient(90deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})`,
-                                        opacity: 0.85,
+                                        color: 'text.secondary',
+                                        letterSpacing: 1,
+                                        display: 'block',
+                                        fontWeight: 400,
                                     }}
-                                />
+                                >
+                                    Configure demo
+                                </Typography>
 
                                 <Stack spacing={2.5}>
-                                    <Typography
-                                        variant="overline"
+                                    <TextField
+                                        fullWidth
+                                        type="number"
+                                        value={k}
+                                        onChange={(e) => setK(parseInt(e.target.value) || 0)}
+                                        error={!!errors.k}
+                                        helperText={errors.k || 'K: number of smallest hash values to keep'}
+                                        size="small"
+                                        sx={{ '& .MuiOutlinedInput-root': { borderRadius: 1.5 } }}
+                                    />
+
+                                    <TextField
+                                        fullWidth
+                                        type="number"
+                                        value={streamSize}
+                                        onChange={(e) => setStreamSize(parseInt(e.target.value) || 0)}
+                                        error={!!errors.streamSize}
+                                        helperText={errors.streamSize || 'Stream size: number of elements to process'}
+                                        size="small"
+                                        sx={{ '& .MuiOutlinedInput-root': { borderRadius: 1.5 } }}
+                                    />
+
+                                    <Box
                                         sx={{
-                                            color: 'text.secondary',
-                                            letterSpacing: 1,
-                                            display: 'block',
-                                            fontWeight: 400,
+                                            p: 2,
+                                            borderRadius: 2,
+                                            border: `1px solid ${alpha(theme.palette.divider, 0.6)}`,
+                                            background: 'transparent',
                                         }}
                                     >
-                                        Configure demo
-                                    </Typography>
+                                        <Stack direction="row" spacing={2} alignItems="baseline">
+                                            <Typography sx={{ fontSize: '1.2rem', fontWeight: 800, lineHeight: 1 }}>
+                                                {accuracyPct === null ? '—' : `~${accuracyPct}%`}
+                                            </Typography>
+                                            <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 600 }}>
+                                                accuracy
+                                            </Typography>
+                                        </Stack>
+                                        <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.5 }}>
+                                            {accuracyPct === null
+                                                ? 'Choose valid values (K < stream size) to see an estimate.'
+                                                : streamSize > k * 100
+                                                    ? `Converges to ~${Math.round((1 - 1 / Math.sqrt(k)) * 100)}% when N >> K`
+                                                    : 'Accuracy improves as K increases relative to N'}
+                                        </Typography>
+                                    </Box>
 
-                                    <Stack spacing={2.5}>
-                                        <TextField
-                                            fullWidth
-                                            type="number"
-                                            value={k}
-                                            onChange={(e) => setK(parseInt(e.target.value) || 0)}
-                                            error={!!errors.k}
-                                            helperText={errors.k || 'K: number of smallest hash values to keep'}
-                                            size="small"
-                                            sx={{ '& .MuiOutlinedInput-root': { borderRadius: 1.5 } }}
-                                        />
+                                    {Object.keys(errors).length > 0 && (
+                                        <Alert severity="error" sx={{ borderRadius: 2 }}>
+                                            Please fix the configuration errors above before starting.
+                                        </Alert>
+                                    )}
 
-                                        <TextField
-                                            fullWidth
-                                            type="number"
-                                            value={streamSize}
-                                            onChange={(e) => setStreamSize(parseInt(e.target.value) || 0)}
-                                            error={!!errors.streamSize}
-                                            helperText={errors.streamSize || 'Stream size: number of elements to process'}
-                                            size="small"
-                                            sx={{ '& .MuiOutlinedInput-root': { borderRadius: 1.5 } }}
-                                        />
-
-                                        <Box
+                                    <Stack direction="row" spacing={2} justifyContent="center" sx={{ pt: 0.5 }}>
+                                        <Button
+                                            onClick={handleReset}
+                                            variant="outlined"
+                                            startIcon={<RestartAltIcon />}
                                             sx={{
-                                                p: 2,
-                                                borderRadius: 2,
-                                                border: `1px solid ${alpha(theme.palette.divider, 0.6)}`,
-                                                background: 'transparent',
+                                                textTransform: 'none',
+                                                color: 'text.secondary',
+                                                '&:hover': { backgroundColor: alpha(theme.palette.divider, 0.1) },
                                             }}
                                         >
-                                            <Stack direction="row" spacing={2} alignItems="baseline">
-                                                <Typography sx={{ fontSize: '1.2rem', fontWeight: 800, lineHeight: 1 }}>
-                                                    {accuracyPct === null ? '—' : `~${accuracyPct}%`}
-                                                </Typography>
-                                                <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 600 }}>
-                                                    accuracy
-                                                </Typography>
-                                            </Stack>
-                                            <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.5 }}>
-                                                {accuracyPct === null
-                                                    ? 'Choose valid values (K < stream size) to see an estimate.'
-                                                    : streamSize > k * 100
-                                                        ? `Converges to ~${Math.round((1 - 1 / Math.sqrt(k)) * 100)}% when N >> K`
-                                                        : 'Accuracy improves as K increases relative to N'}
-                                            </Typography>
-                                        </Box>
-
-                                        {Object.keys(errors).length > 0 && (
-                                            <Alert severity="error" sx={{ borderRadius: 2 }}>
-                                                Please fix the configuration errors above before starting.
-                                            </Alert>
-                                        )}
-
-                                        <Stack direction="row" spacing={2} justifyContent="center" sx={{ pt: 0.5 }}>
-                                            <Button
-                                                onClick={handleReset}
-                                                variant="outlined"
-                                                startIcon={<RestartAltIcon />}
-                                                sx={{
-                                                    textTransform: 'none',
-                                                    color: 'text.secondary',
-                                                    '&:hover': { backgroundColor: alpha(theme.palette.divider, 0.1) },
-                                                }}
-                                            >
-                                                Reset
-                                            </Button>
-                                            <Button
-                                                onClick={startDemo}
-                                                variant="contained"
-                                                disabled={!isConfigValidLive}
-                                            >
-                                                Start demo
-                                            </Button>
-                                        </Stack>
+                                            Reset
+                                        </Button>
+                                        <Button
+                                            onClick={startDemo}
+                                            variant="contained"
+                                            disabled={!isConfigValidLive}
+                                        >
+                                            Start demo
+                                        </Button>
                                     </Stack>
                                 </Stack>
-                            </Paper>
-                        </Box>
-                    </Container>
-                </Box>
+                            </Stack>
+                        </Paper>
+                    </Box>
+                </Container>
             </Box>
 
             {/* Setup narration (speaking + subtitles) */}
