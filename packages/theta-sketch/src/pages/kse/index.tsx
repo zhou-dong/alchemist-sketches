@@ -268,6 +268,7 @@ function KmvPageContent() {
                     }}
                     onComplete={() => {
                         animationController.stopAnimation();
+                        speechSynthesis.cancel();
                         completeStep('kse');
                     }}
                 />
