@@ -114,6 +114,8 @@ export default function TimelinePlayer({
 
   const handleNextPage = () => {
     if (nextPagePath) {
+      speechSynthesis.cancel();
+      timeline.pause();
       navigate(nextPagePath);
     }
   };
