@@ -90,7 +90,7 @@ export default function NarrationPlayer({
   // Split content into sentences with word counts
   const sentenceData = React.useMemo(() => {
     const sentenceList = content.split(/(?<=[.!?])\s+/).filter(s => s.trim());
-    const totalWords = content.split(/\s+/).length;
+    const totalWords = content.split(/\s+/).filter(w => w.trim()).length;
 
     let cumulativeProgress = 0;
     return sentenceList.map(sentence => {
