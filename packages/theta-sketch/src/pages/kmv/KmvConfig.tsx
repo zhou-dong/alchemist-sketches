@@ -392,7 +392,6 @@ Please choose and configure the K and stream size, then press Start demo to watc
                         content={SETUP_NARRATION}
                         rate={1}
                         showSubtitles
-                        // subtitleMaxWidth={760}
                         onNext={startDemo}
                         nextTooltip={isConfigValidLive ? 'Start demo' : 'Fix config to start demo'}
                         nextDisabled={!isConfigValidLive}
