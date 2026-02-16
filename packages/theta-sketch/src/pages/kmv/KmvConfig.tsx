@@ -267,7 +267,7 @@ Please choose and configure the K and stream size, then press Start demo to watc
                                         variant="overline"
                                         sx={{
                                             color: 'text.secondary',
-                                            letterSpacing: 2,
+                                            letterSpacing: 1,
                                             display: 'block',
                                             fontWeight: 400,
                                         }}
