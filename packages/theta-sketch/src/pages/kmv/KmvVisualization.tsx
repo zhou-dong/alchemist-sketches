@@ -7,8 +7,7 @@ import { useThreeContainer } from "../../hooks/useThreeContainer";
 import { DualScene, type TimelineSceneThree, render, axis, text, circle, latex, line } from 'obelus-three-render';
 import { AnimationController } from "../../utils/animation-controller";
 import TimelinePlayer from '../../components/TimelinePlayer';
-import { Container } from '@mui/material';
-import KmvIntroCard from './KmvIntroCard';
+import { Box, Container, Fade, Typography } from '@mui/material';
 import { axisStyle, textStyle, circleStyle, lineStyle, useSyncObelusTheme } from '../../theme/obelusTheme';
 import { useThetaSketchProgress } from '../../contexts/ThetaSketchProgressContext';
 import { useSpeech } from '@alchemist/shared';
@@ -48,14 +47,6 @@ const buildDashboard = (k: number) => {
         text("n_value", `N(Expected) = 0`, { y: -window.innerHeight }, textStyle),
         text("estimated", "Estimated = (K / θ) - 1", { y: -window.innerHeight - 30 }, textStyle),
     ]
-};
-
-// Estimate speaking duration based on word count
-// Average: ~150 words per minute at rate 1.0, adjusted for rate 1.1
-const estimateNarrationDuration = (text: string, rate: number = 1.1): number => {
-    const wordCount = text.split(/\s+/).length;
-    const wordsPerSecond = (150 / 60) * rate;
-    return wordCount / wordsPerSecond;
 };
 
 // Animation to display axis and dashboard
@@ -166,10 +157,62 @@ export default function KmvVisualization({
     useSyncObelusTheme();
 
     const [timeline, setTimeline] = React.useState<any>(null);
-    const [showIntro, setShowIntro] = React.useState(true);
+    const [currentSubtitle, setCurrentSubtitle] = React.useState<string>('');
     const hasBuiltRef = React.useRef(false);
 
     const { containerRef } = useThreeContainer(renderer);
+
+    // Subtitle progress tracking for the intro narration (best-effort timing).
+    const subtitleIntervalRef = React.useRef<ReturnType<typeof setInterval> | null>(null);
+    const narrationStartTimeRef = React.useRef<number>(0);
+    const narrationEstimatedDurationMsRef = React.useRef<number>(0);
+    const narrationPauseStartedAtRef = React.useRef<number | null>(null);
+    const sentenceDataRef = React.useRef<Array<{ text: string; start: number; end: number }> | null>(null);
+    const sentenceRangesRef = React.useRef<Array<{ text: string; startIndex: number; endIndex: number }> | null>(null);
+    const isNarratingRef = React.useRef(false);
+    const boundaryDrivenRef = React.useRef(false);
+    const boundaryEverFiredRef = React.useRef(false);
+
+    const stopSubtitleTracking = React.useCallback(() => {
+        if (subtitleIntervalRef.current) {
+            clearInterval(subtitleIntervalRef.current);
+            subtitleIntervalRef.current = null;
+        }
+    }, []);
+
+    const startSubtitleTracking = React.useCallback(() => {
+        stopSubtitleTracking();
+        subtitleIntervalRef.current = setInterval(() => {
+            if (!isNarratingRef.current) return;
+            const duration = narrationEstimatedDurationMsRef.current;
+            if (!duration) return;
+            const elapsed = Date.now() - narrationStartTimeRef.current;
+            const progress = Math.min(Math.max(elapsed / duration, 0), 1) * 100;
+            const data = sentenceDataRef.current;
+            if (!data || data.length === 0) return;
+
+            const sentence = data.find((s) => progress >= s.start && progress < s.end) ?? data[data.length - 1];
+            if (sentence?.text) setCurrentSubtitle(sentence.text);
+        }, 100);
+    }, [stopSubtitleTracking]);
+
+    const pauseSubtitleTracking = React.useCallback(() => {
+        if (!isNarratingRef.current) return;
+        if (boundaryDrivenRef.current) return;
+        narrationPauseStartedAtRef.current = Date.now();
+        stopSubtitleTracking();
+    }, [stopSubtitleTracking]);
+
+    const resumeSubtitleTracking = React.useCallback(() => {
+        if (!isNarratingRef.current) return;
+        if (boundaryDrivenRef.current) return;
+        const pausedAt = narrationPauseStartedAtRef.current;
+        if (pausedAt) {
+            narrationStartTimeRef.current += Date.now() - pausedAt;
+            narrationPauseStartedAtRef.current = null;
+        }
+        startSubtitleTracking();
+    }, [startSubtitleTracking]);
 
     // Speak the intro narration
     const speakIntro = React.useCallback((text: string) => {
@@ -184,22 +227,88 @@ export default function KmvVisualization({
             utterance.voice = voice;
         }
 
-        // Hide intro when speaking finishes
+        boundaryDrivenRef.current = false;
+        boundaryEverFiredRef.current = false;
+
+        // Prepare sentence ranges for boundary-aligned subtitles.
+        // We keep indices into the original text so `event.charIndex` maps correctly.
+        const sentenceRegex = /[^.!?]+[.!?]+(?:\s+|$)|[^.!?]+$/g;
+        const matches = Array.from(text.matchAll(sentenceRegex));
+        const ranges = (matches.length > 0 ? matches : [{ 0: text, index: 0 } as any]).map((m: any) => {
+            const raw = String(m[0] ?? '');
+            const startIndex = Number(m.index ?? 0);
+            const endIndex = startIndex + raw.length;
+            const display = raw.replace(/\s+/g, ' ').trim();
+            return { text: display, startIndex, endIndex };
+        }).filter((s) => s.text.length > 0);
+        sentenceRangesRef.current = ranges;
+
+        // Fallback sentence list for time-based tracking (same display text).
+        const sentenceList = ranges.length > 0 ? ranges.map((r) => r.text) : [text.replace(/\s+/g, ' ').trim()];
+        const totalWords = text.split(/\s+/).filter(Boolean).length || 1;
+
+        let cumulative = 0;
+        const data = sentenceList.map((s) => {
+            const wc = s.split(/\s+/).filter(Boolean).length || 1;
+            const weight = wc / totalWords;
+            const start = cumulative;
+            cumulative += weight * 100;
+            return { text: s, start, end: cumulative };
+        });
+        sentenceDataRef.current = data;
+
+        // Estimate duration: conservative speaking speed so we don't jump early.
+        const wordsPerSecond = 2.0 * utterance.rate; // ~120 wpm at rate=1
+        const estimatedMs = (totalWords / wordsPerSecond) * 1000;
+        narrationEstimatedDurationMsRef.current = Math.max(estimatedMs, 800);
+        narrationStartTimeRef.current = Date.now();
+        narrationPauseStartedAtRef.current = null;
+        isNarratingRef.current = true;
+
+        // Start at the first sentence.
+        setCurrentSubtitle(data[0]?.text ?? '');
+        startSubtitleTracking();
+
+        // Prefer boundary-driven subtitle updates when available.
+        utterance.onboundary = (event: SpeechSynthesisEvent) => {
+            const charIndex = (event as any).charIndex as number | undefined;
+            if (typeof charIndex !== 'number') return;
+            boundaryEverFiredRef.current = true;
+            boundaryDrivenRef.current = true;
+
+            const rs = sentenceRangesRef.current;
+            if (!rs || rs.length === 0) return;
+            const current = rs.find((r) => charIndex >= r.startIndex && charIndex < r.endIndex) ?? rs[rs.length - 1];
+            if (current?.text) setCurrentSubtitle(current.text);
+
+            // Once boundaries are firing, stop the time-based tracker to avoid jitter.
+            stopSubtitleTracking();
+        };
+
         utterance.onend = () => {
-            setShowIntro(false);
+            isNarratingRef.current = false;
+            stopSubtitleTracking();
+            setCurrentSubtitle('');
+        };
+        utterance.onerror = () => {
+            isNarratingRef.current = false;
+            stopSubtitleTracking();
+            setCurrentSubtitle('');
         };
 
         speechSynthesis.speak(utterance);
-        setShowIntro(true);
-    }, [getCurrentVoice]);
+    }, [getCurrentVoice, startSubtitleTracking, stopSubtitleTracking]);
 
     // Cleanup on unmount
     React.useEffect(() => {
         return () => {
             animationController.stopAnimation();
             speechSynthesis.cancel();
+            isNarratingRef.current = false;
+            stopSubtitleTracking();
+            setCurrentSubtitle('');
         };
-    }, []);
+    }, [stopSubtitleTracking]);
 
     // Build timeline when component mounts
     React.useEffect(() => {
@@ -219,10 +328,18 @@ export default function KmvVisualization({
         clearScene(scene);
         animationController.renderAnimationOnce();
 
-        // Calculate intro narration and its duration
-        const introNarration = `Before we dive into the demo, let's review the KMV algorithm again. K Minimum Values, keeps only the K smallest hash values in memory, in this case K = ${k}. If the sketch is not full, we add the new hash. If full, we compare with theta: smaller values replace the largest, larger values are ignored. In the demo, N Expected shows the real unique count, while Estimated shows the value calculated from K divided by theta minus 1. Now let's see it in action.`;
-        const narrationDuration = estimateNarrationDuration(introNarration, 1.1);
-        const animationStartTime = narrationDuration - 2; // added 2 seconds to the narration duration to ensure animation starts after narration smoothly.
+        // Intro narration (explains what this page shows) — plays while the animation runs.
+        // Includes the implementation rules from KmvIntroCard (but as audio only).
+        const introNarration = `On this page, we simulate KMV on a stream.
+Each dot is an item hashed into a value between 0 and 1 and placed on the number line.
+KMV keeps only the K smallest hash values in memory. Here, K equals ${k}.
+Theta is the current K-th smallest value, shown by the vertical line.
+
+Implementation rules: if the sketch is not full yet, add the new hash. If the sketch is full, compare the new hash to theta.
+If it is smaller than theta, add it and remove the largest stored value. If it is larger than theta, ignore it.
+
+As more items arrive, the estimate updates as N-hat equals K divided by theta, minus 1.`;
+        const animationStartTime = 0;
 
         const entries = buildTimelineEntries(streamSize, k);
 
@@ -246,7 +363,7 @@ export default function KmvVisualization({
             animationController.stopAnimation
         );
 
-        // Brief introduction about KMV - starts immediately
+        // Brief introduction about this page - starts at the beginning
         newTimeline.call(() => {
             speakIntro(introNarration);
         }, [], 0.5);
@@ -257,8 +374,33 @@ export default function KmvVisualization({
 
     return (
         <>
-            {/* Structured Intro Card */}
-            <KmvIntroCard visible={showIntro} />
+            {/* Subtitle display for current narration */}
+            <Fade in={!!currentSubtitle}>
+                <Box
+                    sx={{
+                        position: 'fixed',
+                        bottom: window.innerHeight / 12 + 140,
+                        left: '50%',
+                        transform: 'translateX(-50%)',
+                        width: 'min(900px, calc(100vw - 32px))',
+                        zIndex: 1001,
+                        textAlign: 'center',
+                        pointerEvents: 'none',
+                    }}
+                >
+                    <Typography
+                        variant="body1"
+                        sx={{
+                            color: 'text.primary',
+                            px: 3,
+                            py: 1.5,
+                            lineHeight: 1.6,
+                        }}
+                    >
+                        {currentSubtitle}
+                    </Typography>
+                </Box>
+            </Fade>
 
             {/* Timeline Player */}
             {timeline && (
@@ -283,15 +425,19 @@ export default function KmvVisualization({
                         onStart={() => {
                             animationController.startAnimation();
                             speechSynthesis.resume();
+                            resumeSubtitleTracking();
                         }}
                         onPause={() => {
                             animationController.stopAnimation();
                             speechSynthesis.pause();
+                            pauseSubtitleTracking();
                         }}
                         onComplete={() => {
                             animationController.stopAnimation();
                             speechSynthesis.cancel();
-                            setShowIntro(false);
+                            isNarratingRef.current = false;
+                            stopSubtitleTracking();
+                            setCurrentSubtitle('');
                             completeStep('kmv');
                         }}
                     />

@@ -1,7 +1,6 @@
 import React from 'react';
 import { Tooltip, IconButton, Stack } from '@mui/material';
 import Recap from './Recap';
-import KmvConfig from './KmvConfigDialog';
 import Demo from './Demo';
 import StepTitle from '@alchemist/theta-sketch/components/StepTitle';
 
@@ -20,7 +19,7 @@ function ThetaSketchPageContent() {
     const [k, setK] = React.useState(defaultK);
     const [streamSize, setStreamSize] = React.useState(defaultStreamSize);
 
-    // Progressive flow step: 0 = intro, 1 = config, 2 = demo
+    // Progressive flow step: 0 = intro/recap, 1 = setup (implementation + config), 2 = demo
     const [flowStep, setFlowStep] = React.useState<number>(0);
 
     const IntroductionToggle = () => (
@@ -76,10 +75,11 @@ function ThetaSketchPageContent() {
             {/* Introduction */}
             {flowStep === 0 && <Recap onClose={() => setFlowStep(1)} />}
 
-            {/* Configuration */}
+            {/* Setup (implementation + configuration) */}
             {flowStep === 1 && (
-                <KmvConfig
-                    onStart={() => setFlowStep(2)}
+                <Demo
+                    key="kmv-setup"
+                    defaultView="setup"
                     k={k}
                     streamSize={streamSize}
                     setK={setK}
@@ -89,8 +89,19 @@ function ThetaSketchPageContent() {
                 />
             )}
 
-            {/* Visualization with Timeline Player */}
-            {flowStep === 2 && <Demo k={k} streamSize={streamSize} />}
+            {/* Demo */}
+            {flowStep === 2 && (
+                <Demo
+                    key="kmv-demo"
+                    defaultView="demo"
+                    k={k}
+                    streamSize={streamSize}
+                    setK={setK}
+                    setStreamSize={setStreamSize}
+                    defaultK={defaultK}
+                    defaultStreamSize={defaultStreamSize}
+                />
+            )}
 
             {/* Toggle buttons */}
             <Stack
