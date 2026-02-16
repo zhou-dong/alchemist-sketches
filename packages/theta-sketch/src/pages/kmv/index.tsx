@@ -1,13 +1,14 @@
 import React from 'react';
 import { Tooltip, IconButton, Stack } from '@mui/material';
 import Recap from './Recap';
-import Demo from './Demo';
+import Config from './Config';
 import StepTitle from '@alchemist/theta-sketch/components/StepTitle';
 
 import * as Settings from '@mui/icons-material/Settings';
 import * as TipsAndUpdates from '@mui/icons-material/TipsAndUpdates';
 import * as SportsEsports from '@mui/icons-material/SportsEsports';
 import StepProgressIndicator from '@alchemist/theta-sketch/components/StepProgressIndicator';
+import KmvVisualization from './KmvVisualization';
 
 const SettingsIcon = Settings.default as unknown as React.ElementType;
 const TipsAndUpdatesIcon = TipsAndUpdates.default as unknown as React.ElementType;
@@ -77,9 +78,8 @@ function ThetaSketchPageContent() {
 
             {/* Setup (implementation + configuration) */}
             {flowStep === 1 && (
-                <Demo
+                <Config
                     key="kmv-setup"
-                    defaultView="setup"
                     k={k}
                     streamSize={streamSize}
                     setK={setK}
@@ -91,16 +91,7 @@ function ThetaSketchPageContent() {
 
             {/* Demo */}
             {flowStep === 2 && (
-                <Demo
-                    key="kmv-demo"
-                    defaultView="demo"
-                    k={k}
-                    streamSize={streamSize}
-                    setK={setK}
-                    setStreamSize={setStreamSize}
-                    defaultK={defaultK}
-                    defaultStreamSize={defaultStreamSize}
-                />
+                <KmvVisualization k={k} streamSize={streamSize} />
             )}
 
             {/* Toggle buttons */}
