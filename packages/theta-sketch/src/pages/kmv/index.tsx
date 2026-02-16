@@ -1,6 +1,6 @@
 import React from 'react';
 import { Tooltip, IconButton, Stack } from '@mui/material';
-import KseToKmv from './KseToKmv';
+import Recap from './Recap';
 import KmvConfig from './KmvConfigDialog';
 import KmvVisualization from './KmvVisualization';
 import StepTitle from '@alchemist/theta-sketch/components/StepTitle';
@@ -74,7 +74,7 @@ function ThetaSketchPageContent() {
             <StepProgressIndicator currentStepId="kmv" />
 
             {/* Introduction */}
-            {flowStep === 0 && <KseToKmv onClose={() => setFlowStep(1)} />}
+            {flowStep === 0 && <Recap onClose={() => setFlowStep(1)} />}
 
             {/* Configuration */}
             {flowStep === 1 && (

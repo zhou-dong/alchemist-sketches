@@ -31,7 +31,7 @@ interface NarrationSection {
 const NARRATION_SECTIONS: NarrationSection[] = [
     {
         id: 'insight',
-        text: "Quick recap. Order statistics tells us among N uniformly distributed values between 0 and 1, the K-th smallest item has an expected value of θ = K divided by N plus 1. K-th smallest estimation flips that relationship: observe theta, the K-th smallest value, and estimate value N approximately equals K divided by theta, minus 1.",
+        text: "Quick recap. Order statistics tells us among N uniformly distributed values between 0 and 1, the K-th smallest item has an expected value of θ = K divided by N plus 1. K-th smallest estimation flips that relationship: observe theta, the K-th smallest value, and estimate the total count N approximately equals K divided by theta, minus 1.",
     },
     {
         id: 'core-insight',
@@ -46,9 +46,9 @@ const NARRATION_SECTIONS: NarrationSection[] = [
         text: 'KMV Implementation. KMV, which stands for K Minimum Values, stores only K hash values in memory, regardless of stream size. The algorithm has three steps. Initialize: create a container for K smallest hash values, initially empty. Process: hash each element to a value between 0 and 1. If it is smaller than the K-th smallest, add it and remove the largest. Estimate: calculate N approximately equal to K divided by theta minus 1, using the K-th smallest value.',
     },
     {
-        id: 'cta',
-        text: 'When you are ready, click the next button to configure and start the demo.',
-    },
+        id: 'demo',
+        text: 'On the next section, we will build a KMV sketch and demonstrate how it works.',
+    }
 ];
 
 interface InfoCardProps {
@@ -422,14 +422,14 @@ export default function KseToKmv({ onClose }: { onClose: () => void }) {
                                 color: 'text.secondary',
                             }}
                         >
-                            To use this in a data stream, we only need to maintain the K smallest hashes.
+                            To use this in a data stream, we only need to maintain the <strong>K smallest hashes</strong>.
                         </Typography>
                     </StepSection>
                 </Box>
             </Fade>
 
             {/* Section 2: Requirements */}
-            <Fade in={isSectionVisible(1)} timeout={600}>
+            <Fade in={isSectionVisible(2)} timeout={600}>
                 <Box>
                     <StepSection
                         title="Requirements for Practice"
@@ -468,7 +468,7 @@ export default function KseToKmv({ onClose }: { onClose: () => void }) {
             </Fade>
 
             {/* Section 3: KMV Algorithm */}
-            <Fade in={isSectionVisible(2)} timeout={600}>
+            <Fade in={isSectionVisible(3)} timeout={600}>
                 <Box>
                     <StepSection
                         title="KMV: The Implementation"
