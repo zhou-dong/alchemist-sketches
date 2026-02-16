@@ -74,6 +74,7 @@ export default function NarrationPlayer({
   const pausedTimeRef = useRef<number>(0);
   const estimatedDurationRef = useRef<number>(0);
   const progressIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const clearSubtitleTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const iconSize = size === 'small' ? 20 : size === 'large' ? 26 : 24;
   const buttonSize = size === 'small' ? 'small' : size === 'medium' ? 'medium' : 'large';
@@ -152,6 +153,10 @@ export default function NarrationPlayer({
   const speak = useCallback(() => {
     speechSynthesis.cancel();
     stopProgressTracking();
+    if (clearSubtitleTimeoutRef.current) {
+      clearTimeout(clearSubtitleTimeoutRef.current);
+      clearSubtitleTimeoutRef.current = null;
+    }
 
     const utterance = new SpeechSynthesisUtterance(content);
     utterance.rate = rate;
@@ -172,10 +177,22 @@ export default function NarrationPlayer({
       setIsPlaying(false);
       setIsPaused(false);
       setProgress(100);
-      setCurrentSubtitle('');
+      // Ensure the final sentence is visible at completion.
+      const lastSentence = sentenceData[sentenceData.length - 1]?.text ?? '';
+      if (lastSentence) setCurrentSubtitle(lastSentence);
       stopProgressTracking();
       onComplete?.();
       onPlayingChange?.(false);
+
+      // Clear subtitle shortly after to avoid lingering text.
+      if (lastSentence) {
+        clearSubtitleTimeoutRef.current = setTimeout(() => {
+          setCurrentSubtitle('');
+          clearSubtitleTimeoutRef.current = null;
+        }, 900);
+      } else {
+        setCurrentSubtitle('');
+      }
     };
 
     utterance.onerror = (event) => {
@@ -232,6 +249,10 @@ export default function NarrationPlayer({
     return () => {
       speechSynthesis.cancel();
       stopProgressTracking();
+      if (clearSubtitleTimeoutRef.current) {
+        clearTimeout(clearSubtitleTimeoutRef.current);
+        clearSubtitleTimeoutRef.current = null;
+      }
     };
   }, [stopProgressTracking]);
 
