@@ -8,6 +8,8 @@ import {
     SetCard,
     NewThetaLimitNote,
     LimitSection,
+} from './SetOperationsDemoShared';
+import {
     ThetaBar,
     StepDots,
     CountBadge,
@@ -16,7 +18,7 @@ import {
     SKETCH_A_COLOR,
     SKETCH_B_COLOR,
     RESULT_COLOR,
-} from './SetOperationsDemoShared';
+} from '../../components/set-operations/SetOperationsVizShared';
 
 const VISUAL_STEPS = 3; // 0: A and B bars; 1: common θ + highlight below θ; 2: intersection result bar
 
@@ -64,10 +66,15 @@ export default function SetOperationsIntersectionPage() {
                             Why θ is important for intersection
                         </Typography>
                         <Typography variant="body2" color="text.secondary" sx={{ mb: 2, lineHeight: 1.7 }}>
-                            For intersection we need a <strong>common threshold</strong>: we only look at values <strong>below θ</strong> in both sketches, then count how many appear in both. That count, divided by θ, gives the estimated intersection size. So <strong>θ defines the operation</strong> — without θ we don’t know where to cut off. We use <strong>θ = min(θ_A, θ_B)</strong> so both sketches are treated on the same scale. That makes θ <strong>necessary</strong> for the result to be meaningful and to be used in further set operations.
+                            For intersection we need a <strong>common threshold</strong>: we only look at values <strong>below θ</strong> in
+                            both sketches, then count how many appear in both. That count, divided by θ, gives the estimated intersection size.
+                            So <strong>θ defines the operation</strong> — without θ we don’t know where to cut off. We use{' '}
+                            <strong>θ = min(θ_A, θ_B)</strong> so both sketches are treated on the same scale. That makes θ{' '}
+                            <strong>necessary</strong> for the result to be meaningful and to be used in further set operations.
                         </Typography>
                         <Typography variant="body2" sx={{ fontWeight: 600, color: 'text.primary' }}>
-                            The problem: KMV does not store θ. So after we compute the intersection, the result has no stored θ — and we hit the limit below.
+                            The problem: KMV does not store θ. So after we compute the intersection, the result has no stored θ — and we hit the
+                            limit below.
                         </Typography>
                     </Paper>
 
@@ -89,8 +96,17 @@ export default function SetOperationsIntersectionPage() {
                         <Stack spacing={2}>
                             {visualStep >= 1 && (
                                 <Fade in={true}>
-                                    <Box sx={{ p: 1.5, borderRadius: 1, bgcolor: alpha(theme.palette.primary.main, 0.06), border: `1px solid ${alpha(theme.palette.primary.main, 0.2)}` }}>
-                                        <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', mb: 1 }}>θ comparison</Typography>
+                                    <Box
+                                        sx={{
+                                            p: 1.5,
+                                            borderRadius: 1,
+                                            bgcolor: alpha(theme.palette.primary.main, 0.06),
+                                            border: `1px solid ${alpha(theme.palette.primary.main, 0.2)}`,
+                                        }}
+                                    >
+                                        <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', mb: 1 }}>
+                                            θ comparison
+                                        </Typography>
                                         <ThetaCompareMini thetaA={sketchA.theta} thetaB={sketchB.theta} colorA={SKETCH_A_COLOR} colorB={SKETCH_B_COLOR} />
                                     </Box>
                                 </Fade>
@@ -116,7 +132,8 @@ export default function SetOperationsIntersectionPage() {
                             {visualStep >= 1 && (
                                 <Fade in={true}>
                                     <Typography variant="body2" color="text.secondary" sx={{ fontFamily: 'monospace' }}>
-                                        Common θ for intersection = min(θ_A, θ_B) = <strong>{commonTheta.toFixed(3)}</strong>. Shaded region = “below θ” (values we use for intersection).
+                                        Common θ for intersection = min(θ_A, θ_B) = <strong>{commonTheta.toFixed(3)}</strong>. Shaded region =
+                                        “below θ” (values we use for intersection).
                                     </Typography>
                                 </Fade>
                             )}
@@ -124,9 +141,7 @@ export default function SetOperationsIntersectionPage() {
                                 <Stack direction="row" spacing={1} flexWrap="wrap" sx={{ gap: 1 }}>
                                     <CountBadge label="|A below θ|" count={countABelowTheta} color={SKETCH_A_COLOR} />
                                     <CountBadge label="|B below θ|" count={countBBelowTheta} color={SKETCH_B_COLOR} />
-                                    {visualStep >= 2 && (
-                                        <CountBadge label="|A ∩ B|" count={intersection.values.length} color={RESULT_COLOR} />
-                                    )}
+                                    {visualStep >= 2 && <CountBadge label="|A ∩ B|" count={intersection.values.length} color={RESULT_COLOR} />}
                                 </Stack>
                             )}
                             {visualStep >= 2 && (
@@ -145,12 +160,7 @@ export default function SetOperationsIntersectionPage() {
                             )}
                             <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', flexWrap: 'wrap' }}>
                                 <StepDots current={visualStep} total={VISUAL_STEPS} />
-                                <Button
-                                    size="small"
-                                    variant="outlined"
-                                    disabled={visualStep === 0}
-                                    onClick={() => setVisualStep((s) => Math.max(0, s - 1))}
-                                >
+                                <Button size="small" variant="outlined" disabled={visualStep === 0} onClick={() => setVisualStep((s) => Math.max(0, s - 1))}>
                                     Previous step
                                 </Button>
                                 <Button
@@ -233,13 +243,21 @@ export default function SetOperationsIntersectionPage() {
                             Why KMV is limited
                         </Typography>
                         <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5, lineHeight: 1.7 }}>
-                            KMV stores only the K values — it never stores θ. So the intersection result above is just a set of values (often fewer than K). We have <strong>no place to store</strong> “θ = min(θ_A, θ_B)” in that result. If we use that result in another intersection or difference, we would have to guess θ from the result. The only thing we can get is <strong>max(result values)</strong>, which is at most min(θ_A, θ_B) and in general <strong>smaller</strong>. So we lose the correct threshold. With the wrong θ, any further set operation would be wrong. That is the <strong>limit of KMV</strong>.
+                            KMV stores only the K values — it never stores θ. So the intersection result above is just a set of values (often fewer
+                            than K). We have <strong>no place to store</strong> “θ = min(θ_A, θ_B)” in that result. If we use that result in
+                            another intersection or difference, we would have to guess θ from the result. The only thing we can get is{' '}
+                            <strong>max(result values)</strong>, which is at most min(θ_A, θ_B) and in general <strong>smaller</strong>. So we
+                            lose the correct threshold. With the wrong θ, any further set operation would be wrong. That is the{' '}
+                            <strong>limit of KMV</strong>.
                         </Typography>
                         <Typography variant="subtitle2" sx={{ fontWeight: 600, color: 'text.primary', mb: 1 }}>
                             Why we need θ
                         </Typography>
                         <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.7 }}>
-                            To fix this we need to <strong>save θ</strong> in the result. The correct θ for the result is min(θ_A, θ_B). Once we save θ explicitly together with the values below it, the result is no longer “just KMV” — it becomes a <strong>Theta Sketch</strong>. So <strong>θ is necessary</strong> for the result to participate in further set operations; saving θ is the natural fix and that step is exactly what turns KMV into Theta Sketch.
+                            To fix this we need to <strong>save θ</strong> in the result. The correct θ for the result is min(θ_A, θ_B). Once we
+                            save θ explicitly together with the values below it, the result is no longer “just KMV” — it becomes a{' '}
+                            <strong>Theta Sketch</strong>. So <strong>θ is necessary</strong> for the result to participate in further set
+                            operations; saving θ is the natural fix and that step is exactly what turns KMV into Theta Sketch.
                         </Typography>
                     </Paper>
 
@@ -267,3 +285,4 @@ export default function SetOperationsIntersectionPage() {
         </>
     );
 }
+

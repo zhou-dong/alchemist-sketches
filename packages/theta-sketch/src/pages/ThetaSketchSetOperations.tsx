@@ -13,7 +13,7 @@ import {
     SKETCH_A_COLOR,
     SKETCH_B_COLOR,
     ThetaBar,
-} from './set-operations/SetOperationsDemoShared';
+} from '../components/set-operations/SetOperationsVizShared';
 
 function mulberry32(seed: number) {
     let a = seed >>> 0;

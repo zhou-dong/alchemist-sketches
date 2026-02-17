@@ -14,8 +14,9 @@ export default function SetOperationsDemoPage() {
 
             <Container maxWidth="md" sx={{ py: 3, pb: 10 }}>
                 <Typography variant="body2" color="text.secondary" sx={{ mb: 3, lineHeight: 1.7 }}>
-                    <strong>KMV (K Minimum Values)</strong>: each sketch stores <strong>exactly K</strong> smallest hash values. θ = K-th value (max of the K values).
-                    Choose an operation to see how union, intersection, and difference work — and why intersection and difference hit a limit (saving θ leads to Theta Sketch).
+                    <strong>KMV (K Minimum Values)</strong>: each sketch stores <strong>exactly K</strong> smallest hash values. θ =
+                    K-th value (max of the K values). Choose an operation to see how union, intersection, and difference work —
+                    and why intersection and difference hit a limit (saving θ leads to Theta Sketch).
                 </Typography>
 
                 <Stack spacing={2}>
@@ -110,3 +111,4 @@ export default function SetOperationsDemoPage() {
         </>
     );
 }
+
