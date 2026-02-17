@@ -35,7 +35,6 @@ function ImplementationCard({
     description: string;
 }) {
     const theme = useTheme();
-    const border = alpha(theme.palette.primary.main, 0.22);
     const bg = 'transparent';
 
     return (
@@ -43,8 +42,7 @@ function ImplementationCard({
             variant="outlined"
             sx={{
                 p: 2,
-                borderRadius: 2,
-                borderColor: border,
+                borderRadius: 3,
                 background: bg,
                 flex: 1,
                 minWidth: { xs: '100%', md: 220 },
@@ -130,7 +128,6 @@ export default function Config({
 
     const startDemo = () => {
         if (validateConfig()) {
-            // Stop any ongoing narration from the setup screen before starting the demo.
             speechSynthesis.cancel();
             onStart?.();
         }
