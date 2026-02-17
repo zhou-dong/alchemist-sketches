@@ -332,7 +332,7 @@ export default function KmvVisualization({
         // Includes the implementation rules from KmvIntroCard (but as audio only).
         const introNarration = `On this page, we simulate KMV on a stream.
 Each dot is an item hashed into a value between 0 and 1 and placed on the number line.
-KMV keeps only the K smallest hash values in memory. Here, K equals ${k}.
+KMV keeps only the K smallest hash values in memory, here K equals ${k}.
 Theta is the current K-th smallest value, shown by the vertical line.
 
 Implementation rules: if the sketch is not full yet, add the new hash. If the sketch is full, compare the new hash to theta.
