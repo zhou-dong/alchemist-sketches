@@ -335,8 +335,8 @@ Each dot is an item hashed into a value between 0 and 1 and placed on the number
 KMV keeps only the K smallest hash values in memory, here K equals ${k}.
 Theta is the current K-th smallest value, shown by the vertical line.
 
-Implementation rules: if the sketch is not full yet, add the new hash. If the sketch is full, compare the new hash to theta.
-If it is smaller than theta, add it and remove the largest stored value. If it is larger than theta, ignore it.
+Implementation rules: if the sketch is not full yet, add the new hash. 
+If the sketch is full, compare the new hash to theta; if it is smaller than theta, add it and remove the largest stored value; if it is larger than theta, ignore it.
 
 As more items arrive, the estimate updates as N-hat equals K divided by theta, minus 1.`;
         const animationStartTime = 0;
