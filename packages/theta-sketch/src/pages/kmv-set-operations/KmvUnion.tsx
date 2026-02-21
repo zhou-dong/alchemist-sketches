@@ -323,14 +323,11 @@ const Main = ({ sketchA, sketchB, union, k }: KmvUnionProps) => {
             >
                 <Paper
                     elevation={0}
+                    variant="outlined"
                     sx={{
                         p: 1.5,
                         borderRadius: 3,
-                        border: `1px solid ${alpha(theme.palette.divider, 0.35)}`,
-                        background: alpha(theme.palette.background.paper, theme.palette.mode === 'dark' ? 0.42 : 0.72),
-                        backdropFilter: 'blur(10px)',
-                        WebkitBackdropFilter: 'blur(10px)',
-                        boxShadow: `0 16px 40px ${alpha(theme.palette.common.black, theme.palette.mode === 'dark' ? 0.45 : 0.18)}`,
+                        background: 'transparent',
                         maxHeight: { xs: 'calc(100vh - 260px)', md: 'calc(100vh - 190px)' },
                         overflowY: 'auto',
                     }}
@@ -350,7 +347,7 @@ const Main = ({ sketchA, sketchB, union, k }: KmvUnionProps) => {
                             />
                         </Stack>
                         <Typography variant="caption" color="text.secondary">
-                            Values are hash values in \([0, 1)\). KMV keeps only the K smallest.
+                            Values are hash values in ([0, 1)). KMV keeps only the K smallest.
                         </Typography>
                         <Divider sx={{ borderColor: alpha(theme.palette.divider, 0.35) }} />
 
