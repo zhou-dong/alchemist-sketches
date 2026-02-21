@@ -78,6 +78,24 @@ export default function SetOperationsIntersectionPage() {
                         </Typography>
                     </Paper>
 
+                    <Paper
+                        variant="outlined"
+                        sx={{
+                            p: 2,
+                            borderColor: alpha(theme.palette.info.main, 0.25),
+                            background: alpha(theme.palette.info.main, 0.04),
+                            borderLeft: `4px solid ${theme.palette.info.main}`,
+                        }}
+                    >
+                        <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 0.75 }}>
+                            KMV reminder: θ is implicit (K-th smallest)
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.7 }}>
+                            In KMV, θ is not stored explicitly. It is inferred as the <strong>K-th smallest</strong> value (the max of the stored K).
+                            Intersection needs the shared θ = min(θ_A, θ_B), so losing θ in the result is exactly where KMV stops being composable.
+                        </Typography>
+                    </Paper>
+
                     {/* Visual demo: number-line bars + step-by-step */}
                     <Paper
                         variant="outlined"

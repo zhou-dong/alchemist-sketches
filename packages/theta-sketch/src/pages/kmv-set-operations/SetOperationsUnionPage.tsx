@@ -5,20 +5,19 @@ import { Box, Button, Container, Fade, Paper, Stack, Typography, alpha, useTheme
 import StepProgressIndicator from '../../components/StepProgressIndicator';
 import {
     useSetOperationsDemoData,
-    SetCard,
 } from './SetOperationsDemoShared';
 import {
     ThetaBar,
     StepDots,
     ColorLegend,
     CountBadge,
-    ThetaCompareMini,
     SKETCH_A_COLOR,
     SKETCH_B_COLOR,
     RESULT_COLOR,
 } from '../../components/set-operations/SetOperationsVizShared';
+import KmvUnion from './KmvUnion';
 
-const UNION_VISUAL_STEPS = 3; // 0: A and B bars; 1: θ comparison + merge idea; 2: union result bar
+const UNION_VISUAL_STEPS = 5; // 0: intro, 1: sketch A, 2: sketch B, 3: merge+sort+take K, 4: union result
 
 export default function SetOperationsUnionPage() {
     const navigate = useNavigate();
@@ -33,6 +32,44 @@ export default function SetOperationsUnionPage() {
     const mergedSortedUnique = useMemo(() => {
         return [...new Set([...sketchA.values, ...sketchB.values])].sort((a, b) => a - b);
     }, [sketchA.values, sketchB.values]);
+    const inferredThetaUnion = useMemo(() => (mergedSortedUnique.length >= k ? mergedSortedUnique[k - 1] : 1), [mergedSortedUnique, k]);
+
+    const ValuesBox = ({ title, values, accentColor }: { title: string; values: number[]; accentColor: string }) => (
+        <Paper
+            variant="outlined"
+            sx={{
+                p: 1.5,
+                borderRadius: 2,
+                borderColor: alpha(theme.palette.divider, 0.5),
+                borderLeft: `3px solid ${accentColor}`,
+                background: alpha(theme.palette.background.paper, 0.25),
+            }}
+        >
+            <Typography variant="caption" sx={{ fontWeight: 700, color: 'text.secondary', display: 'block', mb: 1 }}>
+                {title}
+            </Typography>
+            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                {values.map((v, i) => (
+                    <Box
+                        key={i}
+                        component="span"
+                        sx={{
+                            px: 0.75,
+                            py: 0.25,
+                            borderRadius: 1,
+                            fontSize: '0.75rem',
+                            fontFamily: 'monospace',
+                            bgcolor: alpha(accentColor, 0.15),
+                            border: `1px solid ${alpha(accentColor, 0.35)}`,
+                            color: 'text.primary',
+                        }}
+                    >
+                        {v.toFixed(3)}
+                    </Box>
+                ))}
+            </Box>
+        </Paper>
+    );
 
     return (
         <>
@@ -41,37 +78,6 @@ export default function SetOperationsUnionPage() {
 
             <Container maxWidth="md" sx={{ py: 3, pb: 10 }}>
                 <Stack spacing={3}>
-                    {/* Why union stays KMV */}
-                    <Paper
-                        variant="outlined"
-                        sx={{
-                            p: 3,
-                            borderColor: alpha(theme.palette.primary.main, 0.3),
-                            background: alpha(theme.palette.primary.main, 0.04),
-                        }}
-                    >
-                        <Typography
-                            variant="subtitle1"
-                            sx={{
-                                color: 'primary.main',
-                                fontWeight: 600,
-                                mb: 2,
-                                textTransform: 'uppercase',
-                                letterSpacing: 1,
-                                fontSize: '0.95rem',
-                            }}
-                        >
-                            Why union stays KMV
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary" sx={{ mb: 2, lineHeight: 1.7 }}>
-                            For union we <strong>merge</strong> both K-value sets, sort, and take the <strong>K smallest</strong>. The result
-                            has exactly K values, so its threshold is just the K-th value — we don’t need min(θ_A, θ_B). That means the
-                            result is still a valid KMV sketch and can be used in further unions. Union is the one set operation that{' '}
-                            <strong>preserves KMV</strong>.
-                        </Typography>
-                    </Paper>
-
-                    {/* Visual demo: number-line bars + step-by-step */}
                     <Paper
                         variant="outlined"
                         sx={{
@@ -80,8 +86,12 @@ export default function SetOperationsUnionPage() {
                             background: alpha(theme.palette.secondary.main, 0.02),
                         }}
                     >
-                        <Typography variant="subtitle2" sx={{ fontWeight: 600, color: 'text.primary', mb: 2 }}>
-                            Visual: merge and take K smallest on the number line
+                        <Typography variant="subtitle2" sx={{ fontWeight: 600, color: 'text.primary', mb: 1 }}>
+                            KMV Set Operation: Union (A ∪ B)
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary" sx={{ mb: 2, lineHeight: 1.7 }}>
+                            Union is the easiest KMV set operation. We <strong>merge</strong> the values from two sketches, sort them, and keep the{' '}
+                            <strong>K smallest</strong>. The result is still a valid KMV sketch because it again stores exactly K values.
                         </Typography>
                         <Box sx={{ mb: 2 }}>
                             <ColorLegend />
@@ -101,125 +111,183 @@ export default function SetOperationsUnionPage() {
                                     Step {visualStep + 1} of {UNION_VISUAL_STEPS}
                                 </Typography>
 
-                                {visualStep === 0 && (
+                                {visualStep >= 0 && (
                                     <Stack spacing={1}>
                                         <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
-                                            Start with two KMV sketches
+                                            This page demonstrates the KMV union operator
                                         </Typography>
                                         <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.7 }}>
-                                            Each sketch stores <strong>exactly K</strong> hash values: the K smallest values it has seen. Its θ is the{' '}
-                                            <strong>K-th smallest</strong> value (the largest among the stored K).
+                                            We will build the union step by step: first show Sketch A, then Sketch B, then merge the stored values, and finally keep the{' '}
+                                            K smallest values as the union sketch.
                                         </Typography>
                                         <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.7 }}>
-                                            In the next step we’ll compute the union by <strong>merging</strong> these stored values and taking K smallest again.
+                                            Note: KMV stores only the <strong>K values</strong>. It does <strong>not</strong> store θ explicitly. If we show a cutoff line, it is{' '}
+                                            <strong>inferred</strong> as the K-th smallest value of a list.
                                         </Typography>
                                     </Stack>
                                 )}
 
-                                {visualStep === 1 && (
+                                {visualStep >= 1 && (
                                     <Stack spacing={1}>
                                         <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
-                                            Union operator = merge, sort, take K smallest
+                                            Step 2: Sketch A (KMV)
                                         </Typography>
                                         <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.7 }}>
-                                            Compute \(A ∪ B\) by taking the union of the stored values from A and B, sorting them, and keeping the{' '}
-                                            <strong>K smallest</strong> of the merged list.
+                                            Sketch A stores <strong>exactly K</strong> hash values (the K smallest from stream A). We do not need to talk about θ here — KMV keeps only values.
+                                        </Typography>
+                                        <Typography variant="caption" color="text.secondary">
+                                            We will use these stored values as the input to the union operator.
+                                        </Typography>
+                                    </Stack>
+                                )}
+
+                                {visualStep >= 2 && (
+                                    <Stack spacing={1}>
+                                        <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
+                                            Step 3: Sketch B (KMV)
+                                        </Typography>
+                                        <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.7 }}>
+                                            Sketch B also stores <strong>exactly K</strong> hash values (the K smallest from stream B). Again, KMV keeps only values.
+                                        </Typography>
+                                        <Typography variant="caption" color="text.secondary">
+                                            Next, we’ll merge the stored values from A and B.
+                                        </Typography>
+                                    </Stack>
+                                )}
+
+                                {visualStep >= 3 && (
+                                    <Stack spacing={1}>
+                                        <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
+                                            Step 4: Merge, unique, sort, take K smallest
+                                        </Typography>
+                                        <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.7 }}>
+                                            To compute union, we combine the stored values, remove duplicates, sort them, and keep the first K values.
                                         </Typography>
                                         <Typography variant="body2" color="text.secondary" sx={{ fontFamily: 'monospace' }}>
                                             merged = sort(unique(valuesA ∪ valuesB))<br />
-                                            result.values = merged[0..K-1]<br />
-                                            result.θ = result.values[K-1]
+                                            union.values = merged[0..K-1]
                                         </Typography>
                                         <Typography variant="caption" color="text.secondary">
-                                            Merged unique count: {mergedSortedUnique.length} (showing first {Math.min(12, mergedSortedUnique.length)}):{' '}
-                                            {mergedSortedUnique.slice(0, 12).map((v) => v.toFixed(3)).join(', ')}
-                                            {mergedSortedUnique.length > 12 ? ' …' : ''}
+                                            Merged unique count: {mergedSortedUnique.length}. The first K values are highlighted below.
                                         </Typography>
                                     </Stack>
                                 )}
 
-                                {visualStep === 2 && (
+                                {visualStep >= 4 && (
                                     <Stack spacing={1}>
                                         <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
-                                            The result is still a KMV sketch
+                                            Step 5: Union result (still KMV)
                                         </Typography>
                                         <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.7 }}>
-                                            After taking the K smallest merged values, the result has <strong>exactly K values</strong> again. That means it is a valid
-                                            KMV sketch, with θ equal to its K-th value.
+                                            The union sketch stores <strong>exactly K</strong> values again, so it is still a valid KMV sketch.
                                         </Typography>
                                         <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.7 }}>
-                                            This is why <strong>union preserves KMV</strong>: you can take the union result and union it again with another sketch.
+                                            If we display θ here, it is <strong>inferred</strong> as the K-th smallest value (the max of the stored K).
                                         </Typography>
                                         <Typography variant="body2" color="text.secondary" sx={{ fontFamily: 'monospace' }}>
-                                            θ_union = {union.theta.toFixed(3)} &nbsp;|&nbsp; N̂ = k/θ − 1 = {union.estimated.toFixed(2)}
+                                            inferred θ_union = {inferredThetaUnion.toFixed(3)} &nbsp;|&nbsp; N̂ = k/θ − 1 = {union.estimated.toFixed(2)}
                                         </Typography>
                                     </Stack>
                                 )}
                             </Paper>
 
+                            {/* Visuals for current step */}
                             {visualStep >= 1 && (
                                 <Fade in={true}>
-                                    <Box
-                                        sx={{
-                                            p: 1.5,
-                                            borderRadius: 1,
-                                            bgcolor: alpha(theme.palette.primary.main, 0.06),
-                                            border: `1px solid ${alpha(theme.palette.primary.main, 0.2)}`,
-                                        }}
-                                    >
-                                        <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', mb: 1 }}>
-                                            θ comparison (union uses K-th of merged, not min)
+                                    <Box>
+                                        <ThetaBar values={sketchA.values} theta={1} showTheta={false} color={SKETCH_A_COLOR} title="Sketch A (KMV) — stored K values" />
+                                        <Typography variant="caption" color="text.secondary">
+                                            KMV stores values only (no stored θ).
                                         </Typography>
-                                        <ThetaCompareMini thetaA={sketchA.theta} thetaB={sketchB.theta} colorA={SKETCH_A_COLOR} colorB={SKETCH_B_COLOR} />
+                                        <Box sx={{ mt: 1.25 }}>
+                                            <ValuesBox title={`Sketch A values (K = ${k})`} values={sketchA.values} accentColor={SKETCH_A_COLOR} />
+                                        </Box>
                                     </Box>
                                 </Fade>
                             )}
-                            <Fade in={true}>
-                                <Box>
-                                    <ThetaBar
-                                        values={sketchA.values}
-                                        theta={sketchA.theta}
-                                        color={SKETCH_A_COLOR}
-                                        title={`Sketch A — θ_A = ${sketchA.theta.toFixed(2)}`}
-                                    />
-                                    <ThetaBar
-                                        values={sketchB.values}
-                                        theta={sketchB.theta}
-                                        color={SKETCH_B_COLOR}
-                                        title={`Sketch B — θ_B = ${sketchB.theta.toFixed(2)}`}
-                                    />
-                                </Box>
-                            </Fade>
-                            {visualStep >= 1 && (
+
+                            {visualStep >= 2 && (
                                 <Fade in={true}>
-                                    <Typography variant="body2" color="text.secondary" sx={{ fontFamily: 'monospace' }}>
-                                        Union: merge A and B, sort, take <strong>K smallest</strong>. Result θ = K-th value ={' '}
-                                        <strong>{union.theta.toFixed(3)}</strong>.
-                                    </Typography>
+                                    <Box>
+                                        <ThetaBar values={sketchB.values} theta={1} showTheta={false} color={SKETCH_B_COLOR} title="Sketch B (KMV) — stored K values" />
+                                        <Typography variant="caption" color="text.secondary">
+                                            KMV stores values only (no stored θ).
+                                        </Typography>
+                                        <Box sx={{ mt: 1.25 }}>
+                                            <ValuesBox title={`Sketch B values (K = ${k})`} values={sketchB.values} accentColor={SKETCH_B_COLOR} />
+                                        </Box>
+                                    </Box>
                                 </Fade>
                             )}
-                            {visualStep >= 1 && (
-                                <Stack direction="row" spacing={1} flexWrap="wrap" sx={{ gap: 1 }}>
-                                    <CountBadge label="|A|" count={sketchA.values.length} color={SKETCH_A_COLOR} />
-                                    <CountBadge label="|B|" count={sketchB.values.length} color={SKETCH_B_COLOR} />
-                                    {visualStep >= 2 && <CountBadge label="|A ∪ B|" count={union.values.length} color={RESULT_COLOR} />}
-                                </Stack>
+
+                            {visualStep >= 3 && (
+                                <Fade in={true}>
+                                    <Box>
+                                        <ThetaBar
+                                            values={mergedSortedUnique}
+                                            theta={inferredThetaUnion}
+                                            showTheta
+                                            highlightBelowTheta
+                                            color={RESULT_COLOR}
+                                            title="Merged values (unique + sorted) — keep the first K"
+                                        />
+                                        <Typography variant="caption" color="text.secondary">
+                                            The cutoff line is the <strong>inferred</strong> K-th smallest of the merged list (not stored).
+                                        </Typography>
+                                        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mt: 1 }}>
+                                            {mergedSortedUnique.slice(0, 28).map((v, i) => {
+                                                const isKept = i < k;
+                                                return (
+                                                    <Box
+                                                        key={i}
+                                                        component="span"
+                                                        sx={{
+                                                            px: 0.75,
+                                                            py: 0.25,
+                                                            borderRadius: 1,
+                                                            fontSize: '0.75rem',
+                                                            fontFamily: 'monospace',
+                                                            bgcolor: isKept ? alpha(theme.palette.success.main, 0.18) : alpha(theme.palette.divider, 0.12),
+                                                            border: `1px solid ${alpha(isKept ? theme.palette.success.main : theme.palette.divider, 0.35)}`,
+                                                        }}
+                                                    >
+                                                        {v.toFixed(3)}
+                                                    </Box>
+                                                );
+                                            })}
+                                            {mergedSortedUnique.length > 28 && (
+                                                <Typography variant="caption" color="text.secondary">
+                                                    +{mergedSortedUnique.length - 28} more
+                                                </Typography>
+                                            )}
+                                        </Box>
+                                    </Box>
+                                </Fade>
                             )}
-                            {visualStep >= 2 && (
+
+                            {visualStep >= 4 && (
                                 <Fade in={true}>
                                     <Box>
                                         <ThetaBar
                                             values={union.values}
-                                            theta={union.theta}
+                                            theta={inferredThetaUnion}
+                                            showTheta
                                             color={RESULT_COLOR}
-                                            title={`Union (A ∪ B) — θ = K-th value = ${union.theta.toFixed(2)}`}
+                                            title="Union sketch (KMV) — exactly K values"
                                         />
-                                        <Typography variant="caption" color="text.secondary">
-                                            Result has exactly K values → stays KMV.
+                                        <Stack direction="row" spacing={1} flexWrap="wrap" sx={{ gap: 1, mt: 1 }}>
+                                            <CountBadge label="|A|" count={sketchA.values.length} color={SKETCH_A_COLOR} />
+                                            <CountBadge label="|B|" count={sketchB.values.length} color={SKETCH_B_COLOR} />
+                                            <CountBadge label="|merged|" count={mergedSortedUnique.length} color={theme.palette.text.secondary} />
+                                            <CountBadge label="|A ∪ B|" count={union.values.length} color={RESULT_COLOR} />
+                                        </Stack>
+                                        <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.75 }}>
+                                            Union preserves KMV because the result stores exactly K values again.
                                         </Typography>
                                     </Box>
                                 </Fade>
                             )}
+
                             <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', flexWrap: 'wrap' }}>
                                 <StepDots current={visualStep} total={UNION_VISUAL_STEPS} />
                                 <Button size="small" variant="outlined" disabled={visualStep === 0} onClick={() => setVisualStep((s) => Math.max(0, s - 1))}>
@@ -240,51 +308,6 @@ export default function SetOperationsUnionPage() {
                         </Stack>
                     </Paper>
 
-                    <Box>
-                        <Typography variant="overline" sx={{ color: 'text.secondary', letterSpacing: 1, mb: 1, display: 'block' }}>
-                            Input: two KMV sketches (K = {k})
-                        </Typography>
-                        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
-                            <Box sx={{ flex: 1 }}>
-                                <SetCard
-                                    title="Sketch A (KMV)"
-                                    values={sketchA.values}
-                                    theta={sketchA.theta}
-                                    estimated={k / sketchA.theta - 1}
-                                    formula="KMV: exactly K values. θ = K-th value. N̂ = k/θ − 1"
-                                    color={SKETCH_A_COLOR}
-                                    subtitle={`Exactly K smallest of stream A (n ≈ ${streamASize})`}
-                                />
-                            </Box>
-                            <Box sx={{ flex: 1 }}>
-                                <SetCard
-                                    title="Sketch B (KMV)"
-                                    values={sketchB.values}
-                                    theta={sketchB.theta}
-                                    estimated={k / sketchB.theta - 1}
-                                    formula="KMV: exactly K values. θ = K-th value. N̂ = k/θ − 1"
-                                    color={SKETCH_B_COLOR}
-                                    subtitle={`Exactly K smallest of stream B (n ≈ ${streamBSize})`}
-                                />
-                            </Box>
-                        </Stack>
-                    </Box>
-
-                    <Box>
-                        <Typography variant="overline" sx={{ color: 'text.secondary', letterSpacing: 1, mb: 1, display: 'block' }}>
-                            Result: Union (A ∪ B)
-                        </Typography>
-                        <SetCard
-                            title="Union (A ∪ B) — KMV"
-                            values={union.values}
-                            theta={union.theta}
-                            estimated={union.estimated}
-                            formula="Merge A and B, sort, take exactly K smallest. θ = K-th value. N̂ = k/θ − 1"
-                            color={RESULT_COLOR}
-                            subtitle="Result: exactly K values (K smallest of combined). Stays KMV — can be used in further unions."
-                        />
-                    </Box>
-
                     <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
                         <Button variant="outlined" onClick={() => setSeed((s) => s + 1)}>
                             New random example
@@ -303,7 +326,11 @@ export default function SetOperationsUnionPage() {
                         </Button>
                     </Box>
                 </Stack>
+
+              
             </Container>
+
+            <KmvUnion />
         </>
     );
 }

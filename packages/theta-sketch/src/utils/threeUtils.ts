@@ -2,6 +2,51 @@ import * as THREE from 'three';
 import { CSS3DRenderer } from "three/addons/renderers/CSS3DRenderer.js";
 import { DualRenderer, DualScene } from 'obelus-three-render';
 
+function disposeMaterial(material: THREE.Material) {
+    // Dispose textures referenced by common material slots (map, normalMap, etc.)
+    for (const key of Object.keys(material)) {
+        const value = (material as any)[key];
+        if (value && value.isTexture) {
+            (value as THREE.Texture).dispose();
+        }
+    }
+
+    // ShaderMaterial / RawShaderMaterial may store textures in uniforms.
+    const uniforms = (material as any).uniforms as Record<string, { value: any }> | undefined;
+    if (uniforms) {
+        for (const u of Object.values(uniforms)) {
+            const v = u?.value;
+            if (v && v.isTexture) {
+                (v as THREE.Texture).dispose();
+            }
+        }
+    }
+
+    material.dispose();
+}
+
+/** Dispose geometries/materials/textures in a Three.js object subtree. */
+export function disposeObject3DResources(root: THREE.Object3D) {
+    root.traverse((obj: THREE.Object3D) => {
+        const geometry = (obj as any).geometry as THREE.BufferGeometry | undefined;
+        if (geometry) {
+            geometry.dispose();
+        }
+
+        const material = (obj as any).material as THREE.Material | THREE.Material[] | undefined;
+        if (Array.isArray(material)) {
+            material.forEach(disposeMaterial);
+        } else if (material) {
+            disposeMaterial(material);
+        }
+    });
+}
+
+/** Dispose GPU resources in a DualScene (Three.js side). */
+export function disposeDualSceneResources(scene: DualScene) {
+    disposeObject3DResources(scene.threeScene);
+}
+
 export function createOrthographicCamera(
     width: number = window.innerWidth,
     height: number = window.innerHeight,
@@ -81,13 +126,10 @@ export function createDualRenderer(
     return new DualRenderer(webglRenderer as any, css3dRenderer as any);
 };
 
-export function useDualRenderer(
-    width: number = window.innerWidth,
-    height: number = window.innerHeight,
-) {
-    const renderer = createDualRenderer(width, height);
-    const camera = createOrthographicCamera(width, height);
-    return { renderer, camera };
+export function disposeDualRenderer(renderer: DualRenderer) {
+    renderer.webglRenderer.dispose();
+    // CSS3DRenderer has no dispose()
+    // renderer.css3dRenderer.dispose();
 };
 
 export function clearScene(scene: DualScene) {
@@ -95,9 +137,10 @@ export function clearScene(scene: DualScene) {
     while (scene.threeScene.children.length > 0) {
         scene.threeScene.remove(scene.threeScene.children[0]);
     }
-
+    scene.threeScene.clear();
     // Remove all objects from CSS3D scene
     while (scene.css3dScene.children.length > 0) {
         scene.css3dScene.remove(scene.css3dScene.children[0]);
     }
+    scene.css3dScene.clear();
 };

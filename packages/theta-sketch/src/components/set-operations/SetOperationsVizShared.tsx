@@ -155,6 +155,7 @@ export function ThetaBar({
     theta,
     color,
     title,
+    showTheta = true,
     highlightBelowTheta = false,
     onlyBelowTheta = false,
     height = 44,
@@ -163,6 +164,7 @@ export function ThetaBar({
     theta: number;
     color: string;
     title: string;
+    showTheta?: boolean;
     highlightBelowTheta?: boolean;
     onlyBelowTheta?: boolean;
     height?: number;
@@ -193,7 +195,7 @@ export function ThetaBar({
                         stroke={alpha(theme.palette.divider, 0.6)}
                         strokeWidth={2}
                     />
-                    {highlightBelowTheta && theta > 0 && (
+                    {showTheta && highlightBelowTheta && theta > 0 && (
                         <rect
                             x={padding}
                             y={padding}
@@ -203,15 +205,17 @@ export function ThetaBar({
                             rx={2}
                         />
                     )}
-                    <line
-                        x1={padding + (theta / 1) * (width - padding * 2)}
-                        y1={padding}
-                        x2={padding + (theta / 1) * (width - padding * 2)}
-                        y2={padding + height}
-                        stroke={color}
-                        strokeWidth={2}
-                        strokeDasharray="4 2"
-                    />
+                    {showTheta && (
+                        <line
+                            x1={padding + (theta / 1) * (width - padding * 2)}
+                            y1={padding}
+                            x2={padding + (theta / 1) * (width - padding * 2)}
+                            y2={padding + height}
+                            stroke={color}
+                            strokeWidth={2}
+                            strokeDasharray="4 2"
+                        />
+                    )}
                     {displayValues.map((v, i) => (
                         <circle
                             key={i}
@@ -229,7 +233,7 @@ export function ThetaBar({
                         0
                     </Typography>
                     <Typography variant="caption" sx={{ color, fontWeight: 600 }}>
-                        θ = {theta.toFixed(2)}
+                        {showTheta ? `θ = ${theta.toFixed(2)}` : ''}
                     </Typography>
                     <Typography variant="caption" color="text.secondary">
                         1

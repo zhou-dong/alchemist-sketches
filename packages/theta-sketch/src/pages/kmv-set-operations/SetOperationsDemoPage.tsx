@@ -19,6 +19,30 @@ export default function SetOperationsDemoPage() {
                     and why intersection and difference hit a limit (saving θ leads to Theta Sketch).
                 </Typography>
 
+                <Paper
+                    variant="outlined"
+                    sx={{
+                        p: 2,
+                        mb: 3,
+                        borderColor: alpha(theme.palette.warning.main, 0.3),
+                        background: alpha(theme.palette.warning.main, 0.06),
+                        borderLeft: `4px solid ${theme.palette.warning.main}`,
+                    }}
+                >
+                    <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 0.75 }}>
+                        Important: KMV does not store θ
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.7 }}>
+                        A KMV sketch stores only the <strong>K values</strong>. The threshold θ is <strong>implicit</strong>: it is the{' '}
+                        <strong>K-th smallest</strong> value (the max of the stored K). This is fine for estimating a single set.
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary" sx={{ mt: 1, lineHeight: 1.7 }}>
+                        But for <strong>intersection</strong> and <strong>difference</strong>, the correct operation needs a shared θ (usually{' '}
+                        <strong>min(θ_A, θ_B)</strong>). Since KMV does not save θ in the result, those results cannot be used for further set ops —
+                        that’s the KMV limit, and it motivates Theta Sketch.
+                    </Typography>
+                </Paper>
+
                 <Stack spacing={2}>
                     <Paper
                         variant="outlined"
