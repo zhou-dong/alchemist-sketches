@@ -156,10 +156,18 @@ export function NewThetaLimitNote({
     correctTheta,
     resultValues,
     operationLabel,
+    correctThetaDefinition = 'min(θ_A, θ_B)',
+    correctThetaLabel = 'Correct θ (for further set ops)',
+    lostThetaHint = 'Inferred θ < correct θ → we lose the threshold. Must save θ (Theta Sketch) to do further set ops.',
+    okThetaHint = 'Inferred θ = correct θ here; in general inferred ≤ correct. Must save θ for further set ops.',
 }: {
     correctTheta: number;
     resultValues: number[];
     operationLabel: string;
+    correctThetaDefinition?: string;
+    correctThetaLabel?: string;
+    lostThetaHint?: string;
+    okThetaHint?: string;
 }) {
     const theme = useTheme();
     const inferredTheta = resultValues.length > 0 ? Math.max(...resultValues) : null;
@@ -179,7 +187,7 @@ export function NewThetaLimitNote({
                 New θ after {operationLabel}
             </Typography>
             <Typography variant="body2" color="text.secondary" sx={{ fontFamily: 'monospace', fontSize: '0.85rem' }}>
-                Correct θ (for further set ops) = min(θ_A, θ_B) = <strong>{correctTheta.toFixed(3)}</strong>
+                {correctThetaLabel} = {correctThetaDefinition} = <strong>{correctTheta.toFixed(3)}</strong>
             </Typography>
             <Typography
                 variant="body2"
@@ -190,11 +198,11 @@ export function NewThetaLimitNote({
             </Typography>
             {showLimit ? (
                 <Typography variant="caption" color="warning.main" sx={{ display: 'block', mt: 0.5, fontWeight: 500 }}>
-                    Inferred θ &lt; correct θ → we lose the threshold. Must save θ (Theta Sketch) to do further set ops.
+                    {lostThetaHint}
                 </Typography>
             ) : inferredTheta !== null ? (
                 <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.5 }}>
-                    Inferred θ = correct θ here; in general inferred ≤ correct. Must save θ for further set ops.
+                    {okThetaHint}
                 </Typography>
             ) : null}
         </Box>

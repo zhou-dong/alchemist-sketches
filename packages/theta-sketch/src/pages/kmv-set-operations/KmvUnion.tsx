@@ -7,15 +7,26 @@ import { useSetOperationsDemoData } from './SetOperationsDemoShared';
 import { useOrthographicImmediateResize } from '@alchemist/theta-sketch/hooks/useOrthographicResize';
 import * as THREE from 'three';
 import { at } from 'obelus';
-import { Box, Container, Stack, Typography } from '@mui/material';
-import { slideUp } from '@alchemist/shared';
+import { Box, Container, Fade, Stack, Typography } from '@mui/material';
+import { slideUp, useSpeech } from '@alchemist/shared';
 import TimelinePlayer from '@alchemist/theta-sketch/components/TimelinePlayer';
 import { clearScene, disposeDualSceneResources } from '@alchemist/theta-sketch/utils/threeUtils';
 import { NewThetaLimitNote, SetCard } from './SetOperationsDemoShared';
+import { calculateStepTimings } from '@alchemist/theta-sketch/utils/narration';
 interface Position {
     x: number;
     y: number;
 }
+
+const NARRATION: Record<number, string> = {
+    0: `On this page, we will compute a union using KMV sketches. Each sketch keeps only the K smallest hash values, and theta is inferred as the K-th value.`,
+    1: `Step one. This is Sketch A. It contains the K smallest hash values from stream A.`,
+    2: `Step two. This is Sketch B. It contains the K smallest hash values from stream B.`,
+    3: `Step three. To union two KMV sketches, we merge the values, remove duplicates, sort, and keep the K smallest values. Theta is then inferred as the maximum of those K values.`,
+    4: `Notice the limitation. KMV does not store theta explicitly. If you want to do further set operations, you must keep theta. That is exactly why we introduce Theta Sketch.`,
+};
+
+const { startTimes: NARRATION_START, durations: NARRATION_DUR } = calculateStepTimings(NARRATION, 1.0);
 
 function StepBlock({
     show,
@@ -82,12 +93,13 @@ const buildTimelineSteps = (
     axisStartId: string,
     axisEndId: string,
     dotIds: string[],
-    extraIds: string[] = []
+    extraIds: string[] = [],
+    durationSeconds: number = 1
 ) => {
     const steps: any[] = [];
     const buildAndAddStep = (id: string) => {
         steps.push(
-            at(time).animate(id, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 })
+            at(time).animate(id, { position: { y: `+=${window.innerHeight}` } }, { duration: durationSeconds })
         );
     };
 
@@ -110,6 +122,7 @@ const Main = ({ sketchA, sketchB, union, k }: KmvUnionProps) => {
 
     // useSyncObelusTheme();
     const { animationController, containerRef, scene, renderer, camera } = useDualThreeStage();
+    const { speak, stop, pause, resume } = useSpeech({ rate: 1.0 });
 
     useOrthographicImmediateResize(
         renderer,
@@ -119,11 +132,38 @@ const Main = ({ sketchA, sketchB, union, k }: KmvUnionProps) => {
 
     const [timeline, setTimeline] = React.useState<any>(null);
     const [uiStep, setUiStep] = React.useState<number>(0);
+    const [isPlaying, setIsPlaying] = React.useState<boolean>(false);
+    const [currentNarration, setCurrentNarration] = React.useState<string>('');
+    const lastSpokenStepRef = React.useRef<number>(-1);
+
+    const speakStep = React.useCallback(
+        (step: number) => {
+            const text = NARRATION[step] ?? '';
+            if (!text) return;
+            if (lastSpokenStepRef.current === step) return;
+
+            lastSpokenStepRef.current = step;
+            setCurrentNarration(text);
+            speak(text);
+        },
+        [speak]
+    );
+
+    // Stop speech if the page unmounts.
+    React.useEffect(() => stop, [stop]);
+
+    // Drive narration when steps advance (only while playing).
+    React.useEffect(() => {
+        if (!isPlaying) return;
+        speakStep(uiStep);
+    }, [isPlaying, speakStep, uiStep]);
 
     React.useEffect(() => {
         if (!scene || !animationController) return;
 
         setUiStep(0);
+        lastSpokenStepRef.current = -1;
+        setCurrentNarration('');
 
         // Reset scene objects before (re)building.
         disposeDualSceneResources(scene);
@@ -133,6 +173,9 @@ const Main = ({ sketchA, sketchB, union, k }: KmvUnionProps) => {
         const endX = window.innerWidth / 4;
 
         const sketchCValues = union.values;
+
+        const revealDuration = (step: number) =>
+            Math.min(0.9, Math.max(0.5, (NARRATION_DUR[step] ?? 1) * 0.45));
 
         const { axis: axisA, dots: dotsA } = buildAxisAndDots(
             "a",
@@ -173,28 +216,31 @@ const Main = ({ sketchA, sketchB, union, k }: KmvUnionProps) => {
             ],
             timeline: [
                 ...buildTimelineSteps(
-                    1,
+                    NARRATION_START[1] ?? 0,
                     axisA.axisLineId,
                     axisA.axisStartId,
                     axisA.axisEndId,
                     dotsA.map((dot) => dot.dotId),
-                    axisA.axisTitle ? [axisA.axisTitleId] : []
+                    axisA.axisTitle ? [axisA.axisTitleId] : [],
+                    revealDuration(1)
                 ),
                 ...buildTimelineSteps(
-                    2,
+                    NARRATION_START[2] ?? 0,
                     axisB.axisLineId,
                     axisB.axisStartId,
                     axisB.axisEndId,
                     dotsB.map((dot) => dot.dotId),
-                    axisB.axisTitle ? [axisB.axisTitleId] : []
+                    axisB.axisTitle ? [axisB.axisTitleId] : [],
+                    revealDuration(2)
                 ),
                 ...buildTimelineSteps(
-                    3,
+                    NARRATION_START[3] ?? 0,
                     axisC.axisLineId,
                     axisC.axisStartId,
                     axisC.axisEndId,
                     dotsC.map((dot) => dot.dotId),
-                    axisC.axisTitle ? [axisC.axisTitleId] : []
+                    axisC.axisTitle ? [axisC.axisTitleId] : [],
+                    revealDuration(3)
                 ),
             ],
         };
@@ -209,13 +255,12 @@ const Main = ({ sketchA, sketchB, union, k }: KmvUnionProps) => {
             animationController.stopAnimation
         );
 
-        // Keep the overlay UI in sync with the timeline (seek/restart safe).
-        // These match the axis reveal times (1, 2, 3).
-        nextTimeline.call(() => setUiStep(0), [], 0);
-        nextTimeline.call(() => setUiStep(1), [], 0.95);
-        nextTimeline.call(() => setUiStep(2), [], 1.95);
-        nextTimeline.call(() => setUiStep(3), [], 2.95);
-        nextTimeline.call(() => setUiStep(4), [], 3.35);
+        // Keep overlay UI + narration synced to narration timing (seek/restart safe).
+        nextTimeline.call(() => setUiStep(0), [], NARRATION_START[0] ?? 0);
+        nextTimeline.call(() => setUiStep(1), [], NARRATION_START[1] ?? 0);
+        nextTimeline.call(() => setUiStep(2), [], NARRATION_START[2] ?? 0);
+        nextTimeline.call(() => setUiStep(3), [], NARRATION_START[3] ?? 0);
+        nextTimeline.call(() => setUiStep(4), [], NARRATION_START[4] ?? 0);
 
         setTimeline(nextTimeline);
 
@@ -304,13 +349,45 @@ const Main = ({ sketchA, sketchB, union, k }: KmvUnionProps) => {
 
                     <StepBlock show={uiStep >= 4} delayMs={80}>
                         <NewThetaLimitNote
-                            correctTheta={Math.min(sketchA.theta, sketchB.theta)}
+                            correctTheta={union.theta}
+                            correctThetaLabel="Correct θ for the union sketch"
+                            correctThetaDefinition="max(UnionK) (K-th smallest of A ∪ B)"
                             resultValues={union.values}
                             operationLabel="Union"
+                            okThetaHint="For union, the result keeps exactly K values, so θ is always recoverable as max(result values). KMV union is safe to chain."
+                            lostThetaHint="(Not expected for union) If inferred θ < correct θ, something is wrong with the union result."
                         />
                     </StepBlock>
                 </Stack>
             </Box>
+
+            {/* Subtitle Display */}
+            <Fade in={!!currentNarration}>
+                <Box
+                    sx={{
+                        position: 'fixed',
+                        bottom: window.innerHeight / 12 + 140,
+                        left: '50%',
+                        transform: 'translateX(-50%)',
+                        maxWidth: 'min(900px, 92vw)',
+                        zIndex: 1001,
+                        textAlign: 'center',
+                        px: 2,
+                        pointerEvents: 'none',
+                    }}
+                >
+                    <Typography
+                        variant="body1"
+                        sx={{
+                            color: 'text.primary',
+                            px: 3,
+                            py: 1.5,
+                        }}
+                    >
+                        {currentNarration}
+                    </Typography>
+                </Box>
+            </Fade>
 
             <Container
                 maxWidth="sm"
@@ -332,16 +409,21 @@ const Main = ({ sketchA, sketchB, union, k }: KmvUnionProps) => {
                         nextPageTitle="Go to Set Operations"
                         enableNextButton={true}
                         onStart={() => {
+                            setIsPlaying(true);
                             animationController.startAnimation();
-                            speechSynthesis.resume();
+                            resume();
+                            // If starting from the beginning, speak the intro right away.
+                            if (uiStep === 0) speakStep(0);
                         }}
                         onPause={() => {
+                            setIsPlaying(false);
                             animationController.stopAnimation();
-                            speechSynthesis.pause();
+                            pause();
                         }}
                         onComplete={() => {
+                            setIsPlaying(false);
                             animationController.stopAnimation();
-                            speechSynthesis.cancel();
+                            stop();
                         }}
                     />
                 )}
