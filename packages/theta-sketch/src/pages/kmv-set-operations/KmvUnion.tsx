@@ -410,7 +410,7 @@ const Main = ({ sketchA, sketchB, union, k }: KmvUnionProps) => {
                 <Box
                     sx={{
                         position: 'fixed',
-                        bottom: { xs: 184, md: 210 },
+                        bottom: { xs: 184, md: 184 },
                         left: '50%',
                         transform: 'translateX(-50%)',
                         maxWidth: 'min(900px, 92vw)',
