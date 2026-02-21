@@ -75,9 +75,7 @@ const Main = ({ sketchA, sketchB, k }: KmvUnionProps) => {
     useOrthographicImmediateResize(
         renderer,
         camera as THREE.OrthographicCamera,
-        {
-            onResize: () => animationController?.renderAnimationOnce(),
-        }
+        { onResize: () => animationController?.renderAnimationOnce?.() }
     );
 
     const [timeline, setTimeline] = React.useState<any>(null);
@@ -96,20 +94,20 @@ const Main = ({ sketchA, sketchB, k }: KmvUnionProps) => {
 
         const { axis: axisA, dots: dotsA } = buildAxisAndDots(
             "a",
-            { x: startX, y: window.innerHeight / 3 },
-            { x: endX, y: window.innerHeight / 3 },
+            { x: startX, y: window.innerHeight / 3 - window.innerHeight },
+            { x: endX, y: window.innerHeight / 3 - window.innerHeight },
             sketchA.values
         );
         const { axis: axisB, dots: dotsB } = buildAxisAndDots(
             "b",
-            { x: startX, y: window.innerHeight / 4 },
-            { x: endX, y: window.innerHeight / 4 },
+            { x: startX, y: window.innerHeight / 4 - window.innerHeight },
+            { x: endX, y: window.innerHeight / 4 - window.innerHeight },
             sketchB.values
         );
         const { axis: axisC, dots: dotsC } = buildAxisAndDots(
             "c",
-            { x: startX, y: window.innerHeight / 6 },
-            { x: endX, y: window.innerHeight / 6 },
+            { x: startX, y: window.innerHeight / 6 - window.innerHeight },
+            { x: endX, y: window.innerHeight / 6 - window.innerHeight },
             sketchCValues
         );
 
