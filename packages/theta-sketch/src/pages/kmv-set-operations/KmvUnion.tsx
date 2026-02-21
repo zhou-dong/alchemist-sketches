@@ -23,7 +23,7 @@ const NARRATION: Record<number, string> = {
     1: `Step one. This is Sketch A. It contains the K smallest hash values from stream A.`,
     2: `Step two. This is Sketch B. It contains the K smallest hash values from stream B.`,
     3: `Step three. To union two KMV sketches, we merge the values, remove duplicates, sort, and keep the K smallest values. Theta is then inferred as the maximum of those K values.`,
-    4: `Notice the limitation. KMV does not store theta explicitly. If you want to do further set operations, you must keep theta. That is exactly why we introduce Theta Sketch.`,
+    4: `Step four. For union, KMV is safe to chain. The union result keeps exactly K values, so the correct theta is always recoverable as the maximum of those values.`,
 };
 
 const { startTimes: NARRATION_START, durations: NARRATION_DUR } = calculateStepTimings(NARRATION, 1.0);
@@ -270,6 +270,10 @@ const Main = ({ sketchA, sketchB, union, k }: KmvUnionProps) => {
         nextTimeline.call(() => setUiStep(2), [], NARRATION_START[2] ?? 0);
         nextTimeline.call(() => setUiStep(3), [], NARRATION_START[3] ?? 0);
         nextTimeline.call(() => setUiStep(4), [], NARRATION_START[4] ?? 0);
+
+        // Ensure the timeline stays alive long enough for step-4 narration to finish
+        // (otherwise onComplete can fire too early and cancel the utterance).
+        nextTimeline.to({}, { duration: NARRATION_DUR[4] ?? 1 }, NARRATION_START[4] ?? 0);
 
         setTimeline(nextTimeline);
 
