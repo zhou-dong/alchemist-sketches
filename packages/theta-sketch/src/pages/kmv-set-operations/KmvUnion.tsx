@@ -7,7 +7,7 @@ import { useSetOperationsDemoData } from './SetOperationsDemoShared';
 import { useOrthographicImmediateResize } from '@alchemist/theta-sketch/hooks/useOrthographicResize';
 import * as THREE from 'three';
 import { at } from 'obelus';
-import { Box, Container, Fade, Stack, Typography } from '@mui/material';
+import { alpha, Box, Chip, Container, Divider, Fade, Paper, Stack, Typography, useTheme } from '@mui/material';
 import { slideUp, useSpeech } from '@alchemist/shared';
 import TimelinePlayer from '@alchemist/theta-sketch/components/TimelinePlayer';
 import { clearScene, disposeDualSceneResources } from '@alchemist/theta-sketch/utils/threeUtils';
@@ -27,6 +27,14 @@ const NARRATION: Record<number, string> = {
 };
 
 const { startTimes: NARRATION_START, durations: NARRATION_DUR } = calculateStepTimings(NARRATION, 1.0);
+
+const STEP_LABELS: Record<number, string> = {
+    0: 'Intro',
+    1: 'Sketch A',
+    2: 'Sketch B',
+    3: 'Union sketch',
+    4: 'Why union is safe',
+};
 
 function StepBlock({
     show,
@@ -119,6 +127,7 @@ interface KmvUnionProps {
 }
 
 const Main = ({ sketchA, sketchB, union, k }: KmvUnionProps) => {
+    const theme = useTheme();
 
     // useSyncObelusTheme();
     const { animationController, containerRef, scene, renderer, camera } = useDualThreeStage();
@@ -276,7 +285,7 @@ const Main = ({ sketchA, sketchB, union, k }: KmvUnionProps) => {
             <Box
                 sx={{
                     position: 'fixed',
-                    top: window.innerHeight / 18,
+                    top: { xs: 16, md: 24 },
                     left: '50%',
                     transform: 'translateX(-50%)',
                     zIndex: 1000,
@@ -303,62 +312,97 @@ const Main = ({ sketchA, sketchB, union, k }: KmvUnionProps) => {
             <Box
                 sx={{
                     position: 'fixed',
-                    top: window.innerHeight / 6,
-                    left: 16,
+                    top: { xs: 'auto', md: 96 },
+                    bottom: { xs: 116, md: 'auto' },
+                    left: { xs: 12, md: 16 },
+                    right: { xs: 12, md: 'auto' },
                     zIndex: 1000,
-                    width: { xs: 'calc(100% - 32px)', md: 420 },
+                    width: { md: 420 },
                     pointerEvents: 'auto',
                 }}
             >
-                <Stack spacing={1.25}>
-                    <StepBlock show={uiStep >= 1}>
-                        <SetCard
-                            title="Sketch A"
-                            subtitle={`K = ${k}`}
-                            values={sketchA.values}
-                            theta={sketchA.theta}
-                            estimated={sketchA.theta > 0 ? k / sketchA.theta - 1 : 0}
-                            formula="θ = v_k,  N̂ = k/θ − 1"
-                            color="#3b82f6"
-                        />
-                    </StepBlock>
+                <Paper
+                    elevation={0}
+                    sx={{
+                        p: 1.5,
+                        borderRadius: 3,
+                        border: `1px solid ${alpha(theme.palette.divider, 0.35)}`,
+                        background: alpha(theme.palette.background.paper, theme.palette.mode === 'dark' ? 0.42 : 0.72),
+                        backdropFilter: 'blur(10px)',
+                        WebkitBackdropFilter: 'blur(10px)',
+                        boxShadow: `0 16px 40px ${alpha(theme.palette.common.black, theme.palette.mode === 'dark' ? 0.45 : 0.18)}`,
+                        maxHeight: { xs: 'calc(100vh - 260px)', md: 'calc(100vh - 190px)' },
+                        overflowY: 'auto',
+                    }}
+                >
+                    <Stack spacing={1.25}>
+                        <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ gap: 1 }}>
+                            <Typography variant="subtitle2" sx={{ fontWeight: 700, letterSpacing: 0.2 }}>
+                                Walkthrough
+                            </Typography>
+                            <Chip
+                                size="small"
+                                label={STEP_LABELS[uiStep] ?? `Step ${uiStep}`}
+                                sx={{
+                                    fontWeight: 600,
+                                    bgcolor: alpha(theme.palette.primary.main, theme.palette.mode === 'dark' ? 0.25 : 0.12),
+                                }}
+                            />
+                        </Stack>
+                        <Typography variant="caption" color="text.secondary">
+                            Values are hash values in \([0, 1)\). KMV keeps only the K smallest.
+                        </Typography>
+                        <Divider sx={{ borderColor: alpha(theme.palette.divider, 0.35) }} />
 
-                    <StepBlock show={uiStep >= 2} delayMs={40}>
-                        <SetCard
-                            title="Sketch B"
-                            subtitle={`K = ${k}`}
-                            values={sketchB.values}
-                            theta={sketchB.theta}
-                            estimated={sketchB.theta > 0 ? k / sketchB.theta - 1 : 0}
-                            formula="θ = v_k,  N̂ = k/θ − 1"
-                            color="#a855f7"
-                        />
-                    </StepBlock>
+                        <StepBlock show={uiStep >= 1}>
+                            <SetCard
+                                title="Sketch A"
+                                subtitle={`K = ${k}`}
+                                values={sketchA.values}
+                                theta={sketchA.theta}
+                                estimated={sketchA.theta > 0 ? k / sketchA.theta - 1 : 0}
+                                formula="θ = v_k,  N̂ = k/θ − 1"
+                                color="#3b82f6"
+                            />
+                        </StepBlock>
 
-                    <StepBlock show={uiStep >= 3} delayMs={60}>
-                        <SetCard
-                            title="Union (KMV)"
-                            subtitle="Merge unique values → keep K smallest"
-                            values={union.values}
-                            theta={union.theta}
-                            estimated={union.estimated}
-                            formula="UnionK = sort(A∪B)[:K],  θ = max(UnionK),  N̂ = k/θ − 1"
-                            color="#22c55e"
-                        />
-                    </StepBlock>
+                        <StepBlock show={uiStep >= 2} delayMs={40}>
+                            <SetCard
+                                title="Sketch B"
+                                subtitle={`K = ${k}`}
+                                values={sketchB.values}
+                                theta={sketchB.theta}
+                                estimated={sketchB.theta > 0 ? k / sketchB.theta - 1 : 0}
+                                formula="θ = v_k,  N̂ = k/θ − 1"
+                                color="#a855f7"
+                            />
+                        </StepBlock>
 
-                    <StepBlock show={uiStep >= 4} delayMs={80}>
-                        <NewThetaLimitNote
-                            correctTheta={union.theta}
-                            correctThetaLabel="Correct θ for the union sketch"
-                            correctThetaDefinition="max(UnionK) (K-th smallest of A ∪ B)"
-                            resultValues={union.values}
-                            operationLabel="Union"
-                            okThetaHint="For union, the result keeps exactly K values, so θ is always recoverable as max(result values). KMV union is safe to chain."
-                            lostThetaHint="(Not expected for union) If inferred θ < correct θ, something is wrong with the union result."
-                        />
-                    </StepBlock>
-                </Stack>
+                        <StepBlock show={uiStep >= 3} delayMs={60}>
+                            <SetCard
+                                title="Union (KMV)"
+                                subtitle="Merge unique values → keep K smallest"
+                                values={union.values}
+                                theta={union.theta}
+                                estimated={union.estimated}
+                                formula="UnionK = sort(A∪B)[:K],  θ = max(UnionK),  N̂ = k/θ − 1"
+                                color="#22c55e"
+                            />
+                        </StepBlock>
+
+                        <StepBlock show={uiStep >= 4} delayMs={80}>
+                            <NewThetaLimitNote
+                                correctTheta={union.theta}
+                                correctThetaLabel="Correct θ for the union sketch"
+                                correctThetaDefinition="max(UnionK) (K-th smallest of A ∪ B)"
+                                resultValues={union.values}
+                                operationLabel="Union"
+                                okThetaHint="For union, the result keeps exactly K values, so θ is always recoverable as max(result values). KMV union is safe to chain."
+                                lostThetaHint="(Not expected for union) If inferred θ < correct θ, something is wrong with the union result."
+                            />
+                        </StepBlock>
+                    </Stack>
+                </Paper>
             </Box>
 
             {/* Subtitle Display */}
@@ -366,7 +410,7 @@ const Main = ({ sketchA, sketchB, union, k }: KmvUnionProps) => {
                 <Box
                     sx={{
                         position: 'fixed',
-                        bottom: window.innerHeight / 12 + 140,
+                        bottom: { xs: 184, md: 210 },
                         left: '50%',
                         transform: 'translateX(-50%)',
                         maxWidth: 'min(900px, 92vw)',
@@ -393,7 +437,7 @@ const Main = ({ sketchA, sketchB, union, k }: KmvUnionProps) => {
                 maxWidth="sm"
                 sx={{
                     position: 'fixed',
-                    bottom: window.innerHeight / 12,
+                    bottom: { xs: 12, md: 24 },
                     left: 0,
                     right: 0,
                     zIndex: 1000,
