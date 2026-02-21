@@ -12,8 +12,8 @@ const DEFAULT_DEBOUNCE_MS = 150;
  * DualRenderer + OrthographicCamera.
  */
 export function useOrthographicDebouncedResize(
-    renderer: DualRenderer,
-    camera: THREE.OrthographicCamera,
+    renderer: DualRenderer | null | undefined,
+    camera: THREE.OrthographicCamera | null | undefined,
     options?: {
         /** Called after camera/renderer are updated (e.g. renderAnimationOnce). */
         onResize?: () => void;
@@ -26,6 +26,7 @@ export function useOrthographicDebouncedResize(
     onResizeRef.current = onResize;
 
     React.useEffect(() => {
+        if (!renderer || !camera) return;
         let timeoutId: ReturnType<typeof setTimeout> | null = null;
 
         const handleResize = () => {
@@ -52,8 +53,8 @@ export function useOrthographicDebouncedResize(
  * Use when the scene is light and you want the view to update immediately.
  */
 export function useOrthographicImmediateResize(
-    renderer: DualRenderer,
-    camera: THREE.OrthographicCamera,
+    renderer: DualRenderer | null | undefined,
+    camera: THREE.OrthographicCamera | null | undefined,
     options?: {
         /** Called after camera/renderer are updated (e.g. renderAnimationOnce). */
         onResize?: () => void;
@@ -64,6 +65,7 @@ export function useOrthographicImmediateResize(
     onResizeRef.current = onResize;
 
     React.useEffect(() => {
+        if (!renderer || !camera) return;
         const handleResize = () => {
             const width = window.innerWidth;
             const height = window.innerHeight;
