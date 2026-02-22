@@ -7,7 +7,7 @@ import { useSetOperationsDemoData } from './SetOperationsDemoShared';
 import { useOrthographicImmediateResize } from '@alchemist/theta-sketch/hooks/useOrthographicResize';
 import * as THREE from 'three';
 import { at } from 'obelus';
-import { Box, Container, Fade, Typography, useTheme } from '@mui/material';
+import { Box, Container, Fade, Typography } from '@mui/material';
 import { slideUp, useSpeech } from '@alchemist/shared';
 import TimelinePlayer from '@alchemist/theta-sketch/components/TimelinePlayer';
 import { clearScene, disposeDualSceneResources } from '@alchemist/theta-sketch/utils/threeUtils';
