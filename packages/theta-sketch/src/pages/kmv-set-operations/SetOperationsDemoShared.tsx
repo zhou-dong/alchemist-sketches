@@ -53,10 +53,18 @@ function mulberry32(seed: number) {
 
 
 export function buildTwoSketches(k: number, streamASize: number, streamBSize: number, seed: number) {
+    const PRECISION = 2;
+    const SCALE = 10 ** PRECISION;
+    // With rounding, possible unique values are 0.01 .. 1.00 (inclusive) => SCALE.
+    // (We intentionally exclude 0.00 so visuals never pin at the left boundary.)
+    const MAX_UNIQUE = SCALE;
+
     const rngA = mulberry32(seed * 1000 + 1);
     const hashesA = new Set<number>();
-    while (hashesA.size < Math.min(streamASize, 500)) {
-        hashesA.add(Math.round(rngA() * 1000) / 1000);
+    while (hashesA.size < Math.min(streamASize, 500, MAX_UNIQUE)) {
+        const v = Math.round(rngA() * SCALE) / SCALE;
+        if (v === 0) continue;
+        hashesA.add(v);
     }
     const sortedA = Array.from(hashesA).sort((a, b) => a - b);
     const valuesA = sortedA.slice(0, k);
@@ -65,8 +73,10 @@ export function buildTwoSketches(k: number, streamASize: number, streamBSize: nu
 
     const rngB = mulberry32(seed * 1000 + 2);
     const hashesB = new Set<number>();
-    while (hashesB.size < Math.min(streamBSize, 500)) {
-        hashesB.add(Math.round(rngB() * 1000) / 1000);
+    while (hashesB.size < Math.min(streamBSize, 500, MAX_UNIQUE)) {
+        const v = Math.round(rngB() * SCALE) / SCALE;
+        if (v === 0) continue;
+        hashesB.add(v);
     }
     const sortedB = Array.from(hashesB).sort((a, b) => a - b);
     const valuesB = sortedB.slice(0, k);
