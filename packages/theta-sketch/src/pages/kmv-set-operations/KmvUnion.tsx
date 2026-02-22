@@ -1,6 +1,6 @@
 import React from 'react';
 import { type TimelineSceneThree, render, axis, text, circle, latex } from 'obelus-three-render';
-import { axisStyle, circleStyle, textStyle } from '@alchemist/theta-sketch/theme/obelusTheme';
+import { axisStyle, circleStyle, textStyle, useSyncObelusTheme } from '@alchemist/theta-sketch/theme/obelusTheme';
 import { useDualThreeStage } from '@alchemist/theta-sketch/hooks/useDualThreeStage';
 import { buildAnimateTimeline } from 'obelus-gsap-animator';
 import { useSetOperationsDemoData } from './SetOperationsDemoShared';
@@ -104,6 +104,8 @@ const Main = ({ sketchA, sketchB, union, k }: KmvUnionProps) => {
     // useSyncObelusTheme();
     const { animationController, containerRef, scene, renderer, camera } = useDualThreeStage();
     const { speak, stop, pause, resume } = useSpeech({ rate: 1.0 });
+
+    useSyncObelusTheme();
 
     useOrthographicImmediateResize(
         renderer,
