@@ -100,8 +100,7 @@ interface KmvUnionProps {
 }
 
 const Main = ({ sketchA, sketchB, union, k }: KmvUnionProps) => {
-    const theme = useTheme();
-
+    // const theme = useTheme();
     // useSyncObelusTheme();
     const { animationController, containerRef, scene, renderer, camera } = useDualThreeStage();
     const { speak, stop, pause, resume } = useSpeech({ rate: 1.0 });
@@ -380,7 +379,7 @@ const Main = ({ sketchA, sketchB, union, k }: KmvUnionProps) => {
             <Box
                 sx={{
                     position: 'fixed',
-                    top: { xs: 16, md: 24 },
+                    top: window.innerHeight / 12,
                     left: '50%',
                     transform: 'translateX(-50%)',
                     zIndex: 1000,
