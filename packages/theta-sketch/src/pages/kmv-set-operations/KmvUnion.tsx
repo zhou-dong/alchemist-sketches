@@ -1,5 +1,5 @@
 import React from 'react';
-import { type TimelineSceneThree, render, axis, text, circle } from 'obelus-three-render';
+import { type TimelineSceneThree, render, axis, text, circle, latex } from 'obelus-three-render';
 import { axisStyle, circleStyle, textStyle } from '@alchemist/theta-sketch/theme/obelusTheme';
 import { useDualThreeStage } from '@alchemist/theta-sketch/hooks/useDualThreeStage';
 import { buildAnimateTimeline } from 'obelus-gsap-animator';
@@ -7,12 +7,12 @@ import { useSetOperationsDemoData } from './SetOperationsDemoShared';
 import { useOrthographicImmediateResize } from '@alchemist/theta-sketch/hooks/useOrthographicResize';
 import * as THREE from 'three';
 import { at } from 'obelus';
-import { alpha, Box, Chip, Container, Divider, Fade, Paper, Stack, Typography, useTheme } from '@mui/material';
+import { Box, Container, Fade, Typography, useTheme } from '@mui/material';
 import { slideUp, useSpeech } from '@alchemist/shared';
 import TimelinePlayer from '@alchemist/theta-sketch/components/TimelinePlayer';
 import { clearScene, disposeDualSceneResources } from '@alchemist/theta-sketch/utils/threeUtils';
-import { NewThetaLimitNote, SetCard } from './SetOperationsDemoShared';
 import { calculateStepTimings } from '@alchemist/theta-sketch/utils/narration';
+
 interface Position {
     x: number;
     y: number;
@@ -20,101 +20,74 @@ interface Position {
 
 const NARRATION: Record<number, string> = {
     0: `On this page, we will compute a union using KMV sketches. Each sketch keeps only the K smallest hash values, and theta is inferred as the K-th value.`,
-    1: `Step one. This is Sketch A. It contains the K smallest hash values from stream A.`,
-    2: `Step two. This is Sketch B. It contains the K smallest hash values from stream B.`,
-    3: `Step three. To union two KMV sketches, we merge the values, remove duplicates, sort, and keep the K smallest values. Theta is then inferred as the maximum of those K values.`,
-    4: `Step four. For union, KMV is safe to chain. The union result keeps exactly K values, so the correct theta is always recoverable as the maximum of those values.`,
+    1: `This is Sketch A. It contains the K smallest hash values from stream A.`,
+    2: `This is Sketch B. It contains the K smallest hash values from stream B.`,
+    3: `This is the union sketch. It initially as an empty sketch.`,
+    4: "We add the values from Sketch A and Sketch B to it.",
+    5: "We then remove duplicates and sort the values.",
+    6: "Finally, we keep the K smallest values and infer theta as the maximum of those values.",
+    7: "For union, KMV is safe to chain. The union result keeps exactly K values, so the correct theta is always recoverable as the maximum of those values.",
 };
 
 const { startTimes: NARRATION_START, durations: NARRATION_DUR } = calculateStepTimings(NARRATION, 1.0);
 
-const STEP_LABELS: Record<number, string> = {
-    0: 'Intro',
-    1: 'Sketch A',
-    2: 'Sketch B',
-    3: 'Union sketch',
-    4: 'Why union is safe',
-};
-
-function StepBlock({
-    show,
-    children,
-    delayMs = 0,
-}: {
-    show: boolean;
-    children: React.ReactNode;
-    delayMs?: number;
-}) {
-    return (
-        <Box
-            sx={{
-                opacity: show ? 1 : 0,
-                transform: show ? 'translateX(0px)' : 'translateX(-12px)',
-                transition: `opacity 320ms ease, transform 320ms ease`,
-                transitionDelay: `${delayMs}ms`,
-                pointerEvents: show ? 'auto' : 'none',
-            }}
-        >
-            {children}
-        </Box>
-    );
-}
-
-const buildAxis = (start: Position, end: Position, title?: string) => {
+const buildAxis = (start: Position, end: Position) => {
     const randomId = Math.random().toString(36).substring(2, 15);
-
     const axisLineId = `axis_line_${randomId}`;
-    const axisStartId = `axis_start_${randomId}`;
-    const axisEndId = `axis_end_${randomId}`;
-    const axisTitleId = `axis_title_${randomId}`;
-
-    const axisLine = axis(axisLineId, start, end, { ...axisStyle, dotCount: 2 });
-    const axisStart = text(axisStartId, "0", { x: start.x, y: start.y - 15 }, textStyle);
-    const axisEnd = text(axisEndId, "1", { x: end.x, y: end.y - 15 }, textStyle);
-    const axisTitle = title
-        ? text(axisTitleId, title, { x: start.x, y: start.y + 18 }, { ...textStyle, fontSize: '18px' } as any)
-        : null;
-
-    return { axisLineId, axisStartId, axisEndId, axisTitleId, axisLine, axisStart, axisEnd, axisTitle };
+    const axisLine = axis(axisLineId, start, end, { ...axisStyle, dotCount: 0 });
+    return { axisLineId, axisLine, };
 };
 
-const buildDot = (name: string, start: Position, end: Position, value: number) => {
-    const radius = 3;
-    const scale = end.x - start.x;
-    const x = start.x + value * scale;
+const buildDot = (start: Position, end: Position, value: number, sizeScale: number) => {
+    const randomId = Math.random().toString(36).substring(2, 15);
+    const radius = 10;
+    const lengthScale = end.x - start.x;
+    const x = start.x + value * lengthScale;
     const y = start.y;
-    const dotId = `${name}_dot_${value}`;
+    const dotId = `dot_${randomId}_${value}`;
     const dot = circle(dotId, radius, { x, y }, circleStyle);
+
+    (dot.target as THREE.Mesh).scale.set(sizeScale, sizeScale, sizeScale);
     return { dotId, dot };
 };
 
-const buildAxisAndDots = (name: string, start: Position, end: Position, values: number[]) => {
-    const axisTitle = name === 'a' ? 'Sketch A (KMV)' : name === 'b' ? 'Sketch B (KMV)' : 'Union sketch (KMV)';
-    const axis = buildAxis(start, end, axisTitle);
-    const dots = values.map((value) => buildDot(name, start, end, value));
-    return { axis, dots };
+const buildNumber = (start: Position, end: Position, value: number, size: number, index: number, scale: number) => {
+    const randomId = Math.random().toString(36).substring(2, 15);
+    const numberId = `number_${randomId}_${value}`;
+    const totalLength = end.x - start.x;
+    const x = start.x + index * (totalLength / (size - 1));
+    const y = start.y - 30;
+    const number = text(numberId, value.toString(), { x, y }, { ...textStyle, fontSize: '18px' });
+    (number.target as THREE.Mesh).scale.set(scale, scale, scale);
+    return { numberId, number };
+};
+
+const buildLatex = (title: string, y: number, k: number, theta: number, estimated: number, scale: number) => {
+    const latexExpression = `\\begin{align*}
+    \\text{ ${title} } \\quad | \\quad \\quad
+    k = ${k}, \\quad \\theta = \\max(v_1,\\dots,v_k) = ${theta.toFixed(3)}, \\quad \\hat{N} = \\frac{k}{\\theta} - 1 = \\frac{${k}}{${theta.toFixed(3)}} - 1 = ${estimated.toFixed(3)}
+    \\end{align*}
+    `;
+    const randomId = Math.random().toString(36).substring(2, 15);
+    const latexId = `latex_${randomId}`;
+    const instance = latex(latexId, latexExpression, { x: 0, y: y + 30 }, { ...textStyle, fontSize: '18px' });
+    (instance.target as THREE.Mesh).scale.set(scale, scale, scale);
+    return { latexId, latex: instance };
 };
 
 const buildTimelineSteps = (
     time: number,
     axisLineId: string,
-    axisStartId: string,
-    axisEndId: string,
     dotIds: string[],
-    extraIds: string[] = [],
-    durationSeconds: number = 1
 ) => {
     const steps: any[] = [];
     const buildAndAddStep = (id: string) => {
         steps.push(
-            at(time).animate(id, { position: { y: `+=${window.innerHeight}` } }, { duration: durationSeconds })
+            at(time).animate(id, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 })
         );
     };
 
     buildAndAddStep(axisLineId);
-    buildAndAddStep(axisStartId);
-    buildAndAddStep(axisEndId);
-    extraIds.forEach((id) => buildAndAddStep(id));
     dotIds.forEach((dotId) => buildAndAddStep(dotId));
     return steps;
 };
@@ -181,75 +154,193 @@ const Main = ({ sketchA, sketchB, union, k }: KmvUnionProps) => {
         const startX = -window.innerWidth / 4;
         const endX = window.innerWidth / 4;
 
-        const sketchCValues = union.values;
+        const aY = window.innerHeight / 12 * 3 - window.innerHeight;
+        const axisA = buildAxis({ x: startX, y: aY }, { x: endX, y: aY });
+        const dotsA = sketchA.values.map((value) => buildDot({ x: startX, y: aY }, { x: endX, y: aY }, value, 1));
+        const dotsA1 = sketchA.values.map((value) => buildDot({ x: startX, y: aY }, { x: endX, y: aY }, value, 1));
+        const numbersA = sketchA.values.map((value, index) => buildNumber({ x: startX, y: aY }, { x: endX, y: aY }, value, sketchA.values.length, index, 1));
+        const latexA = buildLatex("Sketch A (KMV)", aY, k, sketchA.theta, sketchA.theta > 0 ? k / sketchA.theta - 1 : 0, 1);
 
-        const revealDuration = (step: number) =>
-            Math.min(0.9, Math.max(0.5, (NARRATION_DUR[step] ?? 1) * 0.45));
+        const bY = window.innerHeight / 12 - window.innerHeight;
+        const axisB = buildAxis({ x: startX, y: bY }, { x: endX, y: bY });
+        const dotsB = sketchB.values.map((value) => buildDot({ x: startX, y: bY }, { x: endX, y: bY }, value, 1));
+        const dotsB1 = sketchB.values.map((value) => buildDot({ x: startX, y: bY }, { x: endX, y: bY }, value, 1));
+        const numbersB = sketchB.values.map((value, index) => buildNumber({ x: startX, y: bY }, { x: endX, y: bY }, value, sketchB.values.length, index, 1));
+        const latexB = buildLatex("Sketch B (KMV)", bY, k, sketchB.theta, sketchB.theta > 0 ? k / sketchB.theta - 1 : 0, 1);
 
-        const { axis: axisA, dots: dotsA } = buildAxisAndDots(
-            "a",
-            { x: startX, y: window.innerHeight / 12 * 3 - window.innerHeight },
-            { x: endX, y: window.innerHeight / 12 * 3 - window.innerHeight },
-            sketchA.values
-        );
-        const { axis: axisB, dots: dotsB } = buildAxisAndDots(
-            "b",
-            { x: startX, y: window.innerHeight / 12 - window.innerHeight },
-            { x: endX, y: window.innerHeight / 12 - window.innerHeight },
-            sketchB.values
-        );
-        const { axis: axisC, dots: dotsC } = buildAxisAndDots(
-            "c",
-            { x: startX, y: -window.innerHeight / 12 - window.innerHeight },
-            { x: endX, y: -window.innerHeight / 12 - window.innerHeight },
-            sketchCValues
-        );
+        const cY = -window.innerHeight / 12 - window.innerHeight;
+        const axisC = buildAxis({ x: startX, y: cY }, { x: endX, y: cY });
+        const dotsC = union.values.map((value) => buildDot({ x: startX, y: cY }, { x: endX, y: cY }, value, 0));
+        const numbersC = union.values.map((value, index) => buildNumber({ x: startX, y: cY }, { x: endX, y: cY }, value, union.values.length, index, 0));
+        const numbersABUnion = sketchA.values.concat(sketchB.values).map((value, index) => buildNumber({ x: startX, y: cY }, { x: endX, y: cY }, value, sketchA.values.length + sketchB.values.length, index, 0));
+        const numbersABUnionSorted = [...new Set(sketchA.values.concat(sketchB.values))].sort((a, b) => a - b).map((value, index) => buildNumber({ x: startX, y: cY }, { x: endX, y: cY }, value, sketchA.values.length + sketchB.values.length, index, 0));
+        const latexUnion = buildLatex("Union sketch (KMV)", cY, k, union.theta, union.theta > 0 ? k / union.theta - 1 : 0, 0);
 
         const timelineScene: TimelineSceneThree = {
             objects: [
                 axisA.axisLine,
-                axisA.axisStart,
-                axisA.axisEnd,
-                ...(axisA.axisTitle ? [axisA.axisTitle] : []),
                 ...(dotsA.map((dot) => dot.dot)),
+                ...(dotsA1.map((dot) => dot.dot)),
+                ...(numbersA.map((number) => number.number)),
+                latexA.latex,
                 axisB.axisLine,
-                axisB.axisStart,
-                axisB.axisEnd,
-                ...(axisB.axisTitle ? [axisB.axisTitle] : []),
                 ...(dotsB.map((dot) => dot.dot)),
+                ...(dotsB1.map((dot) => dot.dot)),
+                ...(numbersB.map((number) => number.number)),
+                latexB.latex,
                 axisC.axisLine,
-                axisC.axisStart,
-                axisC.axisEnd,
-                ...(axisC.axisTitle ? [axisC.axisTitle] : []),
                 ...(dotsC.map((dot) => dot.dot)),
+                ...(numbersC.map((number) => number.number)),
+                ...(numbersABUnion.map((number) => number.number)),
+                ...(numbersABUnionSorted.map((number) => number.number)),
+                latexUnion.latex,
             ],
             timeline: [
                 ...buildTimelineSteps(
-                    NARRATION_START[1] ?? 0,
+                    NARRATION_START[1] ?? 1,
                     axisA.axisLineId,
-                    axisA.axisStartId,
-                    axisA.axisEndId,
                     dotsA.map((dot) => dot.dotId),
-                    axisA.axisTitle ? [axisA.axisTitleId] : [],
-                    revealDuration(1)
+                ),
+                ...dotsA1.map((dot) =>
+                    at(NARRATION_START[1] ?? 1).animate(
+                        dot.dotId,
+                        { position: { y: `+=${window.innerHeight}` } },
+                        { duration: 1 }
+                    )
+                ),
+                ...numbersA.map((number) =>
+                    at(NARRATION_START[1] ?? 1).animate(
+                        number.numberId,
+                        { position: { y: `+=${window.innerHeight}` } },
+                        { duration: 1 }
+                    )
+                ),
+                at(NARRATION_START[1] ?? 1).animate(
+                    latexA.latexId,
+                    { position: { y: `+=${window.innerHeight}` } },
+                    { duration: 1 }
                 ),
                 ...buildTimelineSteps(
-                    NARRATION_START[2] ?? 0,
+                    NARRATION_START[2] ?? 2,
                     axisB.axisLineId,
-                    axisB.axisStartId,
-                    axisB.axisEndId,
                     dotsB.map((dot) => dot.dotId),
-                    axisB.axisTitle ? [axisB.axisTitleId] : [],
-                    revealDuration(2)
+                ),
+                ...dotsB1.map((dot) =>
+                    at(NARRATION_START[2] ?? 2).animate(
+                        dot.dotId,
+                        { position: { y: `+=${window.innerHeight}` } },
+                        { duration: 1 }
+                    )
+                ),
+                ...numbersB.map((number) =>
+                    at(NARRATION_START[2] ?? 2).animate(
+                        number.numberId,
+                        { position: { y: `+=${window.innerHeight}` } },
+                        { duration: 1 }
+                    )
+                ),
+                at(NARRATION_START[2] ?? 2).animate(
+                    latexB.latexId,
+                    { position: { y: `+=${window.innerHeight}` } },
+                    { duration: 1 }
                 ),
                 ...buildTimelineSteps(
-                    NARRATION_START[3] ?? 0,
+                    NARRATION_START[3] ?? 3,
                     axisC.axisLineId,
-                    axisC.axisStartId,
-                    axisC.axisEndId,
                     dotsC.map((dot) => dot.dotId),
-                    axisC.axisTitle ? [axisC.axisTitleId] : [],
-                    revealDuration(3)
+                ),
+                ...numbersC.map((number) =>
+                    at(NARRATION_START[3] ?? 3).animate(
+                        number.numberId,
+                        { position: { y: `+=${window.innerHeight}` } },
+                        { duration: 1 }
+                    )
+                ),
+                ...numbersABUnion.map((number) =>
+                    at(NARRATION_START[3] ?? 3).animate(
+                        number.numberId,
+                        { position: { y: `+=${window.innerHeight}` } },
+                        { duration: 1 }
+                    )
+                ),
+                ...numbersABUnionSorted.map((number) =>
+                    at(NARRATION_START[3] ?? 3).animate(
+                        number.numberId,
+                        { position: { y: `+=${window.innerHeight}` } },
+                        { duration: 1 }
+                    )
+                ),
+                at(NARRATION_START[3] ?? 3).animate(
+                    latexUnion.latexId,
+                    { position: { y: `+=${window.innerHeight}` } },
+                    { duration: 1 }
+                ),
+                ...dotsA1.map((dot) => at(NARRATION_START[4] ?? 4).animate(
+                    dot.dotId,
+                    { position: { y: `-=${window.innerHeight / 12 * 4}` } },
+                    { duration: 1 }
+                )),
+                ...dotsB1.map((dot) => at(NARRATION_START[4] ?? 4).animate(
+                    dot.dotId,
+                    { position: { y: `-=${window.innerHeight / 12 * 2}` } },
+                    { duration: 1 }
+                )),
+                ...numbersABUnion.map((number) =>
+                    at(NARRATION_START[4] ?? 4).animate(
+                        number.numberId,
+                        { scale: { x: 1, y: 1, z: 1 } },
+                        { duration: 1 }
+                    )
+                ),
+                ...numbersABUnion.map((number) =>
+                    at(NARRATION_START[5] ?? 5).animate(
+                        number.numberId,
+                        { scale: { x: 0, y: 0, z: 0 } },
+                        { duration: 1 }
+                    )
+                ),
+                ...numbersABUnionSorted.map((number) =>
+                    at(NARRATION_START[5] ?? 5).animate(
+                        number.numberId,
+                        { scale: { x: 1, y: 1, z: 1 } },
+                        { duration: 1 }
+                    )
+                ),
+                ...dotsA1.map((dot) => at(NARRATION_START[6] ?? 6).animate(
+                    dot.dotId,
+                    { scale: { x: 0, y: 0, z: 0 } },
+                    { duration: 1 }
+                )),
+                ...dotsB1.map((dot) => at(NARRATION_START[6] ?? 6).animate(
+                    dot.dotId,
+                    { scale: { x: 0, y: 0, z: 0 } },
+                    { duration: 1 }
+                )),
+                ...dotsC.map((dot) =>
+                    at(NARRATION_START[6] ?? 6).animate(
+                        dot.dotId,
+                        { scale: { x: 1, y: 1, z: 1 } },
+                        { duration: 1 }
+                    )
+                ),
+                ...numbersC.map((number) =>
+                    at(NARRATION_START[6] ?? 6).animate(
+                        number.numberId,
+                        { scale: { x: 1, y: 1, z: 1 } },
+                        { duration: 1 }
+                    )
+                ),
+                ...numbersABUnionSorted.map((number) =>
+                    at(NARRATION_START[6] ?? 6).animate(
+                        number.numberId,
+                        { scale: { x: 0, y: 0, z: 0 } },
+                        { duration: 1 }
+                    )
+                ),
+                at(NARRATION_START[6] ?? 6).animate(
+                    latexUnion.latexId,
+                    { scale: { x: 1, y: 1, z: 1 } },
+                    { duration: 1 }
                 ),
             ],
         };
@@ -265,15 +356,15 @@ const Main = ({ sketchA, sketchB, union, k }: KmvUnionProps) => {
         );
 
         // Keep overlay UI + narration synced to narration timing (seek/restart safe).
-        nextTimeline.call(() => setUiStep(0), [], NARRATION_START[0] ?? 0);
-        nextTimeline.call(() => setUiStep(1), [], NARRATION_START[1] ?? 0);
-        nextTimeline.call(() => setUiStep(2), [], NARRATION_START[2] ?? 0);
-        nextTimeline.call(() => setUiStep(3), [], NARRATION_START[3] ?? 0);
-        nextTimeline.call(() => setUiStep(4), [], NARRATION_START[4] ?? 0);
 
+        const narrationSize = Object.keys(NARRATION).length;
+
+        for (let i = 0; i < narrationSize; i++) {
+            nextTimeline.call(() => setUiStep(i), [], NARRATION_START[i] ?? i);
+        }
         // Ensure the timeline stays alive long enough for step-4 narration to finish
         // (otherwise onComplete can fire too early and cancel the utterance).
-        nextTimeline.to({}, { duration: NARRATION_DUR[4] ?? 1 }, NARRATION_START[4] ?? 0);
+        nextTimeline.to({}, { duration: NARRATION_DUR[narrationSize - 1] ?? 1 }, NARRATION_START[narrationSize - 1] ?? narrationSize - 1);
 
         setTimeline(nextTimeline);
 
@@ -306,104 +397,11 @@ const Main = ({ sketchA, sketchB, union, k }: KmvUnionProps) => {
                         mb: 1,
                     }}
                 >
-                    KMV Union (Three Sketches)
+                    KMV Union
                 </Typography>
-                <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center' }}>
+                <Typography variant="body1" color="text.secondary" sx={{ textAlign: 'center' }}>
                     KMV stores only the K smallest hash values; θ is inferred as the K-th value.
                 </Typography>
-            </Box>
-
-            <Box
-                sx={{
-                    position: 'fixed',
-                    top: { xs: 'auto', md: 96 },
-                    bottom: { xs: 116, md: 'auto' },
-                    left: { xs: 12, md: 16 },
-                    right: { xs: 12, md: 'auto' },
-                    zIndex: 1000,
-                    width: { md: 420 },
-                    pointerEvents: 'auto',
-                }}
-            >
-                <Paper
-                    elevation={0}
-                    variant="outlined"
-                    sx={{
-                        p: 1.5,
-                        borderRadius: 3,
-                        background: 'transparent',
-                        maxHeight: { xs: 'calc(100vh - 260px)', md: 'calc(100vh - 190px)' },
-                        overflowY: 'auto',
-                    }}
-                >
-                    <Stack spacing={1.25}>
-                        <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ gap: 1 }}>
-                            <Typography variant="subtitle2" sx={{ fontWeight: 700, letterSpacing: 0.2 }}>
-                                Walkthrough
-                            </Typography>
-                            <Chip
-                                size="small"
-                                label={STEP_LABELS[uiStep] ?? `Step ${uiStep}`}
-                                sx={{
-                                    fontWeight: 600,
-                                    bgcolor: alpha(theme.palette.primary.main, theme.palette.mode === 'dark' ? 0.25 : 0.12),
-                                }}
-                            />
-                        </Stack>
-                        <Typography variant="caption" color="text.secondary">
-                            Values are hash values in ([0, 1)). KMV keeps only the K smallest.
-                        </Typography>
-                        <Divider sx={{ borderColor: alpha(theme.palette.divider, 0.35) }} />
-
-                        <StepBlock show={uiStep >= 1}>
-                            <SetCard
-                                title="Sketch A"
-                                subtitle={`K = ${k}`}
-                                values={sketchA.values}
-                                theta={sketchA.theta}
-                                estimated={sketchA.theta > 0 ? k / sketchA.theta - 1 : 0}
-                                formula="θ = v_k,  N̂ = k/θ − 1"
-                                color="#3b82f6"
-                            />
-                        </StepBlock>
-
-                        <StepBlock show={uiStep >= 2} delayMs={40}>
-                            <SetCard
-                                title="Sketch B"
-                                subtitle={`K = ${k}`}
-                                values={sketchB.values}
-                                theta={sketchB.theta}
-                                estimated={sketchB.theta > 0 ? k / sketchB.theta - 1 : 0}
-                                formula="θ = v_k,  N̂ = k/θ − 1"
-                                color="#a855f7"
-                            />
-                        </StepBlock>
-
-                        <StepBlock show={uiStep >= 3} delayMs={60}>
-                            <SetCard
-                                title="Union (KMV)"
-                                subtitle="Merge unique values → keep K smallest"
-                                values={union.values}
-                                theta={union.theta}
-                                estimated={union.estimated}
-                                formula="UnionK = sort(A∪B)[:K],  θ = max(UnionK),  N̂ = k/θ − 1"
-                                color="#22c55e"
-                            />
-                        </StepBlock>
-
-                        <StepBlock show={uiStep >= 4} delayMs={80}>
-                            <NewThetaLimitNote
-                                correctTheta={union.theta}
-                                correctThetaLabel="Correct θ for the union sketch"
-                                correctThetaDefinition="max(UnionK) (K-th smallest of A ∪ B)"
-                                resultValues={union.values}
-                                operationLabel="Union"
-                                okThetaHint="For union, the result keeps exactly K values, so θ is always recoverable as max(result values). KMV union is safe to chain."
-                                lostThetaHint="(Not expected for union) If inferred θ < correct θ, something is wrong with the union result."
-                            />
-                        </StepBlock>
-                    </Stack>
-                </Paper>
             </Box>
 
             {/* Subtitle Display */}
@@ -411,7 +409,7 @@ const Main = ({ sketchA, sketchB, union, k }: KmvUnionProps) => {
                 <Box
                     sx={{
                         position: 'fixed',
-                        bottom: { xs: 184, md: 184 },
+                        bottom: window.innerHeight / 12 + 120,
                         left: '50%',
                         transform: 'translateX(-50%)',
                         maxWidth: 'min(900px, 92vw)',
@@ -422,7 +420,7 @@ const Main = ({ sketchA, sketchB, union, k }: KmvUnionProps) => {
                     }}
                 >
                     <Typography
-                        variant="body1"
+                        variant="body2"
                         sx={{
                             color: 'text.primary',
                             px: 3,
@@ -438,7 +436,7 @@ const Main = ({ sketchA, sketchB, union, k }: KmvUnionProps) => {
                 maxWidth="sm"
                 sx={{
                     position: 'fixed',
-                    bottom: { xs: 12, md: 24 },
+                    bottom: window.innerHeight / 12,
                     left: 0,
                     right: 0,
                     zIndex: 1000,
