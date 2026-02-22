@@ -57,7 +57,7 @@ const buildNumber = (start: Position, end: Position, value: number, size: number
     const totalLength = end.x - start.x;
     const x = start.x + index * (totalLength / (size - 1));
     const y = start.y - 30;
-    const number = text(numberId, value.toString(), { x, y }, { ...textStyle, fontSize: '18px' });
+    const number = text(numberId, value.toFixed(2), { x, y }, { ...textStyle, fontSize: '16px' });
     (number.target as THREE.Mesh).scale.set(scale, scale, scale);
     return { numberId, number };
 };
@@ -65,12 +65,12 @@ const buildNumber = (start: Position, end: Position, value: number, size: number
 const buildLatex = (title: string, y: number, k: number, theta: number, estimated: number, scale: number) => {
     const latexExpression = `\\begin{align*}
     \\text{ ${title} } \\quad | \\quad \\quad
-    k = ${k}, \\quad \\theta = \\max(v_1,\\dots,v_k) = ${theta.toFixed(3)}, \\quad \\hat{N} = \\frac{k}{\\theta} - 1 = \\frac{${k}}{${theta.toFixed(3)}} - 1 = ${estimated.toFixed(3)}
+    k = ${k}, \\quad \\theta = \\max(v_1,\\dots,v_k) = ${theta.toFixed(2)}, \\quad \\hat{N} = \\frac{k}{\\theta} - 1 = \\frac{${k}}{${theta.toFixed(2)}} - 1 = ${estimated.toFixed(2)}
     \\end{align*}
     `;
     const randomId = Math.random().toString(36).substring(2, 15);
     const latexId = `latex_${randomId}`;
-    const instance = latex(latexId, latexExpression, { x: 0, y: y + 30 }, { ...textStyle, fontSize: '18px' });
+    const instance = latex(latexId, latexExpression, { x: 0, y: y + 30 }, { ...textStyle, fontSize: '14px' });
     (instance.target as THREE.Mesh).scale.set(scale, scale, scale);
     return { latexId, latex: instance };
 };
