@@ -19,6 +19,7 @@ import {
     SKETCH_B_COLOR,
     RESULT_COLOR,
 } from '../../components/set-operations/SetOperationsVizShared';
+import KmvIntersection from './KmvIntersection';
 
 const VISUAL_STEPS = 3; // 0: A and B bars; 1: common θ + highlight below θ; 2: intersection result bar
 
@@ -300,6 +301,9 @@ export default function SetOperationsIntersectionPage() {
                     </Box>
                 </Stack>
             </Container>
+
+            {/* Full-screen animated Three.js walkthrough */}
+            <KmvIntersection />
         </>
     );
 }

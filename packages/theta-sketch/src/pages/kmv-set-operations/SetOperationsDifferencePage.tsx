@@ -19,6 +19,7 @@ import {
     SKETCH_B_COLOR,
     RESULT_COLOR,
 } from '../../components/set-operations/SetOperationsVizShared';
+import KmvDifference from './KmvDifference';
 
 const DIFF_VISUAL_STEPS = 3; // 0: A and B bars; 1: common θ + highlight below θ; 2: difference result bar
 
@@ -296,6 +297,9 @@ export default function SetOperationsDifferencePage() {
                     </Box>
                 </Stack>
             </Container>
+
+            {/* Full-screen animated Three.js walkthrough */}
+            <KmvDifference />
         </>
     );
 }

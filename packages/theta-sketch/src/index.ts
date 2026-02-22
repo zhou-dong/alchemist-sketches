@@ -15,6 +15,8 @@ export { default as SetOperationsDifferencePage } from './pages/kmv-set-operatio
 export { default as ThetaSketchPage } from './pages/ThetaSketch';
 export { default as ThetaSketchSetOperationsPage } from './pages/ThetaSketchSetOperations';
 export { default as KmvUnionPage } from './pages/kmv-set-operations/KmvUnion';
+export { default as KmvIntersectionPage } from './pages/kmv-set-operations/KmvIntersection';
+export { default as KmvDifferencePage } from './pages/kmv-set-operations/KmvDifference';
 
 // Progress context
 export {
