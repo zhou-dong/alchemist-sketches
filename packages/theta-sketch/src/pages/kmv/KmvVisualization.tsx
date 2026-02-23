@@ -419,8 +419,8 @@ As more items arrive, the estimate updates as N-hat equals K divided by theta, m
                         timeline={timeline}
                         showNextButton={true}
                         showMuteButton={false}
-                        nextPagePath="/theta-sketch/set-operations"
-                        nextPageTitle="Go to Set Operations"
+                        nextPagePath="/theta-sketch/kmv-set-operations?op=union"
+                        nextPageTitle="Go to KMV Set Operations"
                         enableNextButton={true}
                         onStart={() => {
                             animationController.startAnimation();
