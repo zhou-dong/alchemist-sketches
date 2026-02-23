@@ -17,6 +17,7 @@ import { useThetaSketchProgress } from '../contexts/ThetaSketchProgressContext';
 import { calculateStepTimings } from '../utils/narration';
 import StepProgressIndicator from '../components/StepProgressIndicator';
 import { slideUp } from '@alchemist/shared';
+import { useNavigate } from 'react-router-dom';
 
 // Narration for each timeline step
 const STEP_NARRATIONS: Record<number, string> = {
@@ -185,7 +186,7 @@ function OrderStatisticsPageContent() {
     const [currentNarration, setCurrentNarration] = React.useState<string>('');
     const { mode } = useTheme();
     const { getCurrentVoice } = useSpeech({ rate: 1.0 });
-
+    const navigate = useNavigate();
     const lastSpokenStepRef = useRef<number>(-1);
 
     // Sync Three.js materials with the current global theme
@@ -301,8 +302,10 @@ function OrderStatisticsPageContent() {
                 <TimelinePlayer
                     timeline={timelinePlayer}
                     showNextButton={true}
-                    nextPagePath="/theta-sketch/kse"
-                    nextPageTitle="Go to K-th Smallest Estimation"
+                    onNext={() => {
+                        navigate('/theta-sketch/kse');
+                    }}
+                    nextButtonTooltip="Go to K-th Smallest Estimation"
                     enableNextButton={isStepCompleted('order-statistics')}
                     onStart={() => {
                         animationController.startAnimation();

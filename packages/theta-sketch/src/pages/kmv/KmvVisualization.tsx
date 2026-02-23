@@ -14,6 +14,7 @@ import { useSpeech } from '@alchemist/shared';
 import { slideUp } from '@alchemist/shared';
 import { useOrthographicImmediateResize } from '@alchemist/theta-sketch/hooks/useOrthographicResize';
 import * as THREE from 'three';
+import { useNavigate } from 'react-router-dom';
 
 // Scene dimensions
 const axisWidth = window.innerWidth / 2;
@@ -152,7 +153,7 @@ export default function KmvVisualization({
 }: KmvVisualizationProps) {
     const { completeStep } = useThetaSketchProgress();
     const { getCurrentVoice } = useSpeech({ rate: 1.0 });
-
+    const navigate = useNavigate();
     // Sync Three.js materials with the current global theme
     useSyncObelusTheme();
 
@@ -419,8 +420,10 @@ As more items arrive, the estimate updates as N-hat equals K divided by theta, m
                         timeline={timeline}
                         showNextButton={true}
                         showMuteButton={false}
-                        nextPagePath="/theta-sketch/kmv-set-operations?op=union"
-                        nextPageTitle="Go to KMV Set Operations"
+                        onNext={() => {
+                            navigate('/theta-sketch/kmv-set-operations?op=union');
+                        }}
+                        nextButtonTooltip="Go to KMV Set Operations"
                         enableNextButton={true}
                         onStart={() => {
                             animationController.startAnimation();

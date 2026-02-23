@@ -12,6 +12,7 @@ import { slideUp, useSpeech } from '@alchemist/shared';
 import TimelinePlayer from '@alchemist/theta-sketch/components/TimelinePlayer';
 import { clearScene, disposeDualSceneResources } from '@alchemist/theta-sketch/utils/threeUtils';
 import { calculateStepTimings } from '@alchemist/theta-sketch/utils/narration';
+import { useNavigate } from 'react-router-dom';
 
 interface Position {
     x: number;
@@ -102,6 +103,7 @@ interface KmvUnionProps {
 const Main = ({ sketchA, sketchB, union, k }: KmvUnionProps) => {
     // const theme = useTheme();
     // useSyncObelusTheme();
+    const navigate = useNavigate();
     const { animationController, containerRef, scene, renderer, camera } = useDualThreeStage();
     const { speak, stop, pause, resume } = useSpeech({ rate: 1.0 });
 
@@ -449,9 +451,15 @@ const Main = ({ sketchA, sketchB, union, k }: KmvUnionProps) => {
                         timeline={timeline}
                         showNextButton={true}
                         showMuteButton={false}
-                        nextPagePath="/theta-sketch/set-operations"
-                        nextPageTitle="Go to Set Operations"
+                        nextButtonTooltip="Go to KMV Intersection"
                         enableNextButton={true}
+                        onNext={() => {
+                            speechSynthesis.cancel();
+                            setIsPlaying(false);
+                            animationController.stopAnimation();
+                            stop();
+                            navigate('/theta-sketch/kmv-set-operations?op=intersection');
+                        }}
                         onStart={() => {
                             setIsPlaying(true);
                             animationController.startAnimation();

@@ -13,6 +13,7 @@ import { axisStyle, lineStyle, textStyle } from '../../theme/obelusTheme';
 import { useThetaSketchProgress } from '../../contexts/ThetaSketchProgressContext';
 import { slideUp, useSpeech } from '@alchemist/shared';
 import SetOperationsIntroCard from './SetOperationsIntroCard';
+import { useNavigate } from 'react-router-dom';
 
 const renderer = createDualRenderer();
 const camera = createOrthographicCamera();
@@ -174,7 +175,7 @@ export default function SetOperationsVisualization({
 }: SetOperationsVisualizationProps) {
     const { completeStep } = useThetaSketchProgress();
     const { getCurrentVoice } = useSpeech({ rate: 1.0 });
-
+    const navigate = useNavigate();
     const [timeline, setTimeline] = React.useState<any>(null);
     const [showIntro, setShowIntro] = React.useState(true);
     const hasBuiltRef = React.useRef(false);
@@ -477,8 +478,12 @@ export default function SetOperationsVisualization({
                         timeline={timeline}
                         showNextButton={true}
                         showMuteButton={true}
-                        nextPagePath="/theta-sketch/theta-sketch"
-                        nextPageTitle="Go to Theta Sketch"
+                        onNext={() => {
+                            speechSynthesis.cancel();
+                            animationController.stopAnimation();
+                            navigate('/theta-sketch/theta-sketch');
+                        }}
+                        nextButtonTooltip="Go to Theta Sketch"
                         enableNextButton={true}
                         onStart={() => {
                             animationController.startAnimation();

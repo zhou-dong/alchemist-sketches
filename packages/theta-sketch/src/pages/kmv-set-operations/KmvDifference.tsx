@@ -13,6 +13,7 @@ import TimelinePlayer from '@alchemist/theta-sketch/components/TimelinePlayer';
 import { clearScene, disposeDualSceneResources } from '@alchemist/theta-sketch/utils/threeUtils';
 import { calculateStepTimings } from '@alchemist/theta-sketch/utils/narration';
 import { NewThetaLimitNote } from './SetOperationsDemoShared';
+import { useNavigate } from 'react-router-dom';
 
 interface Position {
     x: number;
@@ -75,11 +76,16 @@ interface KmvDifferenceProps {
 }
 
 const Main = ({ sketchA, sketchB, difference, k }: KmvDifferenceProps) => {
+    const navigate = useNavigate();
     const { animationController, containerRef, scene, renderer, camera } = useDualThreeStage();
     const { speak, stop, pause, resume } = useSpeech({ rate: 1.0 });
     const commonTheta = Math.min(sketchA.theta, sketchB.theta);
 
     useSyncObelusTheme();
+
+    const goToSetOperations = React.useCallback(() => {
+        navigate('/theta-sketch/set-operations');
+    }, [navigate]);
 
     useOrthographicImmediateResize(renderer, camera as THREE.OrthographicCamera, {
         onResize: () => animationController?.renderAnimationOnce?.(),
@@ -376,9 +382,15 @@ const Main = ({ sketchA, sketchB, difference, k }: KmvDifferenceProps) => {
                         timeline={timeline}
                         showNextButton={true}
                         showMuteButton={false}
-                        nextPagePath="/theta-sketch/set-operations"
-                        nextPageTitle="Go to Set Operations"
+                        nextButtonTooltip="Go to KMV Limit and Solution"
                         enableNextButton={true}
+                        onNext={() => {
+                            speechSynthesis.cancel();
+                            setIsPlaying(false);
+                            animationController.stopAnimation();
+                            stop();
+                            navigate('/theta-sketch/kmv-set-operations?op=limit-and-solution');
+                        }}
                         onStart={() => {
                             setIsPlaying(true);
                             animationController.startAnimation();

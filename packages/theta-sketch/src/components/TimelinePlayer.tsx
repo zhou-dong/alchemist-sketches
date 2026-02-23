@@ -13,22 +13,13 @@ import {
   ListItemText
 } from '@mui/material';
 
-import * as PlayArrow from '@mui/icons-material/PlayArrow';
-import * as Pause from '@mui/icons-material/Pause';
-import * as RestartAlt from '@mui/icons-material/RestartAlt';
-import * as Speed from '@mui/icons-material/Speed';
-import * as VolumeUp from '@mui/icons-material/VolumeUp';
-import * as VolumeOff from '@mui/icons-material/VolumeOff';
-import * as SkipNext from '@mui/icons-material/SkipNext';
-import { useNavigate } from 'react-router-dom';
-
-const PlayIcon = PlayArrow.default as unknown as React.ElementType;
-const PauseIcon = Pause.default as unknown as React.ElementType;
-const RestartIcon = RestartAlt.default as unknown as React.ElementType;
-const SpeedIcon = Speed.default as unknown as React.ElementType;
-const VolumeUpIcon = VolumeUp.default as unknown as React.ElementType;
-const VolumeOffIcon = VolumeOff.default as unknown as React.ElementType;
-const SkipNextIcon = SkipNext.default as unknown as React.ElementType;
+import PlayIcon from '@mui/icons-material/PlayArrow';
+import PauseIcon from '@mui/icons-material/Pause';
+import RestartIcon from '@mui/icons-material/RestartAlt';
+import SpeedIcon from '@mui/icons-material/Speed';
+import VolumeUpIcon from '@mui/icons-material/VolumeUp';
+import VolumeOffIcon from '@mui/icons-material/VolumeOff';
+import SkipNextIcon from '@mui/icons-material/SkipNext';
 
 interface TimelinePlayerProps {
   timeline: any; // GSAP Timeline
@@ -37,8 +28,8 @@ interface TimelinePlayerProps {
   showMuteButton?: boolean;
   showNextButton?: boolean;
   enableNextButton?: boolean;
-  nextPagePath?: string;
-  nextPageTitle?: string;
+  nextButtonTooltip?: string;
+  onNext?: () => void;
   size?: 'small' | 'medium' | 'large';
   onStart: () => void;
   onPause: () => void;
@@ -52,8 +43,8 @@ export default function TimelinePlayer({
   showMuteButton = false,
   showNextButton = false,
   enableNextButton = false,
-  nextPagePath,
-  nextPageTitle = 'Next',
+  nextButtonTooltip = 'Next',
+  onNext,
   size = 'large',
   onStart,
   onPause,
@@ -61,7 +52,6 @@ export default function TimelinePlayer({
   onMuteChange,
 }: TimelinePlayerProps) {
   const theme = useTheme();
-  const navigate = useNavigate();
   const [isPlaying, setIsPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
   const [speed, setSpeed] = useState(1);
@@ -113,11 +103,10 @@ export default function TimelinePlayer({
   };
 
   const handleNextPage = () => {
-    if (nextPagePath) {
-      speechSynthesis.cancel();
-      timeline.pause();
-      navigate(nextPagePath);
-    }
+    if (!onNext) return;
+    speechSynthesis.cancel();
+    timeline.pause();
+    onNext();
   };
 
   const handleProgressChange = (value: number) => {
@@ -287,8 +276,8 @@ export default function TimelinePlayer({
             </Tooltip>
           )}
 
-          {showNextButton && nextPagePath && (
-            <Tooltip title={nextPageTitle}>
+          {showNextButton && onNext && (
+            <Tooltip title={nextButtonTooltip}>
               <IconButton
                 onClick={handleNextPage}
                 size={buttonSize}

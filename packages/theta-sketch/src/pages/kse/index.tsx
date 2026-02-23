@@ -17,6 +17,7 @@ import StepProgressIndicator from '@alchemist/theta-sketch/components/StepProgre
 import { slideUp } from '@alchemist/shared';
 import { useOrthographicImmediateResize } from '@alchemist/theta-sketch/hooks/useOrthographicResize';
 import * as THREE from 'three';
+import { useNavigate } from 'react-router-dom';
 
 // Narration for each timeline step
 const STEP_NARRATIONS: Record<number, string> = {
@@ -148,7 +149,7 @@ function KmvPageContent() {
     const [currentNarration, setCurrentNarration] = React.useState<string>('');
     const { mode } = useTheme();
     const { getCurrentVoice } = useSpeech({ rate: 1.0 });
-
+    const navigate = useNavigate();
     const lastSpokenStepRef = useRef<number>(-1);
 
     // Sync Three.js materials with the current global theme
@@ -256,8 +257,10 @@ function KmvPageContent() {
                 <TimelinePlayer
                     timeline={timeline}
                     showNextButton={true}
-                    nextPagePath="/theta-sketch/kmv"
-                    nextPageTitle="Go to KMV Algorithm"
+                    onNext={() => {
+                        navigate('/theta-sketch/kmv');
+                    }}
+                    nextButtonTooltip="Go to KMV Algorithm"
                     enableNextButton={isStepCompleted('kse')}
                     onStart={() => {
                         animationController.startAnimation();
