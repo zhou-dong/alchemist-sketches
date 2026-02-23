@@ -14,7 +14,6 @@ import {
   KmvPage,
   SetOperationsPage,
   ThetaSketchPage,
-  ThetaSketchSetOperationsPage,
   KmvUnionPage,
   KmvIntersectionPage,
   KmvDifferencePage,
@@ -44,8 +43,6 @@ function App() {
               <Route path="/theta-sketch/kmv-set-ops" element={<KmvSetOperationsIndexPage />} />
               <Route path="/theta-sketch/set-operations" element={<SetOperationsPage />} />
               <Route path="/theta-sketch/theta-sketch" element={<ThetaSketchPage />} />
-              <Route path="/theta-sketch/theta-sketch/set-operations" element={<ThetaSketchSetOperationsPage />} />
-
             </Routes>
           </Layout>
         </ThetaSketchProgressProvider>
