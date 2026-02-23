@@ -12,7 +12,7 @@ export { default as ThetaSketchPage } from './pages/ThetaSketch';
 export { default as KmvUnionPage } from './pages/kmv-set-operations/KmvUnion';
 export { default as KmvIntersectionPage } from './pages/kmv-set-operations/KmvIntersection';
 export { default as KmvDifferencePage } from './pages/kmv-set-operations/KmvDifference';
-export { default as KmvSetOperationsIndexPage } from './pages/kmv-set-operations';
+export { default as KmvSetOperationsPage } from './pages/kmv-set-operations';
 
 // Progress context
 export {
