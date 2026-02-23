@@ -22,6 +22,7 @@ import {
   KmvUnionPage,
   KmvIntersectionPage,
   KmvDifferencePage,
+  KmvSetOperationsIndexPage,
 } from '@alchemist/theta-sketch';
 
 function App() {
@@ -44,6 +45,7 @@ function App() {
               <Route path="/theta-sketch/kmv-union" element={<KmvUnionPage />} />
               <Route path="/theta-sketch/kmv-intersection" element={<KmvIntersectionPage />} />
               <Route path="/theta-sketch/kmv-difference" element={<KmvDifferencePage />} />
+              <Route path="/theta-sketch/kmv-set-operations" element={<KmvSetOperationsIndexPage />} />
               <Route path="/theta-sketch/set-operations" element={<SetOperationsPage />} />
               <Route path="/theta-sketch/set-operations-demo" element={<SetOperationsDemoPage />} />
               <Route path="/theta-sketch/set-operations-demo/union" element={<SetOperationsUnionPage />} />
