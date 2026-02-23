@@ -13,7 +13,7 @@ import TimelinePlayer from '@alchemist/theta-sketch/components/TimelinePlayer';
 import { clearScene, disposeDualSceneResources } from '@alchemist/theta-sketch/utils/threeUtils';
 import { calculateStepTimings } from '@alchemist/theta-sketch/utils/narration';
 import { useNavigate } from 'react-router-dom';
-import { buildAxis, buildDot, buildLatex, buildNumber } from './KmvSetOperationsThreeShared';
+import { buildAxis, buildDot, buildNumber, buildKmvInfoLatex } from './KmvSetOperationsThreeShared';
 
 const NARRATION: Record<number, string> = {
     0: `On this page, we will compute a union using KMV sketches. Each sketch keeps only the K smallest hash values, and theta is inferred as the K-th value.`,
@@ -27,15 +27,6 @@ const NARRATION: Record<number, string> = {
 };
 
 const { startTimes: NARRATION_START, durations: NARRATION_DUR } = calculateStepTimings(NARRATION, 1.0);
-
-const buildKmvSummaryLatex = (title: string, y: number, k: number, theta: number, estimated: number, scale: number) => {
-    const latexExpression = `\\begin{align*}
-    \\text{ ${title} } \\quad | \\quad \\quad
-    k = ${k}, \\quad \\theta = \\max(v_1,\\dots,v_k) = ${theta.toFixed(2)}, \\quad \\hat{N} = \\frac{k}{\\theta} - 1 = \\frac{${k}}{${theta.toFixed(2)}} - 1 = ${estimated.toFixed(2)}
-    \\end{align*}
-    `;
-    return buildLatex(y, latexExpression, scale, '14px');
-};
 
 interface KmvUnionProps {
     sketchA: { values: number[]; theta: number };
@@ -106,14 +97,14 @@ const Main = ({ sketchA, sketchB, union, k }: KmvUnionProps) => {
         const dotsA = sketchA.values.map((value) => buildDot({ x: startX, y: aY }, { x: endX, y: aY }, value, 1));
         const dotsA1 = sketchA.values.map((value) => buildDot({ x: startX, y: aY }, { x: endX, y: aY }, value, 1));
         const numbersA = sketchA.values.map((value, index) => buildNumber({ x: startX, y: aY }, { x: endX, y: aY }, value, sketchA.values.length, index, 1));
-        const latexA = buildKmvSummaryLatex("Sketch A (KMV)", aY, k, sketchA.theta, sketchA.theta > 0 ? k / sketchA.theta - 1 : 0, 1);
+        const latexA = buildKmvInfoLatex("Sketch A (KMV)", aY, k, sketchA.theta, sketchA.theta > 0 ? k / sketchA.theta - 1 : 0, 1);
 
         const bY = window.innerHeight / 12 - window.innerHeight;
         const axisB = buildAxis({ x: startX, y: bY }, { x: endX, y: bY });
         const dotsB = sketchB.values.map((value) => buildDot({ x: startX, y: bY }, { x: endX, y: bY }, value, 1));
         const dotsB1 = sketchB.values.map((value) => buildDot({ x: startX, y: bY }, { x: endX, y: bY }, value, 1));
         const numbersB = sketchB.values.map((value, index) => buildNumber({ x: startX, y: bY }, { x: endX, y: bY }, value, sketchB.values.length, index, 1));
-        const latexB = buildKmvSummaryLatex("Sketch B (KMV)", bY, k, sketchB.theta, sketchB.theta > 0 ? k / sketchB.theta - 1 : 0, 1);
+        const latexB = buildKmvInfoLatex("Sketch B (KMV)", bY, k, sketchB.theta, sketchB.theta > 0 ? k / sketchB.theta - 1 : 0, 1);
 
         const cY = -window.innerHeight / 12 - window.innerHeight;
         const axisC = buildAxis({ x: startX, y: cY }, { x: endX, y: cY });
@@ -121,7 +112,7 @@ const Main = ({ sketchA, sketchB, union, k }: KmvUnionProps) => {
         const numbersC = union.values.map((value, index) => buildNumber({ x: startX, y: cY }, { x: endX, y: cY }, value, union.values.length, index, 0));
         const numbersABUnion = sketchA.values.concat(sketchB.values).map((value, index) => buildNumber({ x: startX, y: cY }, { x: endX, y: cY }, value, sketchA.values.length + sketchB.values.length, index, 0));
         const numbersABUnionSorted = [...new Set(sketchA.values.concat(sketchB.values))].sort((a, b) => a - b).map((value, index) => buildNumber({ x: startX, y: cY }, { x: endX, y: cY }, value, sketchA.values.length + sketchB.values.length, index, 0));
-        const latexUnion = buildKmvSummaryLatex("Union sketch (KMV)", cY, k, union.theta, union.theta > 0 ? k / union.theta - 1 : 0, 0);
+        const latexUnion = buildKmvInfoLatex("Union sketch (KMV)", cY, k, union.theta, union.theta > 0 ? k / union.theta - 1 : 0, 0);
 
         const timelineScene: TimelineSceneThree = {
             objects: [
