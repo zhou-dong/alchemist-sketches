@@ -1,18 +1,14 @@
 import React from 'react';
-import { Stepper, Step, StepButton, alpha, useTheme } from '@mui/material';
+import { Stepper, Step, StepButton, useTheme, StepConnector } from '@mui/material';
 import Recap from './KmvRecap';
 import Config from './KmvConfig';
 import StepTitle from '@alchemist/theta-sketch/components/StepTitle';
 
-import * as Settings from '@mui/icons-material/Settings';
-import * as TipsAndUpdates from '@mui/icons-material/TipsAndUpdates';
-import * as RocketLaunch from '@mui/icons-material/RocketLaunch';
+import SettingsIcon from '@mui/icons-material/Settings';
+import RocketLaunchIcon from '@mui/icons-material/RocketLaunch';
+import LightbulbIcon from '@mui/icons-material/Lightbulb';
 import StepProgressIndicator from '@alchemist/theta-sketch/components/StepProgressIndicator';
 import KmvVisualization from './KmvVisualization';
-
-const SettingsIcon = Settings.default as unknown as React.ElementType;
-const TipsAndUpdatesIcon = TipsAndUpdates.default as unknown as React.ElementType;
-const RocketLaunchIcon = RocketLaunch.default as unknown as React.ElementType;
 
 function ThetaSketchPageContent() {
     const theme = useTheme();
@@ -55,12 +51,17 @@ function ThetaSketchPageContent() {
             {/* Stepper navigation */}
             <Stepper
                 nonLinear
+                connector={
+                    <StepConnector
+                        sx={{
+                            '&.MuiStepConnector-vertical': { ml: `${40 / 2}px` },
+                        }}
+                    />
+                }
                 activeStep={flowStep}
                 orientation="vertical"
                 sx={{
-                    '& .MuiStepConnector-line': {
-                        borderColor: alpha(theme.palette.divider, 0.5),
-                    },
+                    '& .MuiStepIcon-root': { fontSize: 40 },
                     position: 'fixed',
                     left: 24,
                     top: '50%',
@@ -70,13 +71,7 @@ function ThetaSketchPageContent() {
                 <Step>
                     <StepButton
                         onClick={() => setFlowStep(0)}
-                        icon={<TipsAndUpdatesIcon sx={{ color: iconColor(0) }} />}
-                        sx={{
-                            '& .MuiStepLabel-label': {
-                                color: flowStep === 0 ? theme.palette.primary.main : theme.palette.text.disabled,
-                                fontWeight: flowStep === 0 ? 700 : 500,
-                            },
-                        }}
+                        icon={<LightbulbIcon sx={{ color: iconColor(0), fontSize: 40 }} />}
                     >
                         Recap
                     </StepButton>
@@ -84,13 +79,7 @@ function ThetaSketchPageContent() {
                 <Step>
                     <StepButton
                         onClick={() => setFlowStep(1)}
-                        icon={<SettingsIcon sx={{ color: iconColor(1) }} />}
-                        sx={{
-                            '& .MuiStepLabel-label': {
-                                color: flowStep === 1 ? theme.palette.primary.main : theme.palette.text.disabled,
-                                fontWeight: flowStep === 1 ? 700 : 500,
-                            },
-                        }}
+                        icon={<SettingsIcon sx={{ color: iconColor(1), fontSize: 40 }} />}
                     >
                         Config
                     </StepButton>
@@ -98,13 +87,7 @@ function ThetaSketchPageContent() {
                 <Step>
                     <StepButton
                         onClick={() => setFlowStep(2)}
-                        icon={<RocketLaunchIcon sx={{ color: iconColor(2) }} />}
-                        sx={{
-                            '& .MuiStepLabel-label': {
-                                color: flowStep === 2 ? theme.palette.primary.main : theme.palette.text.disabled,
-                                fontWeight: flowStep === 2 ? 700 : 500,
-                            },
-                        }}
+                        icon={<RocketLaunchIcon sx={{ color: iconColor(2), fontSize: 40 }} />}
                     >
                         Demo
                     </StepButton>
