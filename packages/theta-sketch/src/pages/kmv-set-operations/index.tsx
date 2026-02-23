@@ -100,7 +100,6 @@ export default function KmvSetOperationsIndexPage() {
             {op === 'intersection' && <KmvIntersection />}
             {op === 'difference' && <KmvDifference />}
             {op === 'limitAndSolution' && <KmvSetOperationsSummaryPage />}
-
         </>
     );
 }
