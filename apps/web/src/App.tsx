@@ -13,10 +13,6 @@ import {
   KthSmallestPage,
   KmvPage,
   SetOperationsPage,
-  SetOperationsDemoPage,
-  SetOperationsUnionPage,
-  SetOperationsIntersectionPage,
-  SetOperationsDifferencePage,
   ThetaSketchPage,
   ThetaSketchSetOperationsPage,
   KmvUnionPage,
@@ -47,10 +43,6 @@ function App() {
               <Route path="/theta-sketch/kmv-difference" element={<KmvDifferencePage />} />
               <Route path="/theta-sketch/kmv-set-operations" element={<KmvSetOperationsIndexPage />} />
               <Route path="/theta-sketch/set-operations" element={<SetOperationsPage />} />
-              <Route path="/theta-sketch/set-operations-demo" element={<SetOperationsDemoPage />} />
-              <Route path="/theta-sketch/set-operations-demo/union" element={<SetOperationsUnionPage />} />
-              <Route path="/theta-sketch/set-operations-demo/intersection" element={<SetOperationsIntersectionPage />} />
-              <Route path="/theta-sketch/set-operations-demo/difference" element={<SetOperationsDifferencePage />} />
               <Route path="/theta-sketch/theta-sketch" element={<ThetaSketchPage />} />
               <Route path="/theta-sketch/theta-sketch/set-operations" element={<ThetaSketchSetOperationsPage />} />
 
