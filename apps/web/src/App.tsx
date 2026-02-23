@@ -14,7 +14,7 @@ import {
   KmvPage,
   SetOperationsPage,
   ThetaSketchPage,
-  KmvSetOperationsIndexPage,
+  KmvSetOperationsPage,
 } from '@alchemist/theta-sketch';
 
 function App() {
@@ -34,7 +34,7 @@ function App() {
               <Route path="/theta-sketch/order-statistics" element={<OrderStatisticsPage />} />
               <Route path="/theta-sketch/kse" element={<KthSmallestPage />} />
               <Route path="/theta-sketch/kmv" element={<KmvPage />} />
-              <Route path="/theta-sketch/kmv-set-ops" element={<KmvSetOperationsIndexPage />} />
+              <Route path="/theta-sketch/kmv-set-ops" element={<KmvSetOperationsPage />} />
               <Route path="/theta-sketch/set-operations" element={<SetOperationsPage />} />
               <Route path="/theta-sketch/theta-sketch" element={<ThetaSketchPage />} />
             </Routes>
