@@ -1,7 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { Box, Button, Container, Paper, Stack, Typography, alpha, useTheme } from '@mui/material';
 
-import StepTitle from '../../components/StepTitle';
 import StepProgressIndicator from '../../components/StepProgressIndicator';
 
 export default function KmvSetOperationsSummaryPage() {
