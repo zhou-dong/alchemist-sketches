@@ -11,7 +11,7 @@ import JoinFullIcon from '@mui/icons-material/JoinFull';
 import JoinInnerIcon from '@mui/icons-material/JoinInner';
 import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
 import LightbulbIcon from '@mui/icons-material/Lightbulb';
-import KmvSetOperationsSummaryPage from './KmvSetOperationsSummaryPage';
+import KmvLimitAndSolution from './KmvLimitAndSolution';
 
 type Op = 'union' | 'intersection' | 'difference' | 'limitAndSolution';
 
@@ -99,7 +99,7 @@ export default function KmvSetOperationsIndexPage() {
             {op === 'union' && <KmvUnion />}
             {op === 'intersection' && <KmvIntersection />}
             {op === 'difference' && <KmvDifference />}
-            {op === 'limitAndSolution' && <KmvSetOperationsSummaryPage />}
+            {op === 'limitAndSolution' && <KmvLimitAndSolution />}
         </>
     );
 }

@@ -10,7 +10,33 @@ export default function KmvSetOperationsSummaryPage() {
 
     return (
         <>
-            <StepTitle title="KMV Set Operations — Summary" />
+            <Box
+                sx={{
+                    position: 'fixed',
+                    top: window.innerHeight / 12,
+                    left: '50%',
+                    transform: 'translateX(-50%)',
+                    zIndex: 1000,
+                    width: { xs: '92%', md: 920 },
+                    pointerEvents: 'none',
+                }}
+            >
+                <Typography
+                    variant="h4"
+                    sx={{
+                        textAlign: 'center',
+                        fontWeight: 800,
+                        letterSpacing: -0.5,
+                        mb: 1,
+                    }}
+                >
+                    KMV Limit and Solution
+                </Typography>
+                <Typography variant="body1" color="text.secondary" sx={{ textAlign: 'center' }}>
+                    The limit of KMV intersection and difference is that the result cannot be used in further set operations because θ is not stored. Saving θ in the result fixes that and what we get is Theta Sketch.
+                </Typography>
+            </Box>
+
             <StepProgressIndicator currentStepId="set-operations" />
 
             <Container maxWidth="md" sx={{ py: 3, pb: 10 }}>
