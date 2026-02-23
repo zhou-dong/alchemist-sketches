@@ -11,18 +11,19 @@ import JoinFullIcon from '@mui/icons-material/JoinFull';
 import JoinInnerIcon from '@mui/icons-material/JoinInner';
 import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
 import LightbulbIcon from '@mui/icons-material/Lightbulb';
+import KmvSetOperationsSummaryPage from './KmvSetOperationsSummaryPage';
 
-type Op = 'union' | 'intersection' | 'difference' | 'limit';
+type Op = 'union' | 'intersection' | 'difference' | 'limitAndSolution';
 
 const OPS: { id: Op; label: string; Icon: ElementType }[] = [
     { id: 'union', label: 'Union', Icon: JoinFullIcon },
     { id: 'intersection', label: 'Intersection', Icon: JoinInnerIcon },
     { id: 'difference', label: 'Difference', Icon: RemoveCircleOutlineIcon },
-    { id: 'limit', label: 'θ Solution', Icon: LightbulbIcon },
+    { id: 'limitAndSolution', label: 'θ Solution', Icon: LightbulbIcon },
 ];
 
 function getOp(value: string | null): Op {
-    if (value === 'intersection' || value === 'difference' || value === 'union' || value === 'limit') return value;
+    if (value === 'intersection' || value === 'difference' || value === 'union' || value === 'limitAndSolution') return value;
     return 'union';
 }
 
@@ -98,6 +99,7 @@ export default function KmvSetOperationsIndexPage() {
             {op === 'union' && <KmvUnion />}
             {op === 'intersection' && <KmvIntersection />}
             {op === 'difference' && <KmvDifference />}
+            {op === 'limitAndSolution' && <KmvSetOperationsSummaryPage />}
 
         </>
     );
