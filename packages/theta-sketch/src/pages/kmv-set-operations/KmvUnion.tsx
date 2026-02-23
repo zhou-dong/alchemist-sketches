@@ -1,6 +1,6 @@
 import React from 'react';
-import { type TimelineSceneThree, render, axis, text, circle, latex } from 'obelus-three-render';
-import { axisStyle, circleStyle, textStyle, useSyncObelusTheme } from '@alchemist/theta-sketch/theme/obelusTheme';
+import { type TimelineSceneThree, render } from 'obelus-three-render';
+import { useSyncObelusTheme } from '@alchemist/theta-sketch/theme/obelusTheme';
 import { useDualThreeStage } from '@alchemist/theta-sketch/hooks/useDualThreeStage';
 import { buildAnimateTimeline } from 'obelus-gsap-animator';
 import { useSetOperationsDemoData } from './SetOperationsDemoShared';
@@ -13,11 +13,7 @@ import TimelinePlayer from '@alchemist/theta-sketch/components/TimelinePlayer';
 import { clearScene, disposeDualSceneResources } from '@alchemist/theta-sketch/utils/threeUtils';
 import { calculateStepTimings } from '@alchemist/theta-sketch/utils/narration';
 import { useNavigate } from 'react-router-dom';
-
-interface Position {
-    x: number;
-    y: number;
-}
+import { buildAxis, buildDot, buildLatex, buildNumber } from './KmvSetOperationsThreeShared';
 
 const NARRATION: Record<number, string> = {
     0: `On this page, we will compute a union using KMV sketches. Each sketch keeps only the K smallest hash values, and theta is inferred as the K-th value.`,
@@ -32,65 +28,13 @@ const NARRATION: Record<number, string> = {
 
 const { startTimes: NARRATION_START, durations: NARRATION_DUR } = calculateStepTimings(NARRATION, 1.0);
 
-const buildAxis = (start: Position, end: Position) => {
-    const randomId = Math.random().toString(36).substring(2, 15);
-    const axisLineId = `axis_line_${randomId}`;
-    const axisLine = axis(axisLineId, start, end, { ...axisStyle, dotCount: 0 });
-    return { axisLineId, axisLine, };
-};
-
-const buildDot = (start: Position, end: Position, value: number, sizeScale: number) => {
-    const randomId = Math.random().toString(36).substring(2, 15);
-    const radius = 10;
-    const lengthScale = end.x - start.x;
-    const x = start.x + value * lengthScale;
-    const y = start.y;
-    const dotId = `dot_${randomId}_${value}`;
-    const dot = circle(dotId, radius, { x, y }, circleStyle);
-
-    (dot.target as THREE.Mesh).scale.set(sizeScale, sizeScale, sizeScale);
-    return { dotId, dot };
-};
-
-const buildNumber = (start: Position, end: Position, value: number, size: number, index: number, scale: number) => {
-    const randomId = Math.random().toString(36).substring(2, 15);
-    const numberId = `number_${randomId}_${value}`;
-    const totalLength = end.x - start.x;
-    const x = start.x + index * (totalLength / (size - 1));
-    const y = start.y - 30;
-    const number = text(numberId, value.toFixed(2), { x, y }, { ...textStyle, fontSize: '16px' });
-    (number.target as THREE.Mesh).scale.set(scale, scale, scale);
-    return { numberId, number };
-};
-
-const buildLatex = (title: string, y: number, k: number, theta: number, estimated: number, scale: number) => {
+const buildKmvSummaryLatex = (title: string, y: number, k: number, theta: number, estimated: number, scale: number) => {
     const latexExpression = `\\begin{align*}
     \\text{ ${title} } \\quad | \\quad \\quad
     k = ${k}, \\quad \\theta = \\max(v_1,\\dots,v_k) = ${theta.toFixed(2)}, \\quad \\hat{N} = \\frac{k}{\\theta} - 1 = \\frac{${k}}{${theta.toFixed(2)}} - 1 = ${estimated.toFixed(2)}
     \\end{align*}
     `;
-    const randomId = Math.random().toString(36).substring(2, 15);
-    const latexId = `latex_${randomId}`;
-    const instance = latex(latexId, latexExpression, { x: 0, y: y + 30 }, { ...textStyle, fontSize: '14px' });
-    (instance.target as THREE.Mesh).scale.set(scale, scale, scale);
-    return { latexId, latex: instance };
-};
-
-const buildTimelineSteps = (
-    time: number,
-    axisLineId: string,
-    dotIds: string[],
-) => {
-    const steps: any[] = [];
-    const buildAndAddStep = (id: string) => {
-        steps.push(
-            at(time).animate(id, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 })
-        );
-    };
-
-    buildAndAddStep(axisLineId);
-    dotIds.forEach((dotId) => buildAndAddStep(dotId));
-    return steps;
+    return buildLatex(y, latexExpression, scale, '14px');
 };
 
 interface KmvUnionProps {
@@ -162,14 +106,14 @@ const Main = ({ sketchA, sketchB, union, k }: KmvUnionProps) => {
         const dotsA = sketchA.values.map((value) => buildDot({ x: startX, y: aY }, { x: endX, y: aY }, value, 1));
         const dotsA1 = sketchA.values.map((value) => buildDot({ x: startX, y: aY }, { x: endX, y: aY }, value, 1));
         const numbersA = sketchA.values.map((value, index) => buildNumber({ x: startX, y: aY }, { x: endX, y: aY }, value, sketchA.values.length, index, 1));
-        const latexA = buildLatex("Sketch A (KMV)", aY, k, sketchA.theta, sketchA.theta > 0 ? k / sketchA.theta - 1 : 0, 1);
+        const latexA = buildKmvSummaryLatex("Sketch A (KMV)", aY, k, sketchA.theta, sketchA.theta > 0 ? k / sketchA.theta - 1 : 0, 1);
 
         const bY = window.innerHeight / 12 - window.innerHeight;
         const axisB = buildAxis({ x: startX, y: bY }, { x: endX, y: bY });
         const dotsB = sketchB.values.map((value) => buildDot({ x: startX, y: bY }, { x: endX, y: bY }, value, 1));
         const dotsB1 = sketchB.values.map((value) => buildDot({ x: startX, y: bY }, { x: endX, y: bY }, value, 1));
         const numbersB = sketchB.values.map((value, index) => buildNumber({ x: startX, y: bY }, { x: endX, y: bY }, value, sketchB.values.length, index, 1));
-        const latexB = buildLatex("Sketch B (KMV)", bY, k, sketchB.theta, sketchB.theta > 0 ? k / sketchB.theta - 1 : 0, 1);
+        const latexB = buildKmvSummaryLatex("Sketch B (KMV)", bY, k, sketchB.theta, sketchB.theta > 0 ? k / sketchB.theta - 1 : 0, 1);
 
         const cY = -window.innerHeight / 12 - window.innerHeight;
         const axisC = buildAxis({ x: startX, y: cY }, { x: endX, y: cY });
@@ -177,7 +121,7 @@ const Main = ({ sketchA, sketchB, union, k }: KmvUnionProps) => {
         const numbersC = union.values.map((value, index) => buildNumber({ x: startX, y: cY }, { x: endX, y: cY }, value, union.values.length, index, 0));
         const numbersABUnion = sketchA.values.concat(sketchB.values).map((value, index) => buildNumber({ x: startX, y: cY }, { x: endX, y: cY }, value, sketchA.values.length + sketchB.values.length, index, 0));
         const numbersABUnionSorted = [...new Set(sketchA.values.concat(sketchB.values))].sort((a, b) => a - b).map((value, index) => buildNumber({ x: startX, y: cY }, { x: endX, y: cY }, value, sketchA.values.length + sketchB.values.length, index, 0));
-        const latexUnion = buildLatex("Union sketch (KMV)", cY, k, union.theta, union.theta > 0 ? k / union.theta - 1 : 0, 0);
+        const latexUnion = buildKmvSummaryLatex("Union sketch (KMV)", cY, k, union.theta, union.theta > 0 ? k / union.theta - 1 : 0, 0);
 
         const timelineScene: TimelineSceneThree = {
             objects: [
@@ -199,10 +143,13 @@ const Main = ({ sketchA, sketchB, union, k }: KmvUnionProps) => {
                 latexUnion.latex,
             ],
             timeline: [
-                ...buildTimelineSteps(
-                    NARRATION_START[1] ?? 1,
-                    axisA.axisLineId,
-                    dotsA.map((dot) => dot.dotId),
+                at(NARRATION_START[1] ?? 1).animate(axisA.axisLineId, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 }),
+                ...dotsA.map((dot) =>
+                    at(NARRATION_START[1] ?? 1).animate(
+                        dot.dotId,
+                        { position: { y: `+=${window.innerHeight}` } },
+                        { duration: 1 }
+                    )
                 ),
                 ...dotsA1.map((dot) =>
                     at(NARRATION_START[1] ?? 1).animate(
@@ -223,10 +170,13 @@ const Main = ({ sketchA, sketchB, union, k }: KmvUnionProps) => {
                     { position: { y: `+=${window.innerHeight}` } },
                     { duration: 1 }
                 ),
-                ...buildTimelineSteps(
-                    NARRATION_START[2] ?? 2,
-                    axisB.axisLineId,
-                    dotsB.map((dot) => dot.dotId),
+                at(NARRATION_START[2] ?? 2).animate(axisB.axisLineId, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 }),
+                ...dotsB.map((dot) =>
+                    at(NARRATION_START[2] ?? 2).animate(
+                        dot.dotId,
+                        { position: { y: `+=${window.innerHeight}` } },
+                        { duration: 1 }
+                    )
                 ),
                 ...dotsB1.map((dot) =>
                     at(NARRATION_START[2] ?? 2).animate(
@@ -247,10 +197,13 @@ const Main = ({ sketchA, sketchB, union, k }: KmvUnionProps) => {
                     { position: { y: `+=${window.innerHeight}` } },
                     { duration: 1 }
                 ),
-                ...buildTimelineSteps(
-                    NARRATION_START[3] ?? 3,
-                    axisC.axisLineId,
-                    dotsC.map((dot) => dot.dotId),
+                at(NARRATION_START[3] ?? 3).animate(axisC.axisLineId, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 }),
+                ...dotsC.map((dot) =>
+                    at(NARRATION_START[3] ?? 3).animate(
+                        dot.dotId,
+                        { position: { y: `+=${window.innerHeight}` } },
+                        { duration: 1 }
+                    )
                 ),
                 ...numbersC.map((number) =>
                     at(NARRATION_START[3] ?? 3).animate(
