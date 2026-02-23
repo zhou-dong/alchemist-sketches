@@ -32,7 +32,7 @@ export const THETA_SKETCH_STEPS: RoadmapStep[] = [
     },
     {
         id: 'kse',
-        title: 'k-th smallest estimation',
+        title: 'Kth smallest estimation',
         description: 'How the k-th smallest value relates to the total count. The key insight behind KMV.',
         duration: '~8 min',
         route: '/theta-sketch/kse',
@@ -45,11 +45,11 @@ export const THETA_SKETCH_STEPS: RoadmapStep[] = [
         route: '/theta-sketch/kmv',
     },
     {
-        id: 'set-operations',
-        title: 'Set operation',
+        id: 'kmv-set-ops',
+        title: 'KMV Set operations',
         description: 'Union, intersection, and difference. Combining sketches while preserving accuracy.',
         duration: '~8 min',
-        route: '/theta-sketch/set-operations',
+        route: '/theta-sketch/kmv-set-ops?op=union',
     },
     {
         id: 'theta-sketch-intro',

@@ -83,10 +83,6 @@ const Main = ({ sketchA, sketchB, difference, k }: KmvDifferenceProps) => {
 
     useSyncObelusTheme();
 
-    const goToSetOperations = React.useCallback(() => {
-        navigate('/theta-sketch/set-operations');
-    }, [navigate]);
-
     useOrthographicImmediateResize(renderer, camera as THREE.OrthographicCamera, {
         onResize: () => animationController?.renderAnimationOnce?.(),
     });

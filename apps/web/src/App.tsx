@@ -41,7 +41,7 @@ function App() {
               <Route path="/theta-sketch/kmv-union" element={<KmvUnionPage />} />
               <Route path="/theta-sketch/kmv-intersection" element={<KmvIntersectionPage />} />
               <Route path="/theta-sketch/kmv-difference" element={<KmvDifferencePage />} />
-              <Route path="/theta-sketch/kmv-set-operations" element={<KmvSetOperationsIndexPage />} />
+              <Route path="/theta-sketch/kmv-set-ops" element={<KmvSetOperationsIndexPage />} />
               <Route path="/theta-sketch/set-operations" element={<SetOperationsPage />} />
               <Route path="/theta-sketch/theta-sketch" element={<ThetaSketchPage />} />
               <Route path="/theta-sketch/theta-sketch/set-operations" element={<ThetaSketchSetOperationsPage />} />
