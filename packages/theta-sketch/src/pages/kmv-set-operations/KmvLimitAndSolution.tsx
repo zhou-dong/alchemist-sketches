@@ -33,7 +33,7 @@ export default function KmvSetOperationsSummaryPage() {
                     KMV Limit and Solution
                 </Typography>
                 <Typography variant="body1" color="text.secondary" sx={{ textAlign: 'center' }}>
-                    The limit of KMV intersection and difference is that the result cannot be used in further set operations because θ is not stored. Saving θ in the result fixes that and what we get is Theta Sketch.
+                    The limit of KMV intersection and difference operations is that the result cannot be used in further set operations because θ is not stored. Saving θ in the result fixes that and what we get is Theta Sketch.
                 </Typography>
             </Box>
 
