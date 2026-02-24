@@ -13,7 +13,8 @@ import TimelinePlayer from '@alchemist/theta-sketch/components/TimelinePlayer';
 import { clearScene, disposeDualSceneResources } from '@alchemist/theta-sketch/utils/threeUtils';
 import { calculateStepTimings } from '@alchemist/theta-sketch/utils/narration';
 import { useNavigate } from 'react-router-dom';
-import { buildAxis, buildDot, buildNumber, buildKmvInfoLatex } from './KmvSetOperationsThreeShared';
+import { buildAxis, buildDot, buildNumber, buildKmvInfoLatex } from './KmvSetOperationsSharedThree';
+import { KmvSetOperationHeader } from './KmvSetOperationsSharedComponents';
 
 const NARRATION: Record<number, string> = {
     0: `On this page, we will compute a union using KMV sketches. Each sketch keeps only the K smallest hash values, and theta is inferred as the K-th value.`,
@@ -324,33 +325,7 @@ const Main = ({ sketchA, sketchB, union, k }: KmvUnionProps) => {
 
     return (
         <>
-            <Box
-                sx={{
-                    position: 'fixed',
-                    top: window.innerHeight / 12,
-                    left: '50%',
-                    transform: 'translateX(-50%)',
-                    zIndex: 1000,
-                    width: { xs: '92%', md: 920 },
-                    pointerEvents: 'none',
-                }}
-            >
-                <Typography
-                    variant="h4"
-                    sx={{
-                        textAlign: 'center',
-                        fontWeight: 800,
-                        letterSpacing: -0.5,
-                        mb: 1,
-                    }}
-                >
-                    KMV Union
-                </Typography>
-                <Typography variant="body1" color="text.secondary" sx={{ textAlign: 'center' }}>
-                    KMV keeps only the K smallest hash values and infers θ from the K-th (max stored) value.
-                    Union will return exactly K values, so θ is recoverable and the result stays composable.
-                </Typography>
-            </Box>
+            <KmvSetOperationHeader title="KMV Union" description="KMV keeps only the K smallest hash values and infers θ from the K-th (max stored) value. Union will return exactly K values, so θ is recoverable and the result stays composable." />
 
             {/* Subtitle Display */}
             <Fade in={!!currentNarration}>
