@@ -6,25 +6,28 @@ import StepProgressIndicator from '../../components/StepProgressIndicator';
 import KmvUnion from './KmvUnion';
 import KmvIntersection from './KmvIntersection';
 import KmvDifference from './KmvDifference';
+import KmvSetOperationsIntroPage from './KmvSetOperationsIntro';
 
+import AutoStoriesIcon from '@mui/icons-material/AutoStories';
 import JoinFullIcon from '@mui/icons-material/JoinFull';
 import JoinInnerIcon from '@mui/icons-material/JoinInner';
 import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
 import LightbulbIcon from '@mui/icons-material/Lightbulb';
 import KmvLimitAndSolution from './KmvLimitAndSolution';
 
-type Op = 'union' | 'intersection' | 'difference' | 'limit-and-solution';
+type Op = 'intro' | 'union' | 'intersection' | 'difference' | 'takeaway-theta';
 
 const OPS: { id: Op; label: string; Icon: ElementType }[] = [
+    { id: 'intro', label: 'Intro', Icon: AutoStoriesIcon },
     { id: 'union', label: 'Union', Icon: JoinFullIcon },
     { id: 'intersection', label: 'Intersection', Icon: JoinInnerIcon },
     { id: 'difference', label: 'Difference', Icon: RemoveCircleOutlineIcon },
-    { id: 'limit-and-solution', label: 'θ Solution', Icon: LightbulbIcon },
+    { id: 'takeaway-theta', label: 'Takeaway: θ', Icon: LightbulbIcon },
 ];
 
 function getOp(value: string | null): Op {
-    if (value === 'intersection' || value === 'difference' || value === 'union' || value === 'limit-and-solution') return value;
-    return 'union';
+    if (value === 'intro' || value === 'intersection' || value === 'difference' || value === 'union') return value;
+    return 'intro';
 }
 
 export default function KmvSetOperationsIndexPage() {
@@ -96,10 +99,11 @@ export default function KmvSetOperationsIndexPage() {
             </Box>
 
             {/* Render exactly one animated page at a time */}
+            {op === 'intro' && <KmvSetOperationsIntroPage />}
             {op === 'union' && <KmvUnion />}
             {op === 'intersection' && <KmvIntersection />}
             {op === 'difference' && <KmvDifference />}
-            {op === 'limit-and-solution' && <KmvLimitAndSolution />}
+            {op === 'takeaway-theta' && <KmvLimitAndSolution />}
         </>
     );
 }
