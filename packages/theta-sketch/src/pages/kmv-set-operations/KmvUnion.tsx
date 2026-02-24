@@ -347,7 +347,8 @@ const Main = ({ sketchA, sketchB, union, k }: KmvUnionProps) => {
                     KMV Union
                 </Typography>
                 <Typography variant="body1" color="text.secondary" sx={{ textAlign: 'center' }}>
-                    KMV stores only the K smallest hash values; θ is inferred as the K-th value.
+                    KMV keeps only the K smallest hash values and infers θ from the K-th (max stored) value.
+                    Union will return exactly K values, so θ is recoverable and the result stays composable.
                 </Typography>
             </Box>
 
