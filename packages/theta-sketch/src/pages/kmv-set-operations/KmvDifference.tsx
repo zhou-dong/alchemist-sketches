@@ -1,6 +1,6 @@
 import React from 'react';
-import { type TimelineSceneThree, render, axis, circle, latex } from 'obelus-three-render';
-import { axisStyle, circleStyle, textStyle, useSyncObelusTheme } from '@alchemist/theta-sketch/theme/obelusTheme';
+import { type TimelineSceneThree, render } from 'obelus-three-render';
+import { useSyncObelusTheme } from '@alchemist/theta-sketch/theme/obelusTheme';
 import { useDualThreeStage } from '@alchemist/theta-sketch/hooks/useDualThreeStage';
 import { buildAnimateTimeline } from 'obelus-gsap-animator';
 import { useSetOperationsDemoData } from './SetOperationsDemoShared';
@@ -14,11 +14,8 @@ import { clearScene, disposeDualSceneResources } from '@alchemist/theta-sketch/u
 import { calculateStepTimings } from '@alchemist/theta-sketch/utils/narration';
 import { NewThetaLimitNote } from './SetOperationsDemoShared';
 import { useNavigate } from 'react-router-dom';
-
-interface Position {
-    x: number;
-    y: number;
-}
+import { buildAxis, buildDot, buildLatex } from './KmvSetOperationsSharedThree';
+import { KmvSetOperationHeader } from './KmvSetOperationsSharedComponents';
 
 const NARRATION: Record<number, string> = {
     0: `On this page, we will compute a difference using KMV sketches. Difference also needs a shared threshold theta, which is the minimum of the two sketch thetas.`,
@@ -30,43 +27,6 @@ const NARRATION: Record<number, string> = {
 };
 
 const { startTimes: NARRATION_START, durations: NARRATION_DUR } = calculateStepTimings(NARRATION, 1.0);
-
-const buildAxis = (start: Position, end: Position) => {
-    const randomId = Math.random().toString(36).substring(2, 15);
-    const axisLineId = `axis_line_${randomId}`;
-    const axisLine = axis(axisLineId, start, end, { ...axisStyle, dotCount: 0 });
-    return { axisLineId, axisLine };
-};
-
-const buildDot = (start: Position, end: Position, value: number, sizeScale: number) => {
-    const randomId = Math.random().toString(36).substring(2, 15);
-    const radius = 10;
-    const lengthScale = end.x - start.x;
-    const x = start.x + value * lengthScale;
-    const y = start.y;
-    const dotId = `dot_${randomId}_${value}`;
-    const dot = circle(dotId, radius, { x, y }, circleStyle);
-    (dot.target as THREE.Mesh).scale.set(sizeScale, sizeScale, sizeScale);
-    return { dotId, dot, value };
-};
-
-const buildLatex = (y: number, latexExpression: string, scale: number) => {
-    const randomId = Math.random().toString(36).substring(2, 15);
-    const latexId = `latex_${randomId}`;
-    const instance = latex(latexId, latexExpression, { x: 0, y: y + 30 }, { ...textStyle, fontSize: '18px' });
-    (instance.target as THREE.Mesh).scale.set(scale, scale, scale);
-    return { latexId, latex: instance };
-};
-
-const buildTimelineSteps = (time: number, axisLineId: string, dotIds: string[]) => {
-    const steps: any[] = [];
-    const buildAndAddStep = (id: string) => {
-        steps.push(at(time).animate(id, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 }));
-    };
-    buildAndAddStep(axisLineId);
-    dotIds.forEach((dotId) => buildAndAddStep(dotId));
-    return steps;
-};
 
 interface KmvDifferenceProps {
     sketchA: { values: number[]; theta: number };
@@ -191,15 +151,18 @@ const Main = ({ sketchA, sketchB, difference, k }: KmvDifferenceProps) => {
                 latexLimit.latex,
             ],
             timeline: [
-                ...buildTimelineSteps(NARRATION_START[1] ?? 1, axisA.axisLineId, dotsA.map((d) => d.dotId)),
+                at(NARRATION_START[1] ?? 1).animate(axisA.axisLineId, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 }),
+                ...dotsA.map((d) => at(NARRATION_START[1] ?? 1).animate(d.dotId, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 })),
                 ...dotsA1.map((d) => at(NARRATION_START[1] ?? 1).animate(d.dotId, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 })),
                 at(NARRATION_START[1] ?? 1).animate(latexA.latexId, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 }),
 
-                ...buildTimelineSteps(NARRATION_START[2] ?? 2, axisB.axisLineId, dotsB.map((d) => d.dotId)),
+                at(NARRATION_START[2] ?? 2).animate(axisB.axisLineId, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 }),
+                ...dotsB.map((d) => at(NARRATION_START[2] ?? 2).animate(d.dotId, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 })),
                 ...dotsB1.map((d) => at(NARRATION_START[2] ?? 2).animate(d.dotId, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 })),
                 at(NARRATION_START[2] ?? 2).animate(latexB.latexId, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 }),
 
-                ...buildTimelineSteps(NARRATION_START[3] ?? 3, axisC.axisLineId, dotsC.map((d) => d.dotId)),
+                at(NARRATION_START[3] ?? 3).animate(axisC.axisLineId, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 }),
+                ...dotsC.map((d) => at(NARRATION_START[3] ?? 3).animate(d.dotId, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 })),
                 at(NARRATION_START[3] ?? 3).animate(latexD.latexId, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 }),
 
                 // Step 3: apply common theta cutoff
@@ -262,34 +225,14 @@ const Main = ({ sketchA, sketchB, difference, k }: KmvDifferenceProps) => {
         };
     }, [animationController, difference.estimated, difference.theta, difference.values, k, scene, sketchA.theta, sketchA.values, sketchB.theta, sketchB.values]);
 
+    const headerDescription = `
+    Same as intersection, difference estimation works, but composition breaks: the operation uses shared θ = min(θ_A, θ_B), while the result may have fewer than K values, so inferred θ from the new sketch may not equal the operation θ.
+    The fix is to store θ explicitly in the result; once we store values plus θ, it is no longer plain KMV, but a Theta Sketch.
+    `;
+
     return (
         <>
-            <Box
-                sx={{
-                    position: 'fixed',
-                    top: window.innerHeight / 12,
-                    left: '50%',
-                    transform: 'translateX(-50%)',
-                    zIndex: 1000,
-                    width: { xs: '92%', md: 920 },
-                    pointerEvents: 'none',
-                }}
-            >
-                <Typography
-                    variant="h4"
-                    sx={{
-                        textAlign: 'center',
-                        fontWeight: 800,
-                        letterSpacing: -0.5,
-                        mb: 1,
-                    }}
-                >
-                    KMV Difference
-                </Typography>
-                <Typography variant="body1" color="text.secondary" sx={{ textAlign: 'center' }}>
-                    Difference uses a shared θ = min(θ_A, θ_B). Like intersection, the result cannot stay KMV for chaining.
-                </Typography>
-            </Box>
+            <KmvSetOperationHeader title="KMV Difference" description={headerDescription} />
 
             <Fade in={!!currentNarration}>
                 <Box
