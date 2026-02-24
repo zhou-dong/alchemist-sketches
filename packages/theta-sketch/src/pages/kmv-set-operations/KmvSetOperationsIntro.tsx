@@ -1,105 +1,222 @@
+import React from 'react';
+import gsap from 'gsap';
 import { useNavigate } from 'react-router-dom';
-import { Box, Button, Container, Paper, Stack, Typography, alpha } from '@mui/material';
+import { Box, Container, Fade, Paper, Stack, Typography } from '@mui/material';
+import { slideUp, useSpeech } from '@alchemist/shared';
+import TimelinePlayer from '@alchemist/theta-sketch/components/TimelinePlayer';
+import { calculateStepTimings } from '@alchemist/theta-sketch/utils/narration';
 
 import StepProgressIndicator from '../../components/StepProgressIndicator';
 
+const NARRATION: Record<number, string> = {
+    0: 'This page introduces KMV set operations and explains why Theta Sketch is needed.',
+    1: 'Union is composable in KMV because the result still keeps K values, so theta can be recovered from the maximum stored value.',
+    2: 'Intersection estimation works, but it uses shared theta equal to min of theta A and theta B. The result may have fewer than K values, so inferred theta from the result may not match the operation theta.',
+    3: 'Difference has the same issue as intersection: estimation works, but the result is not safely composable for further set operations.',
+    4: 'The fix is to store theta explicitly with the retained values. That is exactly Theta Sketch: KMV values plus stored theta.',
+};
+
+const { startTimes: NARRATION_START, durations: NARRATION_DUR } = calculateStepTimings(NARRATION, 1.0);
+
 export default function KmvSetOperationsIntroPage() {
     const navigate = useNavigate();
+    const { speak, stop, pause, resume } = useSpeech({ rate: 1.0 });
+    const [timeline, setTimeline] = React.useState<gsap.core.Timeline | null>(null);
+    const [uiStep, setUiStep] = React.useState(0);
+    const [currentNarration, setCurrentNarration] = React.useState('');
+    const isMutedRef = React.useRef(false);
+
+    React.useEffect(() => {
+        const tl = gsap.timeline({ paused: true });
+        const stepIds = Object.keys(NARRATION)
+            .map((k) => Number(k))
+            .sort((a, b) => a - b);
+
+        stepIds.forEach((step) => {
+            const atTime = NARRATION_START[step] ?? 0;
+            const duration = NARRATION_DUR[step] ?? 0.8;
+
+            tl.call(() => {
+                const text = NARRATION[step] ?? '';
+                setUiStep(step);
+                setCurrentNarration(text);
+                if (!isMutedRef.current && text) speak(text);
+            }, undefined, atTime);
+
+            // Keep a segment for player progress/scrubbing.
+            tl.to({}, { duration }, atTime);
+        });
+
+        setTimeline(tl);
+        return () => {
+            tl.kill();
+            stop();
+        };
+    }, [speak, stop]);
 
     return (
         <>
             <StepProgressIndicator currentStepId="set-operations" />
 
-            <Container maxWidth="md" sx={{ py: 4, pb: 12 }}>
+            <Container maxWidth="md" sx={{ py: 4, pb: 4 }}>
                 <Stack spacing={2.5}>
-                    <Typography variant="h4" sx={{ fontWeight: 800, letterSpacing: -0.4 }}>
-                        KMV Set Operations: Intro
+                    <Typography variant="h4" sx={{ fontWeight: 800, letterSpacing: -0.4, textAlign: 'center' }}>
+                        KMV Set Operations
                     </Typography>
-                    <Typography variant="body1" color="text.secondary" sx={{ lineHeight: 1.8 }}>
+                    <Typography variant="body1" color="text.secondary" sx={{ lineHeight: 1.8, textAlign: 'center' }}>
                         KMV supports union, intersection, and difference estimation. But composability is different across these operations.
                     </Typography>
 
-                    <Paper
-                        variant="outlined"
+                    <Box
                         sx={{
-                            p: 2.5,
-                            borderColor: alpha('#4caf50', 0.35),
-                            background: alpha('#4caf50', 0.06),
+                            opacity: uiStep >= 1 ? 1 : 0,
+                            visibility: uiStep >= 1 ? 'visible' : 'hidden',
+                            transition: 'opacity 450ms ease',
+                            pointerEvents: uiStep >= 1 ? 'auto' : 'none',
                         }}
                     >
-                        <Typography variant="subtitle1" sx={{ fontWeight: 900, mb: 1 }}>
-                            Union (A ∪ B): composable in KMV
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.8 }}>
-                            After merge + dedupe + keep K smallest values, the union result is still a valid KMV sketch. The threshold can be inferred from
-                            the new sketch as max(values), so further set operations remain safe.
-                        </Typography>
-                    </Paper>
+                        <Paper
+                            variant="outlined"
+                            sx={{
+                                p: 2.5,
+                                background: "transparent",
+                            }}
+                        >
+                            <Typography variant="subtitle1" sx={{ fontWeight: 900, mb: 1 }}>
+                                Union (A ∪ B): composable in KMV
+                            </Typography>
+                            <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.8 }}>
+                                After merge + dedupe + keep K smallest values, the union result is still a valid KMV sketch. The threshold can be inferred from
+                                the new sketch as max(values), so further set operations remain safe.
+                            </Typography>
+                        </Paper>
+                    </Box>
 
-                    <Paper
-                        variant="outlined"
+                    <Box
                         sx={{
-                            p: 2.5,
-                            borderColor: alpha('#ff9800', 0.35),
-                            background: alpha('#ff9800', 0.06),
+                            opacity: uiStep >= 2 ? 1 : 0,
+                            visibility: uiStep >= 2 ? 'visible' : 'hidden',
+                            transition: 'opacity 450ms ease',
+                            pointerEvents: uiStep >= 2 ? 'auto' : 'none',
                         }}
                     >
-                        <Typography variant="subtitle1" sx={{ fontWeight: 900, mb: 1 }}>
-                            Intersection (A ∩ B): estimate works, result is not composable
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.8 }}>
-                            Intersection uses a shared threshold θ = min(θ_A, θ_B). The resulting sketch can contain fewer than K values, so inferring θ from
-                            that new sketch does not necessarily recover the θ used by the operation.
-                        </Typography>
-                    </Paper>
+                        <Paper
+                            variant="outlined"
+                            sx={{
+                                p: 2.5,
+                                background: "transparent",
+                            }}
+                        >
+                            <Typography variant="subtitle1" sx={{ fontWeight: 900, mb: 1 }}>
+                                Intersection (A ∩ B): estimation works, result is not composable
+                            </Typography>
+                            <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.8 }}>
+                                Intersection uses a shared threshold θ = min(θ_A, θ_B). The resulting sketch might contain fewer than K values, so inferring θ from
+                                that new sketch might not recover the θ used by the operation, so the result is not composable.
+                                The fix is to store θ explicitly in the result; once we store values plus θ, it is no longer plain KMV, but a <strong>Theta Sketch</strong>.
+                            </Typography>
+                        </Paper>
+                    </Box>
 
-                    <Paper
-                        variant="outlined"
+                    <Box
                         sx={{
-                            p: 2.5,
-                            borderColor: alpha('#ff9800', 0.35),
-                            background: alpha('#ff9800', 0.06),
+                            opacity: uiStep >= 3 ? 1 : 0,
+                            visibility: uiStep >= 3 ? 'visible' : 'hidden',
+                            transition: 'opacity 450ms ease',
+                            pointerEvents: uiStep >= 3 ? 'auto' : 'none',
                         }}
                     >
-                        <Typography variant="subtitle1" sx={{ fontWeight: 900, mb: 1 }}>
-                            Difference (A ∖ B): same limitation as intersection
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.8 }}>
-                            Difference also depends on shared θ = min(θ_A, θ_B). The new sketch may have fewer than K values, so inferred θ from the result is
-                            not guaranteed to be the original operation θ. That breaks safe chaining for further set operations.
-                        </Typography>
-                    </Paper>
+                        <Paper
+                            variant="outlined"
+                            sx={{
+                                p: 2.5,
+                                background: "transparent",
+                            }}
+                        >
+                            <Typography variant="subtitle1" sx={{ fontWeight: 900, mb: 1 }}>
+                                Difference (A ∖ B): estimation works, but same limitation as intersection
+                            </Typography>
+                            <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.8 }}>
+                                Same as intersection, difference uses shared θ = min(θ_A, θ_B). The new sketch might have fewer than K values, so inferred θ from the result is
+                                not guaranteed to be the original operation θ. That breaks safe chaining for further set operations.
+                                The fix is to store θ explicitly in the result; once we store values plus θ, it is no longer plain KMV, but a <strong>Theta Sketch</strong>.
+                            </Typography>
+                        </Paper>
+                    </Box>
 
-                    <Paper
-                        variant="outlined"
+                    <Box
                         sx={{
-                            p: 2.5,
-                            borderColor: alpha('#9c27b0', 0.35),
-                            background: alpha('#9c27b0', 0.06),
-                            borderLeft: `4px solid ${alpha('#9c27b0', 0.75)}`,
+                            opacity: uiStep >= 4 ? 1 : 0,
+                            visibility: uiStep >= 4 ? 'visible' : 'hidden',
+                            transition: 'opacity 450ms ease',
+                            pointerEvents: uiStep >= 4 ? 'auto' : 'none',
                         }}
                     >
-                        <Typography variant="subtitle1" sx={{ fontWeight: 900, mb: 1 }}>
-                            Why Theta Sketch
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.8 }}>
-                            To make intersection and difference composable, we must store θ explicitly in the sketch. That leads to Theta Sketch:
-                            <br />
-                            <strong>Theta Sketch = KMV values + stored θ</strong>.
-                        </Typography>
-                    </Paper>
-
-                    <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap', pt: 0.5 }}>
-                        <Button variant="contained" onClick={() => navigate('/theta-sketch/kmv-set-ops?op=union')}>
-                            Start with Union Demo
-                        </Button>
-                        <Button variant="outlined" onClick={() => navigate('/theta-sketch/theta-sketch')}>
-                            Continue: Theta Sketch
-                        </Button>
+                        <Paper
+                            variant="outlined"
+                            sx={{
+                                p: 2.5,
+                                background: "transparent",
+                            }}
+                        >
+                            <Typography variant="subtitle1" sx={{ fontWeight: 900, mb: 1 }}>
+                                Why Theta Sketch
+                            </Typography>
+                            <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.8 }}>
+                                To make intersection and difference composable, we must store θ explicitly in the sketch. That leads to Theta Sketch:
+                                <br />
+                                <strong>Theta Sketch = KMV values + stored θ</strong>.
+                            </Typography>
+                        </Paper>
                     </Box>
                 </Stack>
+            </Container>
+
+            <Fade in={!!currentNarration}>
+                <Box
+                    sx={{
+                        width: '100%',
+                        maxWidth: { xs: '92vw', md: 900 },
+                        mx: 'auto',
+                        background: "transparent",
+                        textAlign: 'center',
+                        border: "none",
+                        pointerEvents: 'none',
+                    }}
+                >
+                    <Typography variant="body2" sx={{ color: 'text.primary', px: 3, py: 0 }}>
+                        {currentNarration}
+                    </Typography>
+                </Box>
+            </Fade>
+
+            <Container
+                maxWidth="sm"
+                sx={{
+                    animation: `${slideUp} 1s ease-out 0.25s both`,
+                }}
+            >
+                {timeline && (
+                    <TimelinePlayer
+                        timeline={timeline}
+                        showNextButton={true}
+                        onNext={() => {
+                            navigate('/theta-sketch/kmv-set-ops?op=union');
+                        }}
+                        nextButtonTooltip="Go to KMV Union"
+                        enableNextButton={true}
+                        onStart={() => {
+                            if (!isMutedRef.current) resume();
+                        }}
+                        onPause={() => {
+                            pause();
+                        }}
+                        onComplete={() => {
+                            stop();
+                        }}
+                    />
+                )}
             </Container>
         </>
     );
 }
-
