@@ -64,7 +64,7 @@ export default function KmvSetOperationsIntroPage() {
                         KMV Set Operations
                     </Typography>
                     <Typography variant="body1" color="text.secondary" sx={{ lineHeight: 1.8, textAlign: 'center' }}>
-                        KMV supports union, intersection, and difference estimation. But composability is different across these operations.
+                        KMV supports union, intersection, and difference estimation. But it does not store θ in its result, so the result might not be used in further set operations.
                     </Typography>
 
                     <Box
@@ -113,7 +113,6 @@ export default function KmvSetOperationsIntroPage() {
                             <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.8 }}>
                                 Intersection uses a shared threshold θ = min(θ_A, θ_B). The resulting sketch might contain fewer than K values, so inferring θ from
                                 that new sketch might not recover the θ used by the operation, so the result is not composable.
-                                The fix is to store θ explicitly in the result; once we store values plus θ, it is no longer plain KMV, but a <strong>Theta Sketch</strong>.
                             </Typography>
                         </Paper>
                     </Box>
@@ -139,33 +138,6 @@ export default function KmvSetOperationsIntroPage() {
                             <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.8 }}>
                                 Same as intersection, difference uses shared θ = min(θ_A, θ_B). The new sketch might have fewer than K values, so inferred θ from the result is
                                 not guaranteed to be the original operation θ. That breaks safe chaining for further set operations.
-                                The fix is to store θ explicitly in the result; once we store values plus θ, it is no longer plain KMV, but a <strong>Theta Sketch</strong>.
-                            </Typography>
-                        </Paper>
-                    </Box>
-
-                    <Box
-                        sx={{
-                            opacity: uiStep >= 4 ? 1 : 0,
-                            visibility: uiStep >= 4 ? 'visible' : 'hidden',
-                            transition: 'opacity 450ms ease',
-                            pointerEvents: uiStep >= 4 ? 'auto' : 'none',
-                        }}
-                    >
-                        <Paper
-                            variant="outlined"
-                            sx={{
-                                p: 2.5,
-                                background: "transparent",
-                            }}
-                        >
-                            <Typography variant="subtitle1" sx={{ fontWeight: 900, mb: 1 }}>
-                                Why Theta Sketch
-                            </Typography>
-                            <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.8 }}>
-                                To make intersection and difference composable, we must store θ explicitly in the sketch. That leads to Theta Sketch:
-                                <br />
-                                <strong>Theta Sketch = KMV values + stored θ</strong>.
                             </Typography>
                         </Paper>
                     </Box>
@@ -175,12 +147,13 @@ export default function KmvSetOperationsIntroPage() {
             <Fade in={!!currentNarration}>
                 <Box
                     sx={{
-                        width: '100%',
-                        maxWidth: { xs: '92vw', md: 900 },
-                        mx: 'auto',
-                        background: "transparent",
+                        position: 'fixed',
+                        bottom: window.innerHeight / 12 + 140,
+                        left: '50%',
+                        transform: 'translateX(-50%)',
+                        width: 'min(900px, calc(100vw - 32px))',
+                        zIndex: 1001,
                         textAlign: 'center',
-                        border: "none",
                         pointerEvents: 'none',
                     }}
                 >
@@ -193,6 +166,11 @@ export default function KmvSetOperationsIntroPage() {
             <Container
                 maxWidth="sm"
                 sx={{
+                    position: 'fixed',
+                    bottom: window.innerHeight / 12,
+                    left: 0,
+                    right: 0,
+                    zIndex: 1000,
                     animation: `${slideUp} 1s ease-out 0.25s both`,
                 }}
             >
