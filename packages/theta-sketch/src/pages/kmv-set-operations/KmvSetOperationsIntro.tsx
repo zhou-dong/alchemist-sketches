@@ -9,12 +9,16 @@ import { calculateStepTimings } from '@alchemist/theta-sketch/utils/narration';
 import StepProgressIndicator from '../../components/StepProgressIndicator';
 import { KmvSetOperationHeader } from './KmvSetOperationsSharedComponents';
 
+const DESCRIPTION = `
+KMV supports union, intersection, and difference estimation. But it does not store θ in its result, so the result might not be used in further set operations.
+`;
+
 const NARRATION: Record<number, string> = {
-    0: 'This page introduces KMV set operations and explains why Theta Sketch is needed.',
+    0: 'This page introduces KMV set operations.' + DESCRIPTION,
     1: 'Union is composable in KMV because the result still keeps K values, so theta can be recovered from the maximum stored value.',
     2: 'Intersection estimation works, but it uses shared theta equal to min of theta A and theta B. The result may have fewer than K values, so inferred theta from the result may not match the operation theta.',
     3: 'Difference has the same issue as intersection: estimation works, but the result is not safely composable for further set operations.',
-    4: 'The fix is to store theta explicitly with the retained values. That is exactly Theta Sketch: KMV values plus stored theta.',
+    4: `Click next to see how KMV handles each set operation.`,
 };
 
 const { startTimes: NARRATION_START, durations: NARRATION_DUR } = calculateStepTimings(NARRATION, 1.0);
@@ -55,9 +59,6 @@ export default function KmvSetOperationsIntroPage() {
         };
     }, [speak, stop]);
 
-    const DESCRIPTION = `
-        KMV supports union, intersection, and difference estimation. But it does not store θ in its result, so the result might not be used in further set operations.
-    `;
 
     return (
         <>
@@ -92,7 +93,10 @@ export default function KmvSetOperationsIntroPage() {
                         sx={{
                             opacity: uiStep >= 1 ? 1 : 0,
                             visibility: uiStep >= 1 ? 'visible' : 'hidden',
-                            transition: 'opacity 450ms ease',
+                            transform: uiStep >= 1 ? 'translateY(0px) scale(1)' : 'translateY(16px) scale(0.985)',
+                            filter: uiStep >= 1 ? 'blur(0px)' : 'blur(3px)',
+                            transition: 'opacity 520ms cubic-bezier(0.22, 1, 0.36, 1), transform 520ms cubic-bezier(0.22, 1, 0.36, 1), filter 520ms ease',
+                            willChange: 'opacity, transform, filter',
                             pointerEvents: uiStep >= 1 ? 'auto' : 'none',
                         }}
                     >
@@ -117,7 +121,10 @@ export default function KmvSetOperationsIntroPage() {
                         sx={{
                             opacity: uiStep >= 2 ? 1 : 0,
                             visibility: uiStep >= 2 ? 'visible' : 'hidden',
-                            transition: 'opacity 450ms ease',
+                            transform: uiStep >= 2 ? 'translateY(0px) scale(1)' : 'translateY(16px) scale(0.985)',
+                            filter: uiStep >= 2 ? 'blur(0px)' : 'blur(3px)',
+                            transition: 'opacity 520ms cubic-bezier(0.22, 1, 0.36, 1), transform 520ms cubic-bezier(0.22, 1, 0.36, 1), filter 520ms ease',
+                            willChange: 'opacity, transform, filter',
                             pointerEvents: uiStep >= 2 ? 'auto' : 'none',
                         }}
                     >
@@ -129,7 +136,7 @@ export default function KmvSetOperationsIntroPage() {
                             }}
                         >
                             <Typography variant="subtitle1" sx={{ fontWeight: 900, mb: 1 }}>
-                                Intersection (A ∩ B): estimation works, result is not composable
+                                Intersection (A ∩ B): estimation works, but the result might not be composable for further set operations
                             </Typography>
                             <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.8 }}>
                                 Intersection uses a shared threshold θ = min(θ_A, θ_B). The resulting sketch might contain fewer than K values, so inferring θ from
@@ -142,7 +149,10 @@ export default function KmvSetOperationsIntroPage() {
                         sx={{
                             opacity: uiStep >= 3 ? 1 : 0,
                             visibility: uiStep >= 3 ? 'visible' : 'hidden',
-                            transition: 'opacity 450ms ease',
+                            transform: uiStep >= 3 ? 'translateY(0px) scale(1)' : 'translateY(16px) scale(0.985)',
+                            filter: uiStep >= 3 ? 'blur(0px)' : 'blur(3px)',
+                            transition: 'opacity 520ms cubic-bezier(0.22, 1, 0.36, 1), transform 520ms cubic-bezier(0.22, 1, 0.36, 1), filter 520ms ease',
+                            willChange: 'opacity, transform, filter',
                             pointerEvents: uiStep >= 3 ? 'auto' : 'none',
                         }}
                     >
@@ -154,7 +164,7 @@ export default function KmvSetOperationsIntroPage() {
                             }}
                         >
                             <Typography variant="subtitle1" sx={{ fontWeight: 900, mb: 1 }}>
-                                Difference (A ∖ B): estimation works, but same limitation as intersection
+                                Difference (A ∖ B): estimation works, but the same limitation as intersection
                             </Typography>
                             <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.8 }}>
                                 Same as intersection, difference uses shared θ = min(θ_A, θ_B). The new sketch might have fewer than K values, so inferred θ from the result is
