@@ -7,23 +7,41 @@ import { useSetOperationsDemoData } from './SetOperationsDemoShared';
 import { useOrthographicImmediateResize } from '@alchemist/theta-sketch/hooks/useOrthographicResize';
 import * as THREE from 'three';
 import { at } from 'obelus';
-import { alpha, Box, Container, Fade, Paper, Stack, Typography } from '@mui/material';
+import { Box, Container, Fade, Typography } from '@mui/material';
 import { slideUp, useSpeech } from '@alchemist/shared';
 import TimelinePlayer from '@alchemist/theta-sketch/components/TimelinePlayer';
 import { clearScene, disposeDualSceneResources } from '@alchemist/theta-sketch/utils/threeUtils';
 import { calculateStepTimings } from '@alchemist/theta-sketch/utils/narration';
-import { NewThetaLimitNote } from './SetOperationsDemoShared';
 import { useNavigate } from 'react-router-dom';
 import { buildAxis, buildDot, buildLatex } from './KmvSetOperationsSharedThree';
 import { KmvSetOperationHeader } from './KmvSetOperationsSharedComponents';
 
+const OPENING_DESCRIPTION = `
+  Difference estimation works, but composition breaks: the operation uses shared θ = min(θ_A, θ_B), while the result may have fewer than K values, so inferred θ from the new sketch may not equal the operation θ.
+  The fix is to store θ explicitly in the result; once we store values plus θ, it is no longer plain KMV, but a Theta Sketch.
+`;
+
+const OPENING_NARRATION_0 = `
+  Difference estimation works, but composition breaks.
+  In difference, theta is not inferred from result values; it is the shared threshold min(theta A, theta B).
+  The difference result may have fewer than K values,
+`;
+
+const OPENING_NARRATION_1 = `
+  so inferred theta from the new sketch may not match the operation theta.
+  To support further set operations, we must store theta explicitly in the result, which leads to Theta Sketch.
+  let's see how it works.
+`;
+
 const NARRATION: Record<number, string> = {
-    0: `On this page, we will compute a difference using KMV sketches. Difference also needs a shared threshold theta, which is the minimum of the two sketch thetas.`,
-    1: `This is Sketch A. It contains the K smallest hash values from stream A.`,
-    2: `This is Sketch B. It contains the K smallest hash values from stream B.`,
-    3: `To compute difference, we set a common theta as min(theta A, theta B), and keep only values below that theta in each sketch.`,
-    4: `The difference result contains values that are in A but not in B, below the common theta. The estimate is the count divided by theta.`,
-    5: `This is the KMV limit again. The difference result often has fewer than K values, so the correct theta is not recoverable from the values alone. Saving theta leads to Theta Sketch.`,
+    0: OPENING_NARRATION_0,
+    1: OPENING_NARRATION_1,
+    2: `This is Sketch A, which keeps the K smallest hash values from stream A.`,
+    3: `This is Sketch B, which keeps the K smallest hash values from stream B.`,
+    4: `To compute difference, we set a common theta as min(theta A, theta B), and keep only values below that theta in each sketch.`,
+    5: `Then we keep values that are in Sketch A but not in Sketch B.`,
+    6: `Again, for difference, theta is not inferred from result values; it is min(theta A, theta B).`,
+    7: `Without storing theta explicitly, a difference result is not composable for further set operations. Storing theta leads to Theta Sketch.`,
 };
 
 const { startTimes: NARRATION_START, durations: NARRATION_DUR } = calculateStepTimings(NARRATION, 1.0);
@@ -39,7 +57,6 @@ const Main = ({ sketchA, sketchB, difference, k }: KmvDifferenceProps) => {
     const navigate = useNavigate();
     const { animationController, containerRef, scene, renderer, camera } = useDualThreeStage();
     const { speak, stop, pause, resume } = useSpeech({ rate: 1.0 });
-    const commonTheta = Math.min(sketchA.theta, sketchB.theta);
 
     useSyncObelusTheme();
 
@@ -151,30 +168,30 @@ const Main = ({ sketchA, sketchB, difference, k }: KmvDifferenceProps) => {
                 latexLimit.latex,
             ],
             timeline: [
-                at(NARRATION_START[1] ?? 1).animate(axisA.axisLineId, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 }),
-                ...dotsA.map((d) => at(NARRATION_START[1] ?? 1).animate(d.dotId, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 })),
-                ...dotsA1.map((d) => at(NARRATION_START[1] ?? 1).animate(d.dotId, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 })),
-                at(NARRATION_START[1] ?? 1).animate(latexA.latexId, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 }),
+                at(NARRATION_START[2] ?? 2).animate(axisA.axisLineId, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 }),
+                ...dotsA.map((d) => at(NARRATION_START[2] ?? 2).animate(d.dotId, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 })),
+                ...dotsA1.map((d) => at(NARRATION_START[2] ?? 2).animate(d.dotId, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 })),
+                at(NARRATION_START[2] ?? 2).animate(latexA.latexId, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 }),
 
-                at(NARRATION_START[2] ?? 2).animate(axisB.axisLineId, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 }),
-                ...dotsB.map((d) => at(NARRATION_START[2] ?? 2).animate(d.dotId, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 })),
-                ...dotsB1.map((d) => at(NARRATION_START[2] ?? 2).animate(d.dotId, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 })),
-                at(NARRATION_START[2] ?? 2).animate(latexB.latexId, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 }),
+                at(NARRATION_START[3] ?? 3).animate(axisB.axisLineId, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 }),
+                ...dotsB.map((d) => at(NARRATION_START[3] ?? 3).animate(d.dotId, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 })),
+                ...dotsB1.map((d) => at(NARRATION_START[3] ?? 3).animate(d.dotId, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 })),
+                at(NARRATION_START[3] ?? 3).animate(latexB.latexId, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 }),
 
-                at(NARRATION_START[3] ?? 3).animate(axisC.axisLineId, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 }),
-                ...dotsC.map((d) => at(NARRATION_START[3] ?? 3).animate(d.dotId, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 })),
-                at(NARRATION_START[3] ?? 3).animate(latexD.latexId, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 }),
+                at(NARRATION_START[4] ?? 4).animate(axisC.axisLineId, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 }),
+                ...dotsC.map((d) => at(NARRATION_START[4] ?? 4).animate(d.dotId, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 })),
+                at(NARRATION_START[4] ?? 4).animate(latexD.latexId, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 }),
 
                 // Step 3: apply common theta cutoff
                 ...dotsA1.map((d) =>
-                    at(NARRATION_START[3] ?? 3).animate(
+                    at(NARRATION_START[4] ?? 4).animate(
                         d.dotId,
                         { scale: keepA.has(d.value) ? { x: 1, y: 1, z: 1 } : { x: 0, y: 0, z: 0 } },
                         { duration: 0.8 }
                     )
                 ),
                 ...dotsB1.map((d) =>
-                    at(NARRATION_START[3] ?? 3).animate(
+                    at(NARRATION_START[4] ?? 4).animate(
                         d.dotId,
                         { scale: keepB.has(d.value) ? { x: 1, y: 1, z: 1 } : { x: 0, y: 0, z: 0 } },
                         { duration: 0.8 }
@@ -183,20 +200,20 @@ const Main = ({ sketchA, sketchB, difference, k }: KmvDifferenceProps) => {
 
                 // Step 4: show difference result; keep only A-only values.
                 ...dotsA1.map((d) =>
-                    at(NARRATION_START[4] ?? 4).animate(
+                    at(NARRATION_START[5] ?? 5).animate(
                         d.dotId,
                         { scale: inD.has(d.value) ? { x: 1, y: 1, z: 1 } : { x: 0, y: 0, z: 0 } },
                         { duration: 0.8 }
                     )
                 ),
                 ...dotsB1.map((d) =>
-                    at(NARRATION_START[4] ?? 4).animate(d.dotId, { scale: { x: 0, y: 0, z: 0 } }, { duration: 0.8 })
+                    at(NARRATION_START[5] ?? 5).animate(d.dotId, { scale: { x: 0, y: 0, z: 0 } }, { duration: 0.8 })
                 ),
                 ...dotsC.map((d) =>
-                    at(NARRATION_START[4] ?? 4).animate(d.dotId, { scale: { x: 1, y: 1, z: 1 } }, { duration: 0.8 })
+                    at(NARRATION_START[5] ?? 5).animate(d.dotId, { scale: { x: 1, y: 1, z: 1 } }, { duration: 0.8 })
                 ),
 
-                at(NARRATION_START[5] ?? 5).animate(latexLimit.latexId, { scale: { x: 1, y: 1, z: 1 } }, { duration: 0.9 }),
+                at(NARRATION_START[6] ?? 6).animate(latexLimit.latexId, { scale: { x: 1, y: 1, z: 1 } }, { duration: 0.9 }),
             ],
         };
 
@@ -225,14 +242,9 @@ const Main = ({ sketchA, sketchB, difference, k }: KmvDifferenceProps) => {
         };
     }, [animationController, difference.estimated, difference.theta, difference.values, k, scene, sketchA.theta, sketchA.values, sketchB.theta, sketchB.values]);
 
-    const headerDescription = `
-    Same as intersection, difference estimation works, but composition breaks: the operation uses shared θ = min(θ_A, θ_B), while the result may have fewer than K values, so inferred θ from the new sketch may not equal the operation θ.
-    The fix is to store θ explicitly in the result; once we store values plus θ, it is no longer plain KMV, but a Theta Sketch.
-    `;
-
     return (
         <>
-            <KmvSetOperationHeader title="KMV Difference" description={headerDescription} />
+            <KmvSetOperationHeader title="KMV Difference" description={OPENING_DESCRIPTION} />
 
             <Fade in={!!currentNarration}>
                 <Box
@@ -261,50 +273,6 @@ const Main = ({ sketchA, sketchB, difference, k }: KmvDifferenceProps) => {
                 </Box>
             </Fade>
 
-            {/* KMV limitation callout (difference) */}
-            <Fade in={uiStep >= 5}>
-                <Box
-                    sx={{
-                        position: 'fixed',
-                        left: { xs: 12, md: 16 },
-                        right: { xs: 12, md: 'auto' },
-                        bottom: { xs: 88, md: 120 },
-                        zIndex: 1000,
-                        width: { md: 520 },
-                        pointerEvents: 'none',
-                    }}
-                >
-                    <Paper
-                        elevation={0}
-                        sx={{
-                            p: 2,
-                            borderRadius: 3,
-                            border: `1px solid ${alpha('#fff', 0.12)}`,
-                            background: alpha('#000', 0.22),
-                            backdropFilter: 'blur(10px)',
-                            WebkitBackdropFilter: 'blur(10px)',
-                        }}
-                    >
-                        <Stack spacing={1.25}>
-                            <Typography variant="subtitle2" sx={{ fontWeight: 800 }}>
-                                KMV limitation (Difference)
-                            </Typography>
-                            <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.7 }}>
-                                Difference also uses a shared threshold \(\\theta = \\min(\\theta_A, \\theta_B)\). The result stores only values (often
-                                fewer than K), so the correct θ is not stored in the result — that’s why KMV difference is not composable.
-                            </Typography>
-                            <NewThetaLimitNote
-                                correctTheta={commonTheta}
-                                correctThetaDefinition="min(θ_A, θ_B)"
-                                correctThetaLabel="Correct θ for difference"
-                                resultValues={difference.values}
-                                operationLabel="Difference"
-                            />
-                        </Stack>
-                    </Paper>
-                </Box>
-            </Fade>
-
             <Container
                 maxWidth="sm"
                 sx={{
@@ -321,14 +289,14 @@ const Main = ({ sketchA, sketchB, difference, k }: KmvDifferenceProps) => {
                         timeline={timeline}
                         showNextButton={true}
                         showMuteButton={false}
-                        nextButtonTooltip="Go to KMV Limit and Solution"
+                        nextButtonTooltip="Continue: Theta Sketch"
                         enableNextButton={true}
                         onNext={() => {
                             speechSynthesis.cancel();
                             setIsPlaying(false);
                             animationController.stopAnimation();
                             stop();
-                            navigate('/theta-sketch/kmv-set-operations?op=limit-and-solution');
+                            navigate('/theta-sketch/theta-sketch');
                         }}
                         onStart={() => {
                             setIsPlaying(true);
