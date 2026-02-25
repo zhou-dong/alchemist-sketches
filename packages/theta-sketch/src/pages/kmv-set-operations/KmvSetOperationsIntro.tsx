@@ -7,6 +7,7 @@ import TimelinePlayer from '@alchemist/theta-sketch/components/TimelinePlayer';
 import { calculateStepTimings } from '@alchemist/theta-sketch/utils/narration';
 
 import StepProgressIndicator from '../../components/StepProgressIndicator';
+import { KmvSetOperationHeader } from './KmvSetOperationsSharedComponents';
 
 const NARRATION: Record<number, string> = {
     0: 'This page introduces KMV set operations and explains why Theta Sketch is needed.',
@@ -54,19 +55,39 @@ export default function KmvSetOperationsIntroPage() {
         };
     }, [speak, stop]);
 
+    const DESCRIPTION = `
+        KMV supports union, intersection, and difference estimation. But it does not store θ in its result, so the result might not be used in further set operations.
+    `;
+
     return (
         <>
             <StepProgressIndicator currentStepId="set-operations" />
 
-            <Container maxWidth="md" sx={{ py: 4, pb: 4 }}>
-                <Stack spacing={2.5}>
-                    <Typography variant="h4" sx={{ fontWeight: 800, letterSpacing: -0.4, textAlign: 'center' }}>
-                        KMV Set Operations
-                    </Typography>
-                    <Typography variant="body1" color="text.secondary" sx={{ lineHeight: 1.8, textAlign: 'center' }}>
-                        KMV supports union, intersection, and difference estimation. But it does not store θ in its result, so the result might not be used in further set operations.
-                    </Typography>
+            <KmvSetOperationHeader title="KMV Set Operations" description={DESCRIPTION} />
 
+            <Container
+                maxWidth="md"
+                sx={{
+                    minHeight: '100vh',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    py: 4,
+                }}
+            >
+                <Stack
+                    spacing={2.5}
+                    direction="column"
+                    alignItems="center"
+                    justifyContent="center"
+                    sx={{
+                        width: '100%',
+                        maxWidth: { xs: '92vw', md: 900 },
+                        mx: 'auto',
+                        background: "transparent",
+                        transform: { xs: 'translateY(-4vh)', md: 'translateY(-6vh)' },
+                    }}
+                >
                     <Box
                         sx={{
                             opacity: uiStep >= 1 ? 1 : 0,
