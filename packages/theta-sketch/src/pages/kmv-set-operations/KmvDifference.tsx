@@ -13,7 +13,7 @@ import TimelinePlayer from '@alchemist/theta-sketch/components/TimelinePlayer';
 import { clearScene, disposeDualSceneResources } from '@alchemist/theta-sketch/utils/threeUtils';
 import { calculateStepTimings } from '@alchemist/theta-sketch/utils/narration';
 import { useNavigate } from 'react-router-dom';
-import { buildAxis, buildDot, buildLatex } from './KmvSetOperationsSharedThree';
+import { buildAxis, buildDot, buildKmvInfoLatex, buildLatex, buildNumber } from './KmvSetOperationsSharedThree';
 import { KmvSetOperationHeader } from './KmvSetOperationsSharedComponents';
 
 const OPENING_DESCRIPTION = `
@@ -24,11 +24,10 @@ const OPENING_DESCRIPTION = `
 const OPENING_NARRATION_0 = `
   Difference estimation works, but composition breaks.
   In difference, theta is not inferred from result values; it is the shared threshold min(theta A, theta B).
-  The difference result may have fewer than K values,
+  The difference result may have fewer than K values, so inferred theta from the new sketch may not match the operation theta.
 `;
 
 const OPENING_NARRATION_1 = `
-  so inferred theta from the new sketch may not match the operation theta.
   To support further set operations, we must store theta explicitly in the result, which leads to Theta Sketch.
   let's see how it works.
 `;
@@ -38,10 +37,11 @@ const NARRATION: Record<number, string> = {
     1: OPENING_NARRATION_1,
     2: `This is Sketch A, which keeps the K smallest hash values from stream A.`,
     3: `This is Sketch B, which keeps the K smallest hash values from stream B.`,
-    4: `To compute difference, we set a common theta as min(theta A, theta B), and keep only values below that theta in each sketch.`,
-    5: `Then we keep values that are in Sketch A but not in Sketch B.`,
-    6: `Again, for difference, theta is not inferred from result values; it is min(theta A, theta B).`,
-    7: `Without storing theta explicitly, a difference result is not composable for further set operations. Storing theta leads to Theta Sketch.`,
+    4: `This is the difference sketch. It starts empty.`,
+    5: `We add values from Sketch A and Sketch B.`,
+    6: `Then we keep only values that are in Sketch A but not in Sketch B.`,
+    7: `Finally we will calculate the theta and the estimated number of distinct values in the difference sketch.`,
+    8: `For difference, theta is not inferred from result values; it is min(theta A, theta B). So we should store theta explicitly to make the result composable for further set operations, which leads to Theta Sketch.`,
 };
 
 const { startTimes: NARRATION_START, durations: NARRATION_DUR } = calculateStepTimings(NARRATION, 1.0);
@@ -106,114 +106,130 @@ const Main = ({ sketchA, sketchB, difference, k }: KmvDifferenceProps) => {
         const axisA = buildAxis({ x: startX, y: aY }, { x: endX, y: aY });
         const dotsA = sketchA.values.map((v) => buildDot({ x: startX, y: aY }, { x: endX, y: aY }, v, 1));
         const dotsA1 = sketchA.values.map((v) => buildDot({ x: startX, y: aY }, { x: endX, y: aY }, v, 1));
+        const numbersA = sketchA.values.map((value, index) => buildNumber({ x: startX, y: aY }, { x: endX, y: aY }, value, sketchA.values.length, index, 1));
+        const latexA = buildKmvInfoLatex("Sketch A (KMV)", aY, k, sketchA.theta, sketchA.theta > 0 ? k / sketchA.theta - 1 : 0, 1);
 
         const bY = window.innerHeight / 12 - window.innerHeight;
         const axisB = buildAxis({ x: startX, y: bY }, { x: endX, y: bY });
         const dotsB = sketchB.values.map((v) => buildDot({ x: startX, y: bY }, { x: endX, y: bY }, v, 1));
         const dotsB1 = sketchB.values.map((v) => buildDot({ x: startX, y: bY }, { x: endX, y: bY }, v, 1));
+        const numbersB = sketchB.values.map((value, index) => buildNumber({ x: startX, y: bY }, { x: endX, y: bY }, value, sketchB.values.length, index, 1));
+        const latexB = buildKmvInfoLatex("Sketch B (KMV)", bY, k, sketchB.theta, sketchB.theta > 0 ? k / sketchB.theta - 1 : 0, 1);
 
         const cY = -window.innerHeight / 12 - window.innerHeight;
         const axisC = buildAxis({ x: startX, y: cY }, { x: endX, y: cY });
         const dotsC = difference.values.map((v) => buildDot({ x: startX, y: cY }, { x: endX, y: cY }, v, 0));
+        const numbersABUnion = sketchA.values.concat(sketchB.values).map((value, index) => buildNumber({ x: startX, y: cY }, { x: endX, y: cY }, value, sketchA.values.length + sketchB.values.length, index, 0));
+        const numbersDifference = difference.values.map((value, index) => buildNumber({ x: startX, y: cY }, { x: endX, y: cY }, value, sketchA.values.length, index, 0));
 
         const commonTheta = Math.min(sketchA.theta, sketchB.theta);
         const m = difference.values.length;
 
-        const latexA = buildLatex(
-            aY,
-            `\\begin{align*}
-\\text{Sketch A (KMV)}\\quad |\\quad k=${k},\\; \\theta_A=${sketchA.theta.toFixed(3)},\\; \\hat{N}_A=\\frac{k}{\\theta_A}-1
-\\end{align*}`,
-            1
-        );
-        const latexB = buildLatex(
-            bY,
-            `\\begin{align*}
-\\text{Sketch B (KMV)}\\quad |\\quad k=${k},\\; \\theta_B=${sketchB.theta.toFixed(3)},\\; \\hat{N}_B=\\frac{k}{\\theta_B}-1
-\\end{align*}`,
-            1
-        );
-        const latexD = buildLatex(
+        const latexDifference = buildLatex(
             cY,
             `\\begin{align*}
-\\text{Difference (KMV)}\\quad |\\quad \\theta=\\min(\\theta_A,\\theta_B)=${commonTheta.toFixed(3)},\\; m=${m},\\; \\hat{N}=\\frac{m}{\\theta}=${difference.estimated.toFixed(3)}
-\\end{align*}`,
-            1
-        );
-        const latexLimit = buildLatex(
-            cY - 120,
-            `\\begin{align*}
-\\text{KMV limit: result has no stored }\\theta\\text{, so it cannot be safely reused for further set ops.}
+\\text{Difference (KMV)} \\quad | \\quad \\quad 
+\\theta=\\min(\\theta_A,\\theta_B)=${commonTheta.toFixed(2)},
+\\quad m=|h_1 \\setminus h_2|=${m},
+\\quad \\hat{N}=\\frac{m}{\\theta}=${difference.estimated.toFixed(3)}
 \\end{align*}`,
             0
         );
-
-        const keepA = new Set(sketchA.values.filter((v) => v < commonTheta));
-        const keepB = new Set(sketchB.values.filter((v) => v < commonTheta));
-        const inD = new Set(difference.values);
 
         const timelineScene: TimelineSceneThree = {
             objects: [
                 axisA.axisLine,
                 ...dotsA.map((d) => d.dot),
                 ...dotsA1.map((d) => d.dot),
+                ...numbersA.map((n) => n.number),
                 latexA.latex,
                 axisB.axisLine,
                 ...dotsB.map((d) => d.dot),
                 ...dotsB1.map((d) => d.dot),
+                ...numbersB.map((n) => n.number),
                 latexB.latex,
                 axisC.axisLine,
                 ...dotsC.map((d) => d.dot),
-                latexD.latex,
-                latexLimit.latex,
+                ...numbersABUnion.map((n) => n.number),
+                latexDifference.latex,
+                ...numbersDifference.map((n) => n.number),
             ],
             timeline: [
                 at(NARRATION_START[2] ?? 2).animate(axisA.axisLineId, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 }),
                 ...dotsA.map((d) => at(NARRATION_START[2] ?? 2).animate(d.dotId, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 })),
                 ...dotsA1.map((d) => at(NARRATION_START[2] ?? 2).animate(d.dotId, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 })),
                 at(NARRATION_START[2] ?? 2).animate(latexA.latexId, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 }),
+                ...numbersA.map((n) => at(NARRATION_START[2] ?? 2).animate(n.numberId, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 })),
 
                 at(NARRATION_START[3] ?? 3).animate(axisB.axisLineId, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 }),
                 ...dotsB.map((d) => at(NARRATION_START[3] ?? 3).animate(d.dotId, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 })),
                 ...dotsB1.map((d) => at(NARRATION_START[3] ?? 3).animate(d.dotId, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 })),
                 at(NARRATION_START[3] ?? 3).animate(latexB.latexId, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 }),
+                ...numbersB.map((n) => at(NARRATION_START[3] ?? 3).animate(n.numberId, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 })),
 
                 at(NARRATION_START[4] ?? 4).animate(axisC.axisLineId, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 }),
                 ...dotsC.map((d) => at(NARRATION_START[4] ?? 4).animate(d.dotId, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 })),
-                at(NARRATION_START[4] ?? 4).animate(latexD.latexId, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 }),
-
-                // Step 3: apply common theta cutoff
-                ...dotsA1.map((d) =>
+                at(NARRATION_START[4] ?? 4).animate(latexDifference.latexId, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 }),
+                ...numbersDifference.map((number) => at(NARRATION_START[4] ?? 4).animate(number.numberId, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 })),
+                ...numbersABUnion.map((number) =>
                     at(NARRATION_START[4] ?? 4).animate(
-                        d.dotId,
-                        { scale: keepA.has(d.value) ? { x: 1, y: 1, z: 1 } : { x: 0, y: 0, z: 0 } },
-                        { duration: 0.8 }
-                    )
-                ),
-                ...dotsB1.map((d) =>
-                    at(NARRATION_START[4] ?? 4).animate(
-                        d.dotId,
-                        { scale: keepB.has(d.value) ? { x: 1, y: 1, z: 1 } : { x: 0, y: 0, z: 0 } },
-                        { duration: 0.8 }
+                        number.numberId,
+                        { position: { y: `+=${window.innerHeight}` } },
+                        { duration: 1 }
                     )
                 ),
 
-                // Step 4: show difference result; keep only A-only values.
                 ...dotsA1.map((d) =>
                     at(NARRATION_START[5] ?? 5).animate(
                         d.dotId,
-                        { scale: inD.has(d.value) ? { x: 1, y: 1, z: 1 } : { x: 0, y: 0, z: 0 } },
-                        { duration: 0.8 }
+                        { position: { y: `-=${window.innerHeight / 12 * 4}` } },
+                        { duration: 1 }
                     )
                 ),
                 ...dotsB1.map((d) =>
-                    at(NARRATION_START[5] ?? 5).animate(d.dotId, { scale: { x: 0, y: 0, z: 0 } }, { duration: 0.8 })
+                    at(NARRATION_START[5] ?? 5).animate(
+                        d.dotId,
+                        { position: { y: `-=${window.innerHeight / 12 * 2}` } },
+                        { duration: 1 }
+                    )
                 ),
-                ...dotsC.map((d) =>
-                    at(NARRATION_START[5] ?? 5).animate(d.dotId, { scale: { x: 1, y: 1, z: 1 } }, { duration: 0.8 })
+                ...numbersABUnion.map((number) =>
+                    at(NARRATION_START[5] ?? 5).animate(
+                        number.numberId,
+                        { scale: { x: 1, y: 1, z: 1 } },
+                        { duration: 1 }
+                    )
                 ),
 
-                at(NARRATION_START[6] ?? 6).animate(latexLimit.latexId, { scale: { x: 1, y: 1, z: 1 } }, { duration: 0.9 }),
+                ...dotsA1.map((d) =>
+                    at(NARRATION_START[6] ?? 6).animate(
+                        d.dotId,
+                        { scale: { x: 0, y: 0, z: 0 } },
+                        { duration: 1 }
+                    )
+                ),
+                ...dotsB1.map((d) =>
+                    at(NARRATION_START[6] ?? 6).animate(d.dotId, { scale: { x: 0, y: 0, z: 0 } }, { duration: 1 })
+                ),
+                ...dotsC.map((d) =>
+                    at(NARRATION_START[6] ?? 6).animate(d.dotId, { scale: { x: 1, y: 1, z: 1 } }, { duration: 1 })
+                ),
+                ...numbersABUnion.map((number) =>
+                    at(NARRATION_START[6] ?? 6).animate(
+                        number.numberId,
+                        { scale: { x: 0, y: 0, z: 0 } },
+                        { duration: 1 }
+                    )
+                ),
+                ...numbersDifference.map((number) =>
+                    at(NARRATION_START[6] ?? 6).animate(
+                        number.numberId,
+                        { scale: { x: 1, y: 1, z: 1 } },
+                        { duration: 1 }
+                    )
+                ),
+
+                at(NARRATION_START[7] ?? 7).animate(latexDifference.latexId, { scale: { x: 1, y: 1, z: 1 } }, { duration: 1 }),
             ],
         };
 
