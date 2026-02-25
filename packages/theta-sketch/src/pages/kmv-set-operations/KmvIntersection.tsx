@@ -24,11 +24,10 @@ const OPENING_DESCRIPTION = `
 const OPENING_NARRATION_0 = `
   Intersection estimation works, but composition breaks.
   In intersection, theta is not inferred from result values; it is the shared threshold min(theta A, theta B).
-  The intersection result may have fewer than K values,
+  The intersection result may have fewer than K values, so inferred theta from the new sketch may not match the operation theta.
 `;
 
 const OPENING_NARRATION_1 = `
-  so inferred theta from the new sketch may not match the operation theta.
   To support further set operations, we must store theta explicitly in the result, which leads to Theta Sketch.
   let's see how it works.
 `;
@@ -41,8 +40,8 @@ const NARRATION: Record<number, string> = {
     4: "This is the intersection sketch. It starts empty.",
     5: "We add values from Sketch A and Sketch B.",
     6: "Then we keep only values that appear in both sketches.",
-    7: "Again, for intersection, theta is not inferred from result values; it is min(theta A, theta B).",
-    8: "Because the sketch is not inferred from the result values, we should store theta explicitly in the result for further set operations, which leads to Theta Sketch.",
+    7: "Finally we will calculate the theta and the estimated number of distinct values in the intersection sketch.",
+    8: "For intersection, theta is not inferred from result values; it is min(theta A, theta B). So we should store theta explicitly to make the result composable for further set operations, which leads to Theta Sketch.",
 };
 
 const { startTimes: NARRATION_START, durations: NARRATION_DUR } = calculateStepTimings(NARRATION, 1.0);
