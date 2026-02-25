@@ -82,7 +82,7 @@ export default function KmvLimitAndSolution() {
                         transform: { xs: 'translateY(-4vh)', md: 'translateY(-6vh)' },
                     }}
                 >
-                    <Fade in={uiStep >= 1} timeout={450} mountOnEnter unmountOnExit>
+                    <Fade in={uiStep >= 1} timeout={450}>
                         <Paper
                             variant="outlined"
                             sx={{
@@ -102,7 +102,7 @@ export default function KmvLimitAndSolution() {
                         </Paper>
                     </Fade>
 
-                    <Fade in={uiStep >= 2} timeout={450} mountOnEnter unmountOnExit>
+                    <Fade in={uiStep >= 2} timeout={450}>
                         <Paper
                             variant="outlined"
                             sx={{
