@@ -16,13 +16,33 @@ import { useNavigate } from 'react-router-dom';
 import { buildAxis, buildDot, buildKmvInfoLatex, buildLatex, buildNumber } from './KmvSetOperationsSharedThree';
 import { KmvSetOperationHeader } from './KmvSetOperationsSharedComponents';
 
+const OPENING_DESCRIPTION = `
+  Intersection estimation works, but composition breaks: the operation uses shared θ = min(θ_A, θ_B), while the result may have fewer than K values, so inferred θ from the new sketch may not equal the operation θ.
+   The fix is to store θ explicitly in the result; once we store values plus θ, it is no longer plain KMV, but a Theta Sketch.
+`;
+
+const OPENING_NARRATION_0 = `
+  Intersection estimation works, but composition breaks.
+  In intersection, theta is not inferred from result values; it is the shared threshold min(theta A, theta B).
+  The intersection result may have fewer than K values,
+`;
+
+const OPENING_NARRATION_1 = `
+  so inferred theta from the new sketch may not match the operation theta.
+  To support further set operations, we must store theta explicitly in the result, which leads to Theta Sketch.
+  let's see how it works.
+`;
+
 const NARRATION: Record<number, string> = {
-    0: `On this page, we will compute an intersection using KMV sketches. Intersection needs a shared threshold theta, which is the minimum of the two sketch thetas.`,
-    1: `This is Sketch A. It contains the K smallest hash values from stream A.`,
-    2: `This is Sketch B. It contains the K smallest hash values from stream B.`,
-    3: `To compute intersection, we set a common theta as min(theta A, theta B), and keep only values below that theta in each sketch.`,
-    4: `The intersection result contains values that appear in both sketches below the common theta. The estimate is the count divided by theta.`,
-    5: `This is where KMV hits a limit. The intersection result often has fewer than K values, so the correct theta is not recoverable from the values alone. Saving theta leads to Theta Sketch.`,
+    0: OPENING_NARRATION_0,
+    1: OPENING_NARRATION_1,
+    2: `This is Sketch A, which keeps the K smallest hash values from stream A.`,
+    3: `This is Sketch B, which keeps the K smallest hash values from stream B.`,
+    4: "This is the intersection sketch. It starts empty.",
+    5: "We add values from Sketch A and Sketch B.",
+    6: "Then we keep only values that appear in both sketches.",
+    7: "Again, for intersection, theta is not inferred from result values; it is min(theta A, theta B).",
+    8: "Because the sketch is not inferred from the result values, we should store theta explicitly in the result for further set operations, which leads to Theta Sketch.",
 };
 
 const { startTimes: NARRATION_START, durations: NARRATION_DUR } = calculateStepTimings(NARRATION, 1.0);
@@ -147,90 +167,83 @@ const Main = ({ sketchA, sketchB, intersection, k }: KmvIntersectionProps) => {
                 latexLimit.latex,
             ],
             timeline: [
-                at(NARRATION_START[1] ?? 1).animate(axisA.axisLineId, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 }),
-                ...dotsA.map((d) => at(NARRATION_START[1] ?? 1).animate(d.dotId, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 })),
-                ...dotsA1.map((d) => at(NARRATION_START[1] ?? 1).animate(d.dotId, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 })),
-                at(NARRATION_START[1] ?? 1).animate(latexA.latexId, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 }),
-                ...numbersA.map((n) => at(NARRATION_START[1] ?? 1).animate(n.numberId, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 })),
+                at(NARRATION_START[2] ?? 2).animate(axisA.axisLineId, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 }),
+                ...dotsA.map((d) => at(NARRATION_START[2] ?? 2).animate(d.dotId, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 })),
+                ...dotsA1.map((d) => at(NARRATION_START[2] ?? 2).animate(d.dotId, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 })),
+                at(NARRATION_START[2] ?? 2).animate(latexA.latexId, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 }),
+                ...numbersA.map((n) => at(NARRATION_START[2] ?? 2).animate(n.numberId, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 })),
 
-                at(NARRATION_START[2] ?? 2).animate(axisB.axisLineId, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 }),
-                ...dotsB.map((d) => at(NARRATION_START[2] ?? 2).animate(d.dotId, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 })),
-                ...dotsB1.map((d) => at(NARRATION_START[2] ?? 2).animate(d.dotId, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 })),
-                at(NARRATION_START[2] ?? 2).animate(latexB.latexId, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 }),
-                ...numbersB.map((n) => at(NARRATION_START[2] ?? 2).animate(n.numberId, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 })),
+                at(NARRATION_START[3] ?? 3).animate(axisB.axisLineId, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 }),
+                ...dotsB.map((d) => at(NARRATION_START[3] ?? 3).animate(d.dotId, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 })),
+                ...dotsB1.map((d) => at(NARRATION_START[3] ?? 3).animate(d.dotId, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 })),
+                at(NARRATION_START[3] ?? 3).animate(latexB.latexId, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 }),
+                ...numbersB.map((n) => at(NARRATION_START[3] ?? 3).animate(n.numberId, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 })),
 
-                at(NARRATION_START[3] ?? 3).animate(axisC.axisLineId, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 }),
+                at(NARRATION_START[4] ?? 4).animate(axisC.axisLineId, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 }),
                 ...dotsC.map((d) => at(NARRATION_START[3] ?? 3).animate(d.dotId, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 })),
-                at(NARRATION_START[3] ?? 3).animate(latexIntersection.latexId, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 }),
-                ...numbersC.map((n) => at(NARRATION_START[3] ?? 3).animate(n.numberId, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 })),
-                ...numbersABUnion.map((n) => at(NARRATION_START[3] ?? 3).animate(n.numberId, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 })),
-                at(NARRATION_START[3] ?? 3).animate(latexLimit.latexId, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 }),
+                at(NARRATION_START[4] ?? 4).animate(latexIntersection.latexId, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 }),
+                ...numbersC.map((n) => at(NARRATION_START[4] ?? 4).animate(n.numberId, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 })),
+                ...numbersABUnion.map((n) => at(NARRATION_START[4] ?? 4).animate(n.numberId, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 })),
+                at(NARRATION_START[4] ?? 4).animate(latexLimit.latexId, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 }),
 
                 ...dotsA1.map((d) =>
-                    at(NARRATION_START[4] ?? 4).animate(
+                    at(NARRATION_START[5] ?? 5).animate(
                         d.dotId,
                         { position: { y: `-=${window.innerHeight / 12 * 4}` } },
                         { duration: 1 }
                     )
                 ),
                 ...dotsB1.map((d) =>
-                    at(NARRATION_START[4] ?? 4).animate(
+                    at(NARRATION_START[5] ?? 5).animate(
                         d.dotId,
                         { position: { y: `-=${window.innerHeight / 12 * 2}` } },
                         { duration: 1 }
                     )
                 ),
                 ...numbersABUnion.map((n) =>
-                    at(NARRATION_START[4] ?? 4).animate(
+                    at(NARRATION_START[5] ?? 5).animate(
                         n.numberId,
                         { scale: { x: 1, y: 1, z: 1 } },
                         { duration: 1 }
                     )
                 ),
-                at(NARRATION_START[4] ?? 4).animate(
-                    latexIntersection.latexId,
-                    { scale: { x: 1, y: 1, z: 1 } },
-                    { duration: 1 }
-                ),
                 ...dotsA1.map((d) =>
-                    at(NARRATION_START[5] ?? 5).animate(
+                    at(NARRATION_START[6] ?? 6).animate(
                         d.dotId,
                         { scale: { x: 0, y: 0, z: 0 } },
                         { duration: 1 }
                     )
                 ),
                 ...dotsB1.map((d) =>
-                    at(NARRATION_START[5] ?? 5).animate(
+                    at(NARRATION_START[6] ?? 6).animate(
                         d.dotId,
                         { scale: { x: 0, y: 0, z: 0 } },
                         { duration: 1 }
                     )
                 ),
                 ...dotsC.map((d) =>
-                    at(NARRATION_START[5] ?? 5).animate(d.dotId, { scale: { x: 1, y: 1, z: 1 } }, { duration: 1 })
+                    at(NARRATION_START[6] ?? 6).animate(d.dotId, { scale: { x: 1, y: 1, z: 1 } }, { duration: 1 })
                 ),
                 ...numbersABUnion.map((n) =>
-                    at(NARRATION_START[5] ?? 5).animate(
+                    at(NARRATION_START[6] ?? 6).animate(
                         n.numberId,
                         { scale: { x: 0, y: 0, z: 0 } },
                         { duration: 1 }
                     )
                 ),
                 ...numbersC.map((n) =>
-                    at(NARRATION_START[5] ?? 5).animate(
+                    at(NARRATION_START[6] ?? 6).animate(
                         n.numberId,
                         { scale: { x: 1, y: 1, z: 1 } },
                         { duration: 1 }
                     )
                 ),
 
-                at(NARRATION_START[6] ?? 6).animate(
-                    latexLimit.latexId,
+                at(NARRATION_START[7] ?? 7).animate(
+                    latexIntersection.latexId,
                     { scale: { x: 1, y: 1, z: 1 } },
                     { duration: 1 }
                 ),
-                // // Step 5: show the limit note
-                // at(NARRATION_START[5] ?? 5).animate(latexLimit.latexId, { scale: { x: 1, y: 1, z: 1 } }, { duration: 0.9 }),
             ],
         };
 
@@ -260,14 +273,9 @@ const Main = ({ sketchA, sketchB, intersection, k }: KmvIntersectionProps) => {
     }, [animationController, intersection.estimated, intersection.theta, intersection.values, k, scene, sketchA.theta, sketchA.values, sketchB.theta, sketchB.values]);
 
 
-    const headerDescription = `
-   Intersection estimation works, but composition breaks: the operation uses shared θ = min(θ_A, θ_B), while the result may have fewer than K values, so inferred θ from the new sketch may not equal the operation θ.
-   The fix is to store θ explicitly in the result; once we store values plus θ, it is no longer plain KMV, but a Theta Sketch.
-    `;
-
     return (
         <>
-            <KmvSetOperationHeader title="KMV Intersection" description={headerDescription} />
+            <KmvSetOperationHeader title="KMV Intersection" description={OPENING_DESCRIPTION} />
 
             <Fade in={!!currentNarration}>
                 <Box
