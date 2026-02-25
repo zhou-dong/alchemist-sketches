@@ -18,30 +18,29 @@ import { KmvSetOperationHeader } from './KmvSetOperationsSharedComponents';
 
 const OPENING_DESCRIPTION = `
   Difference estimation works, but composition breaks: the operation uses shared θ = min(θ_A, θ_B), while the result may have fewer than K values, so inferred θ from the new sketch may not equal the operation θ.
-  The fix is to store θ explicitly in the result; once we store values plus θ, it is no longer plain KMV, but a Theta Sketch.
+  The fix is to store θ explicitly in the result.
 `;
 
 const OPENING_NARRATION_0 = `
   Difference estimation works, but composition breaks.
   In difference, theta is not inferred from result values; it is the shared threshold min(theta A, theta B).
-  The difference result may have fewer than K values, so inferred theta from the new sketch may not match the operation theta.
 `;
 
 const OPENING_NARRATION_1 = `
-  To support further set operations, we must store theta explicitly in the result, which leads to Theta Sketch.
-  let's see how it works.
+  Because the difference result may have fewer than K values, so inferred theta from the new sketch may not match the operation theta.
+  To support further set operations, we must store theta explicitly in the result.
 `;
 
 const NARRATION: Record<number, string> = {
     0: OPENING_NARRATION_0,
     1: OPENING_NARRATION_1,
-    2: `This is Sketch A, which keeps the K smallest hash values from stream A.`,
+    2: `Let's see how it works. This is Sketch A, which keeps the K smallest hash values from stream A.`,
     3: `This is Sketch B, which keeps the K smallest hash values from stream B.`,
     4: `This is the difference sketch. It starts empty.`,
     5: `We add values from Sketch A and Sketch B.`,
     6: `Then we keep only values that are in Sketch A but not in Sketch B.`,
     7: `Finally we will calculate the theta and the estimated number of distinct values in the difference sketch.`,
-    8: `For difference, theta is not inferred from result values; it is min(theta A, theta B). So we should store theta explicitly to make the result composable for further set operations, which leads to Theta Sketch.`,
+    8: `For difference, theta is not inferred from result values; it is min(theta A, theta B). So we should store theta explicitly to make the result composable for further set operations.`,
 };
 
 const { startTimes: NARRATION_START, durations: NARRATION_DUR } = calculateStepTimings(NARRATION, 1.0);
@@ -305,14 +304,14 @@ const Main = ({ sketchA, sketchB, difference, k }: KmvDifferenceProps) => {
                         timeline={timeline}
                         showNextButton={true}
                         showMuteButton={false}
-                        nextButtonTooltip="Continue: Theta Sketch"
+                        nextButtonTooltip="Go to Solution"
                         enableNextButton={true}
                         onNext={() => {
                             speechSynthesis.cancel();
                             setIsPlaying(false);
                             animationController.stopAnimation();
                             stop();
-                            navigate('/theta-sketch/theta-sketch');
+                            navigate('/theta-sketch/kmv-set-ops?op=solution');
                         }}
                         onStart={() => {
                             setIsPlaying(true);
