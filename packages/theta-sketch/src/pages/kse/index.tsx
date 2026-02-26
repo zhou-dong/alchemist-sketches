@@ -258,7 +258,7 @@ function KmvPageContent() {
                     timeline={timeline}
                     showNextButton={true}
                     onNext={() => {
-                        navigate('/theta-sketch/kmv');
+                        navigate('/sketches/theta/kmv');
                     }}
                     nextButtonTooltip="Go to KMV Algorithm"
                     enableNextButton={isStepCompleted(2)}
