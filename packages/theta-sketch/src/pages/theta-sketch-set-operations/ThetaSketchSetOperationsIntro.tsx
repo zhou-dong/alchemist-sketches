@@ -184,7 +184,7 @@ export default function ThetaSketchSetOperationsIntro() {
                         timeline={timeline}
                         showNextButton={true}
                         nextButtonTooltip="Go to Theta Sketch Union"
-                        onNext={() => navigate('/theta-sketch/theta-sketch-set-operations?op=union')}
+                        onNext={() => navigate('/theta-sketch/set-operations?op=union')}
                         enableNextButton={true}
                         onStart={() => { resume(); }}
                         onPause={() => { pause(); }}
