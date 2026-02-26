@@ -1,6 +1,6 @@
 import * as THREE from 'three';
-import { axis, circle, latex, text } from 'obelus-three-render';
-import { axisStyle, circleStyle, textStyle } from '@alchemist/theta-sketch/theme/obelusTheme';
+import { axis, circle, latex, line, text } from 'obelus-three-render';
+import { axisStyle, circleStyle, lineStyle, textStyle } from '@alchemist/theta-sketch/theme/obelusTheme';
 
 export interface Position {
     x: number;
@@ -11,15 +11,24 @@ function makeRandomId() {
     return Math.random().toString(36).substring(2, 15);
 }
 
+const buildThetaMarker = (x: number, y: number, value: number, yOffset: number = 0) => {
+    const randomId = makeRandomId();
+    const adjustedY = y - yOffset;
+    const thetaLineId = `theta_marker_line_${randomId}`;
+    const thetaSignId = `theta_marker_sign_${randomId}`;
+    const thetaValueId = `theta_marker_value_${randomId}`;
+    const thetaLine = line(thetaLineId, { x, y: adjustedY + 20 }, { x, y: adjustedY }, 2, lineStyle);
+    const thetaSign = text(thetaSignId, 'θ', { x, y: adjustedY + 30 }, textStyle);
+    const thetaValue = text(thetaValueId, value.toFixed(2), { x, y: adjustedY - 25 }, textStyle);
+    return { thetaLineId, thetaLine, thetaSignId, thetaSign, thetaValueId, thetaValue };
+};
+
 export function buildAxis(start: Position, end: Position) {
     const randomId = makeRandomId();
     const axisLineId = `axis_line_${randomId}`;
-    const axisStartMarkerId = `axis_start_marker_${axisLineId}`;
-    const axisEndMarkerId = `axis_end_marker_${axisLineId}`;
-    const axisLine = axis(axisLineId, start, end, { ...axisStyle, dotCount: 2 });
-    const axisStartMarker = text(axisStartMarkerId, "0", { x: start.x, y: start.y - 15 }, textStyle);
-    const axisEndMarker = text(axisEndMarkerId, "1", { x: end.x, y: end.y - 15 }, textStyle);
-    return { axisLineId, axisLine, axisStartMarkerId, axisStartMarker, axisEndMarkerId, axisEndMarker };
+    const axisLine = axis(axisLineId, start, end, { ...axisStyle, dotCount: 0 });
+    const thetaMarker = buildThetaMarker(start.x, start.y, 0);
+    return { axisLineId, axisLine, thetaMarker };
 }
 
 export function buildDot(start: Position, end: Position, value: number, sizeScale: number) {
