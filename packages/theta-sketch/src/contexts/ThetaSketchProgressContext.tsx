@@ -17,32 +17,32 @@ export const THETA_SKETCH_STEPS: RoadmapStep[] = [
     {
         id: 0,
         title: 'Introduction',
-        route: '/theta-sketch',
+        route: '/sketches/theta',
     },
     {
         id: 1,
         title: 'Order statistics',
-        route: '/theta-sketch/order-statistics',
+        route: '/sketches/theta/order-statistics',
     },
     {
         id: 2,
         title: 'Kth smallest estimation',
-        route: '/theta-sketch/kse',
+        route: '/sketches/theta/kse',
     },
     {
         id: 3,
         title: 'KMV algorithm',
-        route: '/theta-sketch/kmv',
+        route: '/sketches/theta/kmv',
     },
     {
         id: 4,
         title: 'KMV Set operations',
-        route: '/theta-sketch/kmv-set-operations/intro',
+        route: '/sketches/theta/kmv-set-operations/intro',
     },
     {
         id: 5,
         title: 'Theta sketch set operations',
-        route: '/theta-sketch/set-operations/intro',
+        route: '/sketches/theta/set-operations/intro',
     },
 ];
 
