@@ -303,7 +303,7 @@ function OrderStatisticsPageContent() {
                     timeline={timelinePlayer}
                     showNextButton={true}
                     onNext={() => {
-                        navigate('/theta-sketch/kse');
+                        navigate('/sketches/theta/kse');
                     }}
                     nextButtonTooltip="Go to K-th Smallest Estimation"
                     enableNextButton={isStepCompleted(1)}
