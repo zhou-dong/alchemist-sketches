@@ -117,16 +117,22 @@ const Main = ({ sketchA, sketchB, union, k }: KmvUnionProps) => {
         const timelineScene: TimelineSceneThree = {
             objects: [
                 axisA.axisLine,
+                axisA.axisStartMarker,
+                axisA.axisEndMarker,
                 ...(dotsA.map((dot) => dot.dot)),
                 ...(dotsA1.map((dot) => dot.dot)),
                 ...(numbersA.map((number) => number.number)),
                 latexA.latex,
                 axisB.axisLine,
+                axisB.axisStartMarker,
+                axisB.axisEndMarker,
                 ...(dotsB.map((dot) => dot.dot)),
                 ...(dotsB1.map((dot) => dot.dot)),
                 ...(numbersB.map((number) => number.number)),
                 latexB.latex,
                 axisC.axisLine,
+                axisC.axisStartMarker,
+                axisC.axisEndMarker,
                 ...(dotsC.map((dot) => dot.dot)),
                 ...(numbersC.map((number) => number.number)),
                 ...(numbersABUnion.map((number) => number.number)),
@@ -135,6 +141,8 @@ const Main = ({ sketchA, sketchB, union, k }: KmvUnionProps) => {
             ],
             timeline: [
                 at(NARRATION_START[1] ?? 1).animate(axisA.axisLineId, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 }),
+                at(NARRATION_START[1] ?? 1).animate(axisA.axisStartMarkerId, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 }),
+                at(NARRATION_START[1] ?? 1).animate(axisA.axisEndMarkerId, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 }),
                 ...dotsA.map((dot) =>
                     at(NARRATION_START[1] ?? 1).animate(
                         dot.dotId,
@@ -162,6 +170,8 @@ const Main = ({ sketchA, sketchB, union, k }: KmvUnionProps) => {
                     { duration: 1 }
                 ),
                 at(NARRATION_START[2] ?? 2).animate(axisB.axisLineId, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 }),
+                at(NARRATION_START[2] ?? 2).animate(axisB.axisStartMarkerId, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 }),
+                at(NARRATION_START[2] ?? 2).animate(axisB.axisEndMarkerId, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 }),
                 ...dotsB.map((dot) =>
                     at(NARRATION_START[2] ?? 2).animate(
                         dot.dotId,
@@ -189,6 +199,8 @@ const Main = ({ sketchA, sketchB, union, k }: KmvUnionProps) => {
                     { duration: 1 }
                 ),
                 at(NARRATION_START[3] ?? 3).animate(axisC.axisLineId, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 }),
+                at(NARRATION_START[3] ?? 3).animate(axisC.axisStartMarkerId, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 }),
+                at(NARRATION_START[3] ?? 3).animate(axisC.axisEndMarkerId, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 }),
                 ...dotsC.map((dot) =>
                     at(NARRATION_START[3] ?? 3).animate(
                         dot.dotId,
@@ -301,7 +313,6 @@ const Main = ({ sketchA, sketchB, union, k }: KmvUnionProps) => {
             animationController.startAnimation,
             animationController.stopAnimation
         );
-
         // Keep overlay UI + narration synced to narration timing (seek/restart safe).
 
         const narrationSize = Object.keys(NARRATION).length;
@@ -324,7 +335,7 @@ const Main = ({ sketchA, sketchB, union, k }: KmvUnionProps) => {
 
     return (
         <>
-            <ThetaSketchSetOperationHeader title="KMV Union" description="KMV keeps only the K smallest hash values and infers θ from the K-th (max stored) value. Union will return exactly K values, so θ is recoverable and the result stays composable." />
+            <ThetaSketchSetOperationHeader title="Theta Sketch Union" description="Theta Sketch keeps the K smallest hash values and stored θ, so the result is composable for further set operations." />
 
             {/* Subtitle Display */}
             <Fade in={!!currentNarration}>
