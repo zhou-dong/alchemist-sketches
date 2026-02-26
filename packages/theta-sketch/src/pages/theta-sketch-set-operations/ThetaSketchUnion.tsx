@@ -12,7 +12,7 @@ import TimelinePlayer from '@alchemist/theta-sketch/components/TimelinePlayer';
 import { clearScene, disposeDualSceneResources } from '@alchemist/theta-sketch/utils/threeUtils';
 import { calculateStepTimings } from '@alchemist/theta-sketch/utils/narration';
 import { useNavigate } from 'react-router-dom';
-import { buildAxis, buildDot, buildNumber, buildKmvInfoLatex } from './ThetaSketchSetOperationsSharedThree';
+import { buildAxis, buildDot, buildNumber, buildThetaMarker, buildThetaSketchInfoLatex } from './ThetaSketchSetOperationsSharedThree';
 import { ThetaSketchSetOperationHeader } from './ThetaSketchSetOperationsSharedComponents';
 
 const NARRATION: Record<number, string> = {
@@ -97,14 +97,16 @@ const Main = ({ sketchA, sketchB, union, k }: KmvUnionProps) => {
         const dotsA = sketchA.values.map((value) => buildDot({ x: startX, y: aY }, { x: endX, y: aY }, value, 1));
         const dotsA1 = sketchA.values.map((value) => buildDot({ x: startX, y: aY }, { x: endX, y: aY }, value, 1));
         const numbersA = sketchA.values.map((value, index) => buildNumber({ x: startX, y: aY }, { x: endX, y: aY }, value, sketchA.values.length, index, 1));
-        const latexA = buildKmvInfoLatex("Sketch A (KMV)", aY, k, sketchA.theta, sketchA.theta > 0 ? k / sketchA.theta - 1 : 0, 1);
+        const latexA = buildThetaSketchInfoLatex("Sketch A (Theta Sketch)", aY, k, sketchA.theta, sketchA.theta > 0 ? k / sketchA.theta - 1 : 0, 1);
+        const thetaMarkerA = buildThetaMarker({ x: startX, y: aY }, { x: endX, y: aY }, sketchA.theta, 1);
 
         const bY = window.innerHeight / 12 - window.innerHeight;
         const axisB = buildAxis({ x: startX, y: bY }, { x: endX, y: bY });
         const dotsB = sketchB.values.map((value) => buildDot({ x: startX, y: bY }, { x: endX, y: bY }, value, 1));
         const dotsB1 = sketchB.values.map((value) => buildDot({ x: startX, y: bY }, { x: endX, y: bY }, value, 1));
         const numbersB = sketchB.values.map((value, index) => buildNumber({ x: startX, y: bY }, { x: endX, y: bY }, value, sketchB.values.length, index, 1));
-        const latexB = buildKmvInfoLatex("Sketch B (KMV)", bY, k, sketchB.theta, sketchB.theta > 0 ? k / sketchB.theta - 1 : 0, 1);
+        const latexB = buildThetaSketchInfoLatex("Sketch B (Theta Sketch)", bY, k, sketchB.theta, sketchB.theta > 0 ? k / sketchB.theta - 1 : 0, 1);
+        const thetaMarkerB = buildThetaMarker({ x: startX, y: bY }, { x: endX, y: bY }, sketchB.theta, 1);
 
         const cY = -window.innerHeight / 12 - window.innerHeight;
         const axisC = buildAxis({ x: startX, y: cY }, { x: endX, y: cY });
@@ -112,7 +114,8 @@ const Main = ({ sketchA, sketchB, union, k }: KmvUnionProps) => {
         const numbersC = union.values.map((value, index) => buildNumber({ x: startX, y: cY }, { x: endX, y: cY }, value, union.values.length, index, 0));
         const numbersABUnion = sketchA.values.concat(sketchB.values).map((value, index) => buildNumber({ x: startX, y: cY }, { x: endX, y: cY }, value, sketchA.values.length + sketchB.values.length, index, 0));
         const numbersABUnionSorted = [...new Set(sketchA.values.concat(sketchB.values))].sort((a, b) => a - b).map((value, index) => buildNumber({ x: startX, y: cY }, { x: endX, y: cY }, value, sketchA.values.length + sketchB.values.length, index, 0));
-        const latexUnion = buildKmvInfoLatex("Union sketch (KMV)", cY, k, union.theta, union.theta > 0 ? k / union.theta - 1 : 0, 0);
+        const latexUnion = buildThetaSketchInfoLatex("Union sketch (Theta Sketch)", cY, k, union.theta, union.theta > 0 ? k / union.theta - 1 : 0, 0);
+        const thetaMarkerC = buildThetaMarker({ x: startX, y: cY }, { x: endX, y: cY }, union.theta, 0);
 
         const timelineScene: TimelineSceneThree = {
             objects: [
@@ -121,20 +124,28 @@ const Main = ({ sketchA, sketchB, union, k }: KmvUnionProps) => {
                 ...(dotsA1.map((dot) => dot.dot)),
                 ...(numbersA.map((number) => number.number)),
                 latexA.latex,
+                thetaMarkerA.thetaLine,
+                thetaMarkerA.thetaSign,
                 axisB.axisLine,
                 ...(dotsB.map((dot) => dot.dot)),
                 ...(dotsB1.map((dot) => dot.dot)),
                 ...(numbersB.map((number) => number.number)),
                 latexB.latex,
+                thetaMarkerB.thetaLine,
+                thetaMarkerB.thetaSign,
                 axisC.axisLine,
                 ...(dotsC.map((dot) => dot.dot)),
                 ...(numbersC.map((number) => number.number)),
                 ...(numbersABUnion.map((number) => number.number)),
                 ...(numbersABUnionSorted.map((number) => number.number)),
                 latexUnion.latex,
+                thetaMarkerC.thetaLine,
+                thetaMarkerC.thetaSign,
             ],
             timeline: [
                 at(NARRATION_START[1] ?? 1).animate(axisA.axisLineId, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 }),
+                at(NARRATION_START[1] ?? 1).animate(thetaMarkerA.thetaLineId, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 }),
+                at(NARRATION_START[1] ?? 1).animate(thetaMarkerA.thetaSignId, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 }),
                 ...dotsA.map((dot) =>
                     at(NARRATION_START[1] ?? 1).animate(
                         dot.dotId,
@@ -162,6 +173,8 @@ const Main = ({ sketchA, sketchB, union, k }: KmvUnionProps) => {
                     { duration: 1 }
                 ),
                 at(NARRATION_START[2] ?? 2).animate(axisB.axisLineId, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 }),
+                at(NARRATION_START[2] ?? 2).animate(thetaMarkerB.thetaLineId, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 }),
+                at(NARRATION_START[2] ?? 2).animate(thetaMarkerB.thetaSignId, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 }),
                 ...dotsB.map((dot) =>
                     at(NARRATION_START[2] ?? 2).animate(
                         dot.dotId,
@@ -189,6 +202,8 @@ const Main = ({ sketchA, sketchB, union, k }: KmvUnionProps) => {
                     { duration: 1 }
                 ),
                 at(NARRATION_START[3] ?? 3).animate(axisC.axisLineId, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 }),
+                at(NARRATION_START[3] ?? 3).animate(thetaMarkerC.thetaLineId, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 }),
+                at(NARRATION_START[3] ?? 3).animate(thetaMarkerC.thetaSignId, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 }),
                 ...dotsC.map((dot) =>
                     at(NARRATION_START[3] ?? 3).animate(
                         dot.dotId,
@@ -253,6 +268,8 @@ const Main = ({ sketchA, sketchB, union, k }: KmvUnionProps) => {
                         { duration: 1 }
                     )
                 ),
+                at(NARRATION_START[6] ?? 6).animate(thetaMarkerC.thetaLineId, { scale: { x: 1, y: 1, z: 1 } }, { duration: 1 }),
+                at(NARRATION_START[6] ?? 6).animate(thetaMarkerC.thetaSignId, { scale: { x: 1, y: 1, z: 1 } }, { duration: 1 }),
                 ...dotsA1.map((dot) => at(NARRATION_START[6] ?? 6).animate(
                     dot.dotId,
                     { scale: { x: 0, y: 0, z: 0 } },
@@ -407,9 +424,9 @@ export default function KmvUnion() {
 
     const k = 10;
 
-    const sketchA = { values: [0.1, 0.2, 0.3, 0.4, 0.5], theta: 0.5 };
-    const sketchB = { values: [0.6, 0.7, 0.8], theta: 0.8 };
-    const union = { values: [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8], theta: 0.8, estimated: 9 };
+    const sketchA = { values: [0.05, 0.12, 0.18, 0.26, 0.33, 0.41, 0.52, 0.61, 0.73, 0.88], theta: 0.88 };
+    const sketchB = { values: [0.07, 0.14, 0.21, 0.28, 0.36, 0.44, 0.55, 0.66, 0.79, 0.92], theta: 0.92 };
+    const union = { values: [0.05, 0.12, 0.18, 0.26, 0.33, 0.41, 0.52, 0.61, 0.73, 0.88], theta: 0.88, estimated: 9 };
 
     return <Main sketchA={sketchA} sketchB={sketchB} union={union} k={k} />;
 }
