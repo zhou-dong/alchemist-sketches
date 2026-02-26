@@ -20,8 +20,8 @@ const floatUp = keyframes`
   100% { transform: translateY(0px); opacity: 0.35; }
 `;
 const popIn = keyframes`
-  0% { transform: scale(0.92); opacity: 0; }
-  100% { transform: scale(1); opacity: 1; }
+  0% { scale: 0.92; opacity: 0; }
+  100% { scale: 1; opacity: 1; }
 `;
 const glowPulse = keyframes`
   0% { box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.35); }
@@ -36,6 +36,10 @@ const sectionBorderPulse = keyframes`
     border-color: rgba(255, 183, 77, 0.65);
     box-shadow: 0 0 28px 2px rgba(255, 183, 77, 0.20);
   }
+`;
+const sectionBounce = keyframes`
+  0%, 100% { scale: 1; }
+  50% { scale: 1.02; }
 `;
 const sparkleTwinkle = keyframes`
   0%, 100% { transform: scale(0.6); opacity: 0.2; }
@@ -156,7 +160,7 @@ export default function ThetaSketchSetOperationsFinish() {
                         border: `1px solid ${alpha(theme.palette.success.main, 0.35)}`,
                         background: alpha(theme.palette.success.main, 0.05),
                         backdropFilter: "blur(4px)",
-                        animation: `${popIn} 520ms ease-out, ${sectionBorderPulse} 2.6s ease-in-out infinite`,
+                        animation: `${popIn} 520ms ease-out, ${sectionBorderPulse} 2.6s ease-in-out infinite, ${sectionBounce} 2.2s ease-in-out infinite`,
                     }}
                 >
                     <Box
