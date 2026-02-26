@@ -29,14 +29,14 @@ function App() {
               {/* Sketches list */}
               <Route path="/sketches" element={<Sketches />} />
               {/* Theta Sketch module routes */}
-              <Route path="/theta-sketch" element={<ThetaSketchWelcome />} />
-              <Route path="/theta-sketch/order-statistics" element={<OrderStatisticsPage />} />
-              <Route path="/theta-sketch/kse" element={<KthSmallestPage />} />
-              <Route path="/theta-sketch/kmv" element={<KmvPage />} />
-              <Route path="/theta-sketch/kmv-set-operations" element={<KmvSetOperationsPage />} />
-              <Route path="/theta-sketch/kmv-set-operations/:op" element={<KmvSetOperationsPage />} />
-              <Route path="/theta-sketch/set-operations" element={<ThetaSketchSetOperationsPage />} />
-              <Route path="/theta-sketch/set-operations/:op" element={<ThetaSketchSetOperationsPage />} />
+              <Route path="/sketches/theta" element={<ThetaSketchWelcome />} />
+              <Route path="/sketches/theta/order-statistics" element={<OrderStatisticsPage />} />
+              <Route path="/sketches/theta/kse" element={<KthSmallestPage />} />
+              <Route path="/sketches/theta/kmv" element={<KmvPage />} />
+              <Route path="/sketches/theta/kmv-set-operations" element={<KmvSetOperationsPage />} />
+              <Route path="/sketches/theta/kmv-set-operations/:op" element={<KmvSetOperationsPage />} />
+              <Route path="/sketches/theta/set-operations" element={<ThetaSketchSetOperationsPage />} />
+              <Route path="/sketches/theta/set-operations/:op" element={<ThetaSketchSetOperationsPage />} />
             </Routes>
           </Layout>
         </ThetaSketchProgressProvider>
