@@ -117,22 +117,16 @@ const Main = ({ sketchA, sketchB, union, k }: KmvUnionProps) => {
         const timelineScene: TimelineSceneThree = {
             objects: [
                 axisA.axisLine,
-                axisA.axisStartMarker,
-                axisA.axisEndMarker,
                 ...(dotsA.map((dot) => dot.dot)),
                 ...(dotsA1.map((dot) => dot.dot)),
                 ...(numbersA.map((number) => number.number)),
                 latexA.latex,
                 axisB.axisLine,
-                axisB.axisStartMarker,
-                axisB.axisEndMarker,
                 ...(dotsB.map((dot) => dot.dot)),
                 ...(dotsB1.map((dot) => dot.dot)),
                 ...(numbersB.map((number) => number.number)),
                 latexB.latex,
                 axisC.axisLine,
-                axisC.axisStartMarker,
-                axisC.axisEndMarker,
                 ...(dotsC.map((dot) => dot.dot)),
                 ...(numbersC.map((number) => number.number)),
                 ...(numbersABUnion.map((number) => number.number)),
@@ -141,8 +135,6 @@ const Main = ({ sketchA, sketchB, union, k }: KmvUnionProps) => {
             ],
             timeline: [
                 at(NARRATION_START[1] ?? 1).animate(axisA.axisLineId, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 }),
-                at(NARRATION_START[1] ?? 1).animate(axisA.axisStartMarkerId, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 }),
-                at(NARRATION_START[1] ?? 1).animate(axisA.axisEndMarkerId, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 }),
                 ...dotsA.map((dot) =>
                     at(NARRATION_START[1] ?? 1).animate(
                         dot.dotId,
@@ -170,8 +162,6 @@ const Main = ({ sketchA, sketchB, union, k }: KmvUnionProps) => {
                     { duration: 1 }
                 ),
                 at(NARRATION_START[2] ?? 2).animate(axisB.axisLineId, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 }),
-                at(NARRATION_START[2] ?? 2).animate(axisB.axisStartMarkerId, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 }),
-                at(NARRATION_START[2] ?? 2).animate(axisB.axisEndMarkerId, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 }),
                 ...dotsB.map((dot) =>
                     at(NARRATION_START[2] ?? 2).animate(
                         dot.dotId,
@@ -199,8 +189,6 @@ const Main = ({ sketchA, sketchB, union, k }: KmvUnionProps) => {
                     { duration: 1 }
                 ),
                 at(NARRATION_START[3] ?? 3).animate(axisC.axisLineId, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 }),
-                at(NARRATION_START[3] ?? 3).animate(axisC.axisStartMarkerId, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 }),
-                at(NARRATION_START[3] ?? 3).animate(axisC.axisEndMarkerId, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 }),
                 ...dotsC.map((dot) =>
                     at(NARRATION_START[3] ?? 3).animate(
                         dot.dotId,
@@ -420,8 +408,8 @@ export default function KmvUnion() {
     const k = 10;
 
     const sketchA = { values: [0.1, 0.2, 0.3, 0.4, 0.5], theta: 0.5 };
-    const sketchB = { values: [0.6, 0.7, 0.8, 0.9, 1.0], theta: 1.0 };
-    const union = { values: [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0], theta: 1.0, estimated: 9 };
+    const sketchB = { values: [0.6, 0.7, 0.8], theta: 0.8 };
+    const union = { values: [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8], theta: 0.8, estimated: 9 };
 
     return <Main sketchA={sketchA} sketchB={sketchB} union={union} k={k} />;
 }
