@@ -24,7 +24,7 @@ function ThetaSketchPageContent() {
     return (
         <>
             <StepTitle title="K Minimum Value (KMV)" />
-            <StepProgressIndicator currentStepId="kmv" />
+            <StepProgressIndicator currentStepId={3} />
 
             {/* Introduction */}
             {flowStep === 0 && <Recap onClose={() => setFlowStep(1)} />}

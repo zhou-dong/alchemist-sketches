@@ -62,7 +62,7 @@ export default function KmvSetOperationsIntroPage() {
 
     return (
         <>
-            <StepProgressIndicator currentStepId="set-operations" />
+            <StepProgressIndicator currentStepId={4} />
 
             <KmvSetOperationHeader title="KMV Set Operations" description={DESCRIPTION} />
 

@@ -55,7 +55,7 @@ function SetOperationsPage() {
     return (
         <>
             <StepTitle title="Set Operations" />
-            <StepProgressIndicator currentStepId="set-operations" />
+            <StepProgressIndicator currentStepId={5} />
 
             {/* Configuration */}
             {flowStep === 0 && (

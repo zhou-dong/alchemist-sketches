@@ -441,7 +441,7 @@ As more items arrive, the estimate updates as N-hat equals K divided by theta, m
                             isNarratingRef.current = false;
                             stopSubtitleTracking();
                             setCurrentSubtitle('');
-                            completeStep('kmv');
+                            completeStep(3);
                         }}
                     />
                 </Container>

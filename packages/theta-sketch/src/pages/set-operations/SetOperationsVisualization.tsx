@@ -497,7 +497,7 @@ export default function SetOperationsVisualization({
                         onComplete={() => {
                             animationController.stopAnimation();
                             speechSynthesis.cancel();
-                            completeStep('set-operations');
+                            completeStep(5);
                         }}
                     />
                 </Container>

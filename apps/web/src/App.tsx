@@ -34,7 +34,9 @@ function App() {
               <Route path="/theta-sketch/kse" element={<KthSmallestPage />} />
               <Route path="/theta-sketch/kmv" element={<KmvPage />} />
               <Route path="/theta-sketch/kmv-set-operations" element={<KmvSetOperationsPage />} />
+              <Route path="/theta-sketch/kmv-set-operations/:op" element={<KmvSetOperationsPage />} />
               <Route path="/theta-sketch/set-operations" element={<ThetaSketchSetOperationsPage />} />
+              <Route path="/theta-sketch/set-operations/:op" element={<ThetaSketchSetOperationsPage />} />
             </Routes>
           </Layout>
         </ThetaSketchProgressProvider>

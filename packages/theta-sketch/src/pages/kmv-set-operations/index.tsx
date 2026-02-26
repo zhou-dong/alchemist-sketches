@@ -1,6 +1,6 @@
-import type { ElementType } from 'react';
+import { useEffect, type ElementType } from 'react';
 import { Box, Paper, Step, StepButton, StepConnector, Stepper, useTheme } from '@mui/material';
-import { useSearchParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 
 import StepProgressIndicator from '../../components/StepProgressIndicator';
 import KmvUnion from './KmvUnion';
@@ -32,16 +32,27 @@ function getOp(value: string | null): Op {
 
 export default function KmvSetOperationsIndexPage() {
     const theme = useTheme();
-    const [searchParams, setSearchParams] = useSearchParams();
+    const navigate = useNavigate();
+    const { op: opParam } = useParams<{ op?: string }>();
 
-    const op = getOp(searchParams.get('op'));
+    const op = getOp(opParam ?? null);
+
+    // Keep old base route working by redirecting to /intro.
+    // Also guards invalid route params.
+    const isValidOp =
+        opParam === 'intro' ||
+        opParam === 'union' ||
+        opParam === 'intersection' ||
+        opParam === 'difference' ||
+        opParam === 'solution';
+    useEffect(() => {
+        if (!isValidOp) {
+            navigate('/theta-sketch/kmv-set-operations/intro', { replace: true });
+        }
+    }, [isValidOp, navigate]);
 
     const handleChange = (next: Op) => {
-        setSearchParams((prev) => {
-            const p = new URLSearchParams(prev);
-            p.set('op', next);
-            return p;
-        });
+        navigate(`/theta-sketch/kmv-set-operations/${next}`);
     };
 
     const activeStep = OPS.findIndex((o) => o.id === op);
@@ -49,7 +60,7 @@ export default function KmvSetOperationsIndexPage() {
 
     return (
         <>
-            <StepProgressIndicator currentStepId="set-operations" />
+            <StepProgressIndicator currentStepId={4} />
 
             {/* Left navigation overlay */}
             <Box

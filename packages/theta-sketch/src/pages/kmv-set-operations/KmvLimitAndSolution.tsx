@@ -57,7 +57,7 @@ export default function KmvLimitAndSolution() {
         <>
             <KmvSetOperationHeader title="KMV Limit and Solution" description={DESCRIPTION} />
 
-            <StepProgressIndicator currentStepId="set-operations" />
+            <StepProgressIndicator currentStepId={4} />
 
             <Container
                 maxWidth="md"

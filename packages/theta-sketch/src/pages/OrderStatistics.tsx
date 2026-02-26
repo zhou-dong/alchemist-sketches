@@ -260,7 +260,7 @@ function OrderStatisticsPageContent() {
     return (
         <>
             <StepTitle title="Order Statistics" />
-            <StepProgressIndicator currentStepId="order-statistics" />
+            <StepProgressIndicator currentStepId={1} />
 
             {/* Subtitle Display */}
             <Fade in={!!currentNarration}>
@@ -306,7 +306,7 @@ function OrderStatisticsPageContent() {
                         navigate('/theta-sketch/kse');
                     }}
                     nextButtonTooltip="Go to K-th Smallest Estimation"
-                    enableNextButton={isStepCompleted('order-statistics')}
+                    enableNextButton={isStepCompleted(1)}
                     onStart={() => {
                         animationController.startAnimation();
                     }}
@@ -316,7 +316,7 @@ function OrderStatisticsPageContent() {
                     }}
                     onComplete={() => {
                         animationController.stopAnimation();
-                        completeStep('order-statistics');
+                        completeStep(1);
                     }}
                 />
             </Container>

@@ -1,43 +1,55 @@
-import type { ElementType } from 'react';
+import { useEffect, type ElementType } from 'react';
 import { Box, Paper, Step, StepButton, StepConnector, Stepper, useTheme } from '@mui/material';
-import { useSearchParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import StepProgressIndicator from '../../components/StepProgressIndicator';
 
 import AutoStoriesIcon from '@mui/icons-material/AutoStories';
 import CallMergeIcon from '@mui/icons-material/CallMerge';
 import JoinInnerIcon from '@mui/icons-material/JoinInner';
 import DifferenceIcon from '@mui/icons-material/Difference';
+import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 
 import ThetaSketchSetOperationsIntro from './ThetaSketchSetOperationsIntro';
 import ThetaSketchUnion from './ThetaSketchUnion';
 import ThetaSketchIntersection from './ThetaSketchIntersection';
 import ThetaSketchDifference from './ThetaSketchDifference';
+import ThetaSketchSetOperationsFinish from './ThetaSketchSetOperationsFinish';
 
-type Op = 'intro' | 'union' | 'intersection' | 'difference';
+type Op = 'intro' | 'union' | 'intersection' | 'difference' | 'finish';
 
 const OPS: { id: Op; label: string; Icon: ElementType }[] = [
     { id: 'intro', label: 'Intro', Icon: AutoStoriesIcon },
     { id: 'union', label: 'Union', Icon: CallMergeIcon },
     { id: 'intersection', label: 'Intersection', Icon: JoinInnerIcon },
     { id: 'difference', label: 'Difference', Icon: DifferenceIcon },
+    { id: 'finish', label: 'Finish', Icon: EmojiEventsIcon },
 ];
 
 function getOp(value: string | null): Op {
-    if (value === 'intro' || value === 'intersection' || value === 'difference' || value === 'union') return value;
+    if (value === 'intro' || value === 'intersection' || value === 'difference' || value === 'union' || value === 'finish') return value;
     return 'intro';
 }
 
 export default function ThetaSketchSetOperationsPage() {
     const theme = useTheme();
-    const [searchParams, setSearchParams] = useSearchParams();
-    const op = getOp(searchParams.get('op'));
+    const navigate = useNavigate();
+    const { op: opParam } = useParams<{ op?: string }>();
+    const op = getOp(opParam ?? null);
+
+    const isValidOp =
+        opParam === 'intro' ||
+        opParam === 'union' ||
+        opParam === 'intersection' ||
+        opParam === 'difference' ||
+        opParam === 'finish';
+    useEffect(() => {
+        if (!isValidOp) {
+            navigate('/theta-sketch/set-operations/intro', { replace: true });
+        }
+    }, [isValidOp, navigate]);
 
     const handleChange = (next: Op) => {
-        setSearchParams((prev) => {
-            const p = new URLSearchParams(prev);
-            p.set('op', next);
-            return p;
-        });
+        navigate(`/theta-sketch/set-operations/${next}`);
     };
 
     const activeStep = OPS.findIndex((o) => o.id === op);
@@ -45,7 +57,7 @@ export default function ThetaSketchSetOperationsPage() {
 
     return (
         <>
-            <StepProgressIndicator currentStepId="set-operations" />
+            <StepProgressIndicator currentStepId={5} />
             <Box
                 sx={{
                     position: 'fixed',
@@ -84,6 +96,7 @@ export default function ThetaSketchSetOperationsPage() {
             {op === 'union' && <ThetaSketchUnion />}
             {op === 'intersection' && <ThetaSketchIntersection />}
             {op === 'difference' && <ThetaSketchDifference />}
+            {op === 'finish' && <ThetaSketchSetOperationsFinish />}
         </>
     );
 }

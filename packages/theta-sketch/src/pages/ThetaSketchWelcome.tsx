@@ -27,7 +27,7 @@ export const ThetaSketchWelcome = () => {
     const handleDiveIn = useCallback(
         () => {
             speechSynthesis.cancel();
-            completeStep('introduction');
+            completeStep(0);
             navigate('/theta-sketch/order-statistics');
         },
         [completeStep, navigate]
@@ -44,7 +44,7 @@ export const ThetaSketchWelcome = () => {
                 position: 'relative',
             }}
         >
-            <StepProgressIndicator currentStepId="introduction" />
+            <StepProgressIndicator currentStepId={0} />
 
             {/* Main Content - Slightly above center for better visual balance */}
             <Box

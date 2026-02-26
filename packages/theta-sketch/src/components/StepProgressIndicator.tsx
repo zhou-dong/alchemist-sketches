@@ -13,7 +13,7 @@ const ReplayIcon = Replay.default as unknown as React.ElementType;
 
 interface StepProgressIndicatorProps {
     /** Current step ID */
-    currentStepId: string;
+    currentStepId: number;
     /** Initial visibility state */
     defaultExpanded?: boolean;
 }
@@ -135,7 +135,7 @@ export default function StepProgressIndicator({
                             return (
                                 <Tooltip
                                     key={step.id}
-                                    title={isLocked ? 'Complete previous steps first' : step.description}
+                                    title={isLocked ? 'Complete previous steps first' : step.title}
                                     placement="right"
                                     arrow
                                 >

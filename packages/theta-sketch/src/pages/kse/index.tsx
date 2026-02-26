@@ -215,7 +215,7 @@ function KmvPageContent() {
     return (
         <>
             <StepTitle title="K-th Smallest Estimation" />
-            <StepProgressIndicator currentStepId="kse" />
+            <StepProgressIndicator currentStepId={2} />
 
             {/* Subtitle Display */}
             <Fade in={!!currentNarration}>
@@ -261,7 +261,7 @@ function KmvPageContent() {
                         navigate('/theta-sketch/kmv');
                     }}
                     nextButtonTooltip="Go to KMV Algorithm"
-                    enableNextButton={isStepCompleted('kse')}
+                    enableNextButton={isStepCompleted(2)}
                     onStart={() => {
                         animationController.startAnimation();
                     }}
@@ -272,7 +272,7 @@ function KmvPageContent() {
                     onComplete={() => {
                         animationController.stopAnimation();
                         speechSynthesis.cancel();
-                        completeStep('kse');
+                        completeStep(2);
                     }}
                 />
             </Container>

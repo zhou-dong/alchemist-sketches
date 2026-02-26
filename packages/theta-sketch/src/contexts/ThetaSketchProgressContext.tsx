@@ -7,63 +7,42 @@ import React, { createContext, useContext, useMemo, useCallback } from 'react';
 export type StepStatus = 'completed' | 'current' | 'locked';
 
 export interface RoadmapStep {
-    id: string;
+    id: number;
     title: string;
-    description: string;
-    duration: string;
     route: string;
 }
 
 // Step definitions (without status - status is computed dynamically)
 export const THETA_SKETCH_STEPS: RoadmapStep[] = [
     {
-        id: 'introduction',
+        id: 0,
         title: 'Introduction',
-        description: 'What we’re building toward, and why sketches matter.',
-        duration: '~2 min',
         route: '/theta-sketch',
     },
     {
-        id: 'order-statistics',
+        id: 1,
         title: 'Order statistics',
-        description: 'Understanding sorted values and their properties. The foundation for minimum-based estimation.',
-        duration: '~5 min',
         route: '/theta-sketch/order-statistics',
     },
     {
-        id: 'kse',
+        id: 2,
         title: 'Kth smallest estimation',
-        description: 'How the k-th smallest value relates to the total count. The key insight behind KMV.',
-        duration: '~8 min',
         route: '/theta-sketch/kse',
     },
     {
-        id: 'kmv',
+        id: 3,
         title: 'KMV algorithm',
-        description: 'K Minimum Values - tracking the k smallest hashed values to estimate cardinality.',
-        duration: '~10 min',
         route: '/theta-sketch/kmv',
     },
     {
-        id: 'kmv-set-ops',
+        id: 4,
         title: 'KMV Set operations',
-        description: 'Union, intersection, and difference. Combining sketches while preserving accuracy.',
-        duration: '~8 min',
-        route: '/theta-sketch/kmv-set-ops?op=union',
+        route: '/theta-sketch/kmv-set-operations/intro',
     },
     {
-        id: 'theta-sketch-intro',
-        title: 'Theta sketch intro',
-        description: 'Make θ explicit to remove the KMV set-operation limit.',
-        duration: '~10 min',
-        route: '/theta-sketch/theta-sketch',
-    },
-    {
-        id: 'theta-sketch-set-ops',
-        title: 'Theta sketch set ops',
-        description: 'How Theta Sketch performs union, intersection, and difference.',
-        duration: '~8 min',
-        route: '/theta-sketch/theta-sketch/set-operations',
+        id: 5,
+        title: 'Theta sketch set operations',
+        route: '/theta-sketch/set-operations/intro',
     },
 ];
 
@@ -73,17 +52,17 @@ export const THETA_SKETCH_STEPS: RoadmapStep[] = [
 
 interface ThetaSketchProgressContextType {
     /** Set of completed step IDs */
-    completedSteps: Set<string>;
+    completedSteps: Set<number>;
     /** Mark a step as completed */
-    completeStep: (stepId: string) => void;
+    completeStep: (stepId: number) => void;
     /** Reset all progress */
     resetProgress: () => void;
     /** Get status for a step (computed based on completed steps) */
-    getStepStatus: (stepId: string) => StepStatus;
+    getStepStatus: (stepId: number) => StepStatus;
     /** Get all steps with their computed status */
     getStepsWithStatus: () => Array<RoadmapStep & { status: StepStatus }>;
     /** Check if a step is completed */
-    isStepCompleted: (stepId: string) => boolean;
+    isStepCompleted: (stepId: number) => boolean;
 }
 
 const ThetaSketchProgressContext = createContext<ThetaSketchProgressContextType | undefined>(undefined);
@@ -112,34 +91,12 @@ interface ThetaSketchProgressProviderProps {
 
 export const ThetaSketchProgressProvider: React.FC<ThetaSketchProgressProviderProps> = ({ children }) => {
     // Load from localStorage
-    const [completedStepsArray, setCompletedStepsArray] = React.useState<string[]>(() => {
+    const [completedStepsArray, setCompletedStepsArray] = React.useState<number[]>(() => {
         try {
             const saved = localStorage.getItem(STORAGE_KEY);
             const parsed: unknown = saved ? JSON.parse(saved) : [];
-            const raw = Array.isArray(parsed) ? parsed.filter((v): v is string => typeof v === 'string') : [];
-
-            // -----------------------------------------------------------------
-            // Migration / compatibility
-            // -----------------------------------------------------------------
-            // - Old step ID: "theta-sketch"  -> new: "theta-sketch-intro"
-            // - New step 1: "introduction" at "/theta-sketch"
-            //
-            // If a user already completed later steps, auto-complete "introduction"
-            // so the new first step doesn't re-lock their existing progress.
-            const migrated = new Set<string>(raw);
-
-            if (migrated.has('theta-sketch') && !migrated.has('theta-sketch-intro')) {
-                migrated.add('theta-sketch-intro');
-            }
-
-            const hasNonIntroProgress = THETA_SKETCH_STEPS.some(
-                (s) => s.id !== 'introduction' && migrated.has(s.id)
-            );
-            if (hasNonIntroProgress) {
-                migrated.add('introduction');
-            }
-
-            return Array.from(migrated);
+            const raw = Array.isArray(parsed) ? parsed.filter((v): v is number => typeof v === 'number') : [];
+            return raw;
         } catch {
             return [];
         }
@@ -154,31 +111,31 @@ export const ThetaSketchProgressProvider: React.FC<ThetaSketchProgressProviderPr
     }, [completedStepsArray]);
 
     // Mark a step as completed
-    const completeStep = useCallback((stepId: string) => {
+    const completeStep = useCallback((stepId: number) => {
         setCompletedStepsArray(prev => {
             if (prev.includes(stepId)) return prev;
             return [...prev, stepId];
         });
-    }, []);
+    }, [setCompletedStepsArray]);
 
     // Reset all progress
     const resetProgress = useCallback(() => {
         setCompletedStepsArray([]);
-    }, []);
+    }, [setCompletedStepsArray]);
 
     // Check if a step is completed
-    const isStepCompleted = useCallback((stepId: string) => {
+    const isStepCompleted = useCallback((stepId: number) => {
         return completedSteps.has(stepId);
     }, [completedSteps]);
 
     // Get status for a step
     // Logic: First incomplete step is "current", all before it are "completed", all after are "locked"
-    const getStepStatus = useCallback((stepId: string): StepStatus => {
+    const getStepStatus = useCallback((stepId: number): StepStatus => {
         const stepIndex = THETA_SKETCH_STEPS.findIndex(s => s.id === stepId);
         if (stepIndex === -1) return 'locked';
 
         // Find the first incomplete step
-        let firstIncompleteIndex = THETA_SKETCH_STEPS.findIndex(s => !completedSteps.has(s.id));
+        const firstIncompleteIndex = THETA_SKETCH_STEPS.findIndex(s => !completedSteps.has(s.id));
         if (firstIncompleteIndex === -1) {
             // All steps completed
             return 'completed';
