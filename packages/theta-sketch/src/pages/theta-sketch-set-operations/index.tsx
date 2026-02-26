@@ -26,7 +26,8 @@ const OPS: { id: Op; label: string; Icon: ElementType }[] = [
 ];
 
 function getOp(value: string | null): Op {
-    if (value === 'intro' || value === 'intersection' || value === 'difference' || value === 'union' || value === 'finish') return value;
+    if (value === 'intro' || value === 'intersection' || value === 'difference' || value === 'union' || value === 'finish')
+        return value;
     return 'intro';
 }
 
