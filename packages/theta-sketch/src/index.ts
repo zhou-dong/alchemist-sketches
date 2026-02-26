@@ -8,11 +8,11 @@ export { default as OrderStatisticsPage } from './pages/OrderStatistics';
 export { default as KthSmallestPage } from './pages/kse';
 export { default as KmvPage } from './pages/kmv';
 export { default as SetOperationsPage } from './pages/set-operations';
-export { default as ThetaSketchPage } from './pages/ThetaSketch';
 export { default as KmvUnionPage } from './pages/kmv-set-operations/KmvUnion';
 export { default as KmvIntersectionPage } from './pages/kmv-set-operations/KmvIntersection';
 export { default as KmvDifferencePage } from './pages/kmv-set-operations/KmvDifference';
 export { default as KmvSetOperationsPage } from './pages/kmv-set-operations';
+export { default as ThetaSketchSetOperationsPage } from './pages/theta-sketch-set-operations';
 
 // Progress context
 export {
