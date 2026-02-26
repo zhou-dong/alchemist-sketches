@@ -14,8 +14,12 @@ function makeRandomId() {
 export function buildAxis(start: Position, end: Position) {
     const randomId = makeRandomId();
     const axisLineId = `axis_line_${randomId}`;
-    const axisLine = axis(axisLineId, start, end, { ...axisStyle, dotCount: 0 });
-    return { axisLineId, axisLine };
+    const axisStartMarkerId = `axis_start_marker_${axisLineId}`;
+    const axisEndMarkerId = `axis_end_marker_${axisLineId}`;
+    const axisLine = axis(axisLineId, start, end, { ...axisStyle, dotCount: 2 });
+    const axisStartMarker = text(axisStartMarkerId, "0", { x: start.x, y: start.y - 15 }, textStyle);
+    const axisEndMarker = text(axisEndMarkerId, "1", { x: end.x, y: end.y - 15 }, textStyle);
+    return { axisLineId, axisLine, axisStartMarkerId, axisStartMarker, axisEndMarkerId, axisEndMarker };
 }
 
 export function buildDot(start: Position, end: Position, value: number, sizeScale: number) {
