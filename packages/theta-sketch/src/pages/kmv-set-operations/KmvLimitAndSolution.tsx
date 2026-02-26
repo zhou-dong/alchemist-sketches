@@ -163,7 +163,7 @@ export default function KmvLimitAndSolution() {
                             speechSynthesis.cancel();
                             timeline.pause();
                             stop();
-                            navigate('/theta-sketch/theta-sketch');
+                            navigate('/sketches/theta/set-operations/intro');
                         }}
                         nextButtonTooltip="Go to Theta Sketch"
                         enableNextButton={true}

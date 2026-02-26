@@ -44,12 +44,12 @@ export default function ThetaSketchSetOperationsPage() {
         opParam === 'finish';
     useEffect(() => {
         if (!isValidOp) {
-            navigate('/theta-sketch/set-operations/intro', { replace: true });
+            navigate('/sketches/theta/set-operations/intro', { replace: true });
         }
     }, [isValidOp, navigate]);
 
     const handleChange = (next: Op) => {
-        navigate(`/theta-sketch/set-operations/${next}`);
+        navigate(`/sketches/theta/set-operations/${next}`);
     };
 
     const activeStep = OPS.findIndex((o) => o.id === op);
@@ -64,7 +64,7 @@ export default function ThetaSketchSetOperationsPage() {
                     top: '50%',
                     left: '24px',
                     transform: 'translateY(-50%)',
-                    zIndex: 100,
+                    zIndex: 2,
                 }}
             >
                 <Paper elevation={0} sx={{ border: 'none', background: 'transparent' }}>

@@ -3,6 +3,8 @@ import { keyframes } from '@mui/system';
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import { useNavigate } from 'react-router-dom';
+import { useEffect } from 'react';
+import { useThetaSketchProgress } from '@alchemist/theta-sketch';
 
 const confettiFall = keyframes`
   0% { transform: translateY(-12vh) rotate(0deg); opacity: 0; }
@@ -72,6 +74,11 @@ const CONFETTI = [
 export default function ThetaSketchSetOperationsFinish() {
     const theme = useTheme();
     const navigate = useNavigate();
+    const { completeStep } = useThetaSketchProgress();
+
+    useEffect(() => {
+        completeStep(5);
+    }, [completeStep]);
 
     return (
         <>

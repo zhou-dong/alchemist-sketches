@@ -378,7 +378,7 @@ const Main = ({ sketchA, sketchB, union, k }: KmvUnionProps) => {
                             setIsPlaying(false);
                             animationController.stopAnimation();
                             stop();
-                            navigate('/theta-sketch/kmv-set-ops?op=intersection');
+                            navigate('/sketches/theta/kmv-set-operations/intersection');
                         }}
                         onStart={() => {
                             setIsPlaying(true);

@@ -421,7 +421,7 @@ As more items arrive, the estimate updates as N-hat equals K divided by theta, m
                         showNextButton={true}
                         showMuteButton={false}
                         onNext={() => {
-                            navigate('/theta-sketch/kmv-set-ops?op=intro');
+                            navigate('/sketches/theta/kmv-set-operations/intro');
                         }}
                         nextButtonTooltip="Go to KMV Set Operations"
                         enableNextButton={true}

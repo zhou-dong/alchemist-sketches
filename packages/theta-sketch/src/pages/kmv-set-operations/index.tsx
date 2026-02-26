@@ -47,12 +47,12 @@ export default function KmvSetOperationsIndexPage() {
         opParam === 'solution';
     useEffect(() => {
         if (!isValidOp) {
-            navigate('/theta-sketch/kmv-set-operations/intro', { replace: true });
+            navigate('/sketches/theta/kmv-set-operations/intro', { replace: true });
         }
     }, [isValidOp, navigate]);
 
     const handleChange = (next: Op) => {
-        navigate(`/theta-sketch/kmv-set-operations/${next}`);
+        navigate(`/sketches/theta/kmv-set-operations/${next}`);
     };
 
     const activeStep = OPS.findIndex((o) => o.id === op);

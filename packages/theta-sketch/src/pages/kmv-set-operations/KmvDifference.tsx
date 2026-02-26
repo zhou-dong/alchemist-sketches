@@ -311,7 +311,7 @@ const Main = ({ sketchA, sketchB, difference, k }: KmvDifferenceProps) => {
                             setIsPlaying(false);
                             animationController.stopAnimation();
                             stop();
-                            navigate('/theta-sketch/kmv-set-ops?op=solution');
+                            navigate('/sketches/theta/kmv-set-operations/solution');
                         }}
                         onStart={() => {
                             setIsPlaying(true);
