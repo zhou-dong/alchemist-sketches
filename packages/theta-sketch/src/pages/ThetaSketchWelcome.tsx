@@ -28,7 +28,7 @@ export const ThetaSketchWelcome = () => {
         () => {
             speechSynthesis.cancel();
             completeStep(0);
-            navigate('/theta-sketch/order-statistics');
+            navigate('/sketches/theta/order-statistics');
         },
         [completeStep, navigate]
     );
