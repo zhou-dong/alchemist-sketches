@@ -29,7 +29,7 @@ function getOp(value: string | null): Op {
     if (value === 'intro' || value === 'intersection' || value === 'difference' || value === 'union' || value === 'finish')
         return value;
     return 'intro';
-}
+};
 
 export default function ThetaSketchSetOperationsPage() {
     const theme = useTheme();
@@ -100,5 +100,4 @@ export default function ThetaSketchSetOperationsPage() {
             {op === 'finish' && <ThetaSketchSetOperationsFinish />}
         </>
     );
-}
-
+};
