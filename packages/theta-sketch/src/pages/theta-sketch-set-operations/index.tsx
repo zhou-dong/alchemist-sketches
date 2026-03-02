@@ -4,9 +4,9 @@ import { useNavigate, useParams } from 'react-router-dom';
 import StepProgressIndicator from '../../components/StepProgressIndicator';
 
 import AutoStoriesIcon from '@mui/icons-material/AutoStories';
-import CallMergeIcon from '@mui/icons-material/CallMerge';
+import JoinFullIcon from '@mui/icons-material/JoinFull';
 import JoinInnerIcon from '@mui/icons-material/JoinInner';
-import DifferenceIcon from '@mui/icons-material/Difference';
+import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 
 import ThetaSketchSetOperationsIntro from './ThetaSketchSetOperationsIntro';
@@ -19,9 +19,9 @@ type Op = 'intro' | 'union' | 'intersection' | 'difference' | 'finish';
 
 const OPS: { id: Op; label: string; Icon: ElementType }[] = [
     { id: 'intro', label: 'Intro', Icon: AutoStoriesIcon },
-    { id: 'union', label: 'Union', Icon: CallMergeIcon },
+    { id: 'union', label: 'Union', Icon: JoinFullIcon },
     { id: 'intersection', label: 'Intersection', Icon: JoinInnerIcon },
-    { id: 'difference', label: 'Difference', Icon: DifferenceIcon },
+    { id: 'difference', label: 'Difference', Icon: RemoveCircleOutlineIcon },
     { id: 'finish', label: 'Finish', Icon: EmojiEventsIcon },
 ];
 
