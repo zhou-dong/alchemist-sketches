@@ -16,14 +16,14 @@ import { buildAxis, buildDot, buildLatex, buildThetaMarker, buildThetaSketchDesc
 import { ThetaSketchSetOperationHeader } from './ThetaSketchSetOperationsSharedComponents';
 
 const NARRATION: Record<number, string> = {
-    0: `On this page, we will compute a union using KMV sketches. Each sketch keeps only the K smallest hash values, and theta is inferred as the K-th value.`,
-    1: `This is Sketch A. It contains the K smallest hash values from stream A.`,
-    2: `This is Sketch B. It contains the K smallest hash values from stream B.`,
-    3: `This is the union sketch. It initially as an empty sketch.`,
-    4: "We add the values from Sketch A and Sketch B to it.",
-    5: "We then remove duplicates and sort the values.",
-    6: "Finally, we keep the K smallest values and infer theta as the maximum of those values.",
-    7: "For union, KMV is safe to chain. The union result keeps exactly K values, so the correct theta is always recoverable as the maximum of those values.",
+    0: `On this page, we will compute a union using Theta Sketch. Each sketch keeps the K smallest hash values, and stores theta explicitly.`,
+    1: `For the estimation, we use the formula: estimated equals S divided by theta where S is the number of retained hashes, and theta is stored explicitly in the sketch.`,
+    2: `This is Sketch A. It contains the K smallest hash values from stream A.`,
+    3: `This is Sketch B. It contains the K smallest hash values from stream B.`,
+    4: `This is the union sketch. It initially as an empty sketch.`,
+    5: "We add the values from Sketch A and Sketch B to the union sketch.",
+    6: "We then remove duplicates and sort the values.",
+    7: "Finally, we keep the K smallest values, store theta as the maximum of those values, and estimate the union size.",
 };
 
 const unionFormula = (k: number, theta: number, s: number, estimated: number) => {
@@ -142,96 +142,96 @@ const Main = ({ sketchA, sketchB, union, k }: KmvUnionProps) => {
                 thetaMarkerC.thetaSign,
             ],
             timeline: [
-                at(NARRATION_START[0] ?? 0).animate(latexDescription.latexId, { scale: { x: 1, y: 1, z: 1 } }, { duration: 1 }),
-                at(NARRATION_START[1] ?? 1).animate(axisA.axisLineId, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 }),
-                at(NARRATION_START[1] ?? 1).animate(thetaMarkerA.thetaLineId, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 }),
-                at(NARRATION_START[1] ?? 1).animate(thetaMarkerA.thetaSignId, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 }),
+                at(NARRATION_START[0 + 1] ?? 0).animate(latexDescription.latexId, { scale: { x: 1, y: 1, z: 1 } }, { duration: 1 }),
+                at(NARRATION_START[1 + 1] ?? 1).animate(axisA.axisLineId, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 }),
+                at(NARRATION_START[1 + 1] ?? 1).animate(thetaMarkerA.thetaLineId, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 }),
+                at(NARRATION_START[1 + 1] ?? 1).animate(thetaMarkerA.thetaSignId, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 }),
                 ...dotsA.map((dot) =>
-                    at(NARRATION_START[1] ?? 1).animate(
+                    at(NARRATION_START[1 + 1] ?? 1).animate(
                         dot.dotId,
                         { position: { y: `+=${window.innerHeight}` } },
                         { duration: 1 }
                     )
                 ),
                 ...dotsA1.map((dot) =>
-                    at(NARRATION_START[1] ?? 1).animate(
+                    at(NARRATION_START[1 + 1] ?? 1).animate(
                         dot.dotId,
                         { position: { y: `+=${window.innerHeight}` } },
                         { duration: 1 }
                     )
                 ),
-                at(NARRATION_START[1] ?? 1).animate(
+                at(NARRATION_START[1 + 1] ?? 1).animate(
                     latexA.latexId,
                     { position: { y: `+=${window.innerHeight}` } },
                     { duration: 1 }
                 ),
-                at(NARRATION_START[2] ?? 2).animate(axisB.axisLineId, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 }),
-                at(NARRATION_START[2] ?? 2).animate(thetaMarkerB.thetaLineId, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 }),
-                at(NARRATION_START[2] ?? 2).animate(thetaMarkerB.thetaSignId, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 }),
+                at(NARRATION_START[2 + 1] ?? 2).animate(axisB.axisLineId, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 }),
+                at(NARRATION_START[2 + 1] ?? 2).animate(thetaMarkerB.thetaLineId, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 }),
+                at(NARRATION_START[2 + 1] ?? 2).animate(thetaMarkerB.thetaSignId, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 }),
                 ...dotsB.map((dot) =>
-                    at(NARRATION_START[2] ?? 2).animate(
+                    at(NARRATION_START[2 + 1] ?? 2).animate(
                         dot.dotId,
                         { position: { y: `+=${window.innerHeight}` } },
                         { duration: 1 }
                     )
                 ),
                 ...dotsB1.map((dot) =>
-                    at(NARRATION_START[2] ?? 2).animate(
+                    at(NARRATION_START[2 + 1] ?? 2).animate(
                         dot.dotId,
                         { position: { y: `+=${window.innerHeight}` } },
                         { duration: 1 }
                     )
                 ),
-                at(NARRATION_START[2] ?? 2).animate(
+                at(NARRATION_START[2 + 1] ?? 2).animate(
                     latexB.latexId,
                     { position: { y: `+=${window.innerHeight}` } },
                     { duration: 1 }
                 ),
-                at(NARRATION_START[3] ?? 3).animate(axisC.axisLineId, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 }),
-                at(NARRATION_START[3] ?? 3).animate(thetaMarkerC.thetaLineId, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 }),
-                at(NARRATION_START[3] ?? 3).animate(thetaMarkerC.thetaSignId, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 }),
+                at(NARRATION_START[3 + 1] ?? 3).animate(axisC.axisLineId, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 }),
+                at(NARRATION_START[3 + 1] ?? 3).animate(thetaMarkerC.thetaLineId, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 }),
+                at(NARRATION_START[3 + 1] ?? 3).animate(thetaMarkerC.thetaSignId, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 }),
                 ...dotsC.map((dot) =>
-                    at(NARRATION_START[3] ?? 3).animate(
+                    at(NARRATION_START[3 + 1] ?? 3).animate(
                         dot.dotId,
                         { position: { y: `+=${window.innerHeight}` } },
                         { duration: 1 }
                     )
                 ),
-                at(NARRATION_START[3] ?? 3).animate(
+                at(NARRATION_START[3 + 1] ?? 3).animate(
                     latexUnion.latexId,
                     { position: { y: `+=${window.innerHeight}` } },
                     { duration: 1 }
                 ),
-                ...dotsA1.map((dot) => at(NARRATION_START[4] ?? 4).animate(
+                ...dotsA1.map((dot) => at(NARRATION_START[4 + 1] ?? 4).animate(
                     dot.dotId,
                     { position: { y: `-=${window.innerHeight / 12 * 4}` } },
                     { duration: 1 }
                 )),
-                ...dotsB1.map((dot) => at(NARRATION_START[4] ?? 4).animate(
+                ...dotsB1.map((dot) => at(NARRATION_START[4 + 1] ?? 4).animate(
                     dot.dotId,
                     { position: { y: `-=${window.innerHeight / 12 * 2}` } },
                     { duration: 1 }
                 )),
-                at(NARRATION_START[6] ?? 6).animate(thetaMarkerC.thetaLineId, { scale: { x: 1, y: 1, z: 1 } }, { duration: 1 }),
-                at(NARRATION_START[6] ?? 6).animate(thetaMarkerC.thetaSignId, { scale: { x: 1, y: 1, z: 1 } }, { duration: 1 }),
-                ...dotsA1.map((dot) => at(NARRATION_START[6] ?? 6).animate(
+                at(NARRATION_START[6 + 1] ?? 6).animate(thetaMarkerC.thetaLineId, { scale: { x: 1, y: 1, z: 1 } }, { duration: 1 }),
+                at(NARRATION_START[6 + 1] ?? 6).animate(thetaMarkerC.thetaSignId, { scale: { x: 1, y: 1, z: 1 } }, { duration: 1 }),
+                ...dotsA1.map((dot) => at(NARRATION_START[6 + 1] ?? 6).animate(
                     dot.dotId,
                     { scale: { x: 0, y: 0, z: 0 } },
                     { duration: 1 }
                 )),
-                ...dotsB1.map((dot) => at(NARRATION_START[6] ?? 6).animate(
+                ...dotsB1.map((dot) => at(NARRATION_START[6 + 1] ?? 6).animate(
                     dot.dotId,
                     { scale: { x: 0, y: 0, z: 0 } },
                     { duration: 1 }
                 )),
                 ...dotsC.map((dot) =>
-                    at(NARRATION_START[6] ?? 6).animate(
+                    at(NARRATION_START[6 + 1] ?? 6).animate(
                         dot.dotId,
                         { scale: { x: 1, y: 1, z: 1 } },
                         { duration: 1 }
                     )
                 ),
-                at(NARRATION_START[6] ?? 6).animate(
+                at(NARRATION_START[6 + 1] ?? 6).animate(
                     latexUnion.latexId,
                     { scale: { x: 1, y: 1, z: 1 } },
                     { duration: 1 }
