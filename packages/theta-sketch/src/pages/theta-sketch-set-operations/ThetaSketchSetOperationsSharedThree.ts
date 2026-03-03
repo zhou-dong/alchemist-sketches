@@ -21,8 +21,8 @@ export function buildThetaMarker(start: Position, end: Position, value: number, 
     const adjustedY = y - yOffset;
     const thetaLineId = `theta_marker_line_${randomId}`;
     const thetaSignId = `theta_marker_sign_${randomId}`;
-    const thetaLine = line(thetaLineId, { x, y: adjustedY + 25 }, { x, y: adjustedY }, 2, lineStyle);
-    const thetaSign = text(thetaSignId, `θ = ${value.toFixed(2)}`, { x, y: adjustedY + 35 }, { ...textStyle, fontSize: '16px' });
+    const thetaLine = line(thetaLineId, { x, y: adjustedY + 20 }, { x, y: adjustedY }, 2, lineStyle);
+    const thetaSign = text(thetaSignId, `θ = ${value.toFixed(2)}`, { x, y: adjustedY + 30 }, { ...textStyle, fontSize: '16px' });
 
     (thetaLine.target as THREE.Mesh).scale.set(sizeScale, sizeScale, sizeScale);
     (thetaSign.target as THREE.Mesh).scale.set(sizeScale, sizeScale, sizeScale);
@@ -64,16 +64,27 @@ export function buildNumber(start: Position, end: Position, value: number, size:
 export function buildLatex(y: number, latexExpression: string, scale: number, fontSize = '14px') {
     const randomId = makeRandomId();
     const latexId = `latex_${randomId}`;
-    const instance = latex(latexId, latexExpression, { x: 0, y: y + 65 }, { ...textStyle, fontSize });
+    const instance = latex(latexId, latexExpression, { x: 0, y }, { ...textStyle, fontSize });
     (instance.target as THREE.Mesh).scale.set(scale, scale, scale);
     return { latexId, latex: instance };
 }
 
-export const buildThetaSketchInfoLatex = (title: string, y: number, k: number, theta: number, estimated: number, scale: number) => {
+export const buildThetaSketchInfoLatex = (title: string, y: number, s: number, theta: number, estimated: number, scale: number) => {
     const latexExpression = `\\begin{align*}
-    \\text{ ${title} } \\quad | \\quad \\quad
-    k = ${k}, \\quad \\theta=\\min(\\theta_A,\\theta_B)=${theta.toFixed(2)},\\quad \\hat{N} = \\frac{k}{\\theta} - 1 = \\frac{${k}}{${theta.toFixed(2)}} - 1 = ${estimated.toFixed(2)}
+    \\text{ ${title} }| \\quad
+    k = ${s}, \\quad \\theta=${theta.toFixed(2)},
+    \\quad \\hat{N} = \\frac{|S|}{\\theta}= \\frac{${s}}{${theta.toFixed(2)}} = ${estimated.toFixed(2)}
+
+
     \\end{align*}
     `;
+    return buildLatex(y, latexExpression, scale, '14px');
+};
+
+export const buildThetaSketchDescriptionLatex = (y: number, scale: number) => {
+    const latexExpression = `
+\\begin{align*}
+\\hat{N} = \\frac{|S|}{\\theta} \\text{ where } |S| \\text{ is the number of retained hashes,} \\text{ and } \\theta \\text{ is stored explicitly in the sketch}
+\\end{align*}`;
     return buildLatex(y, latexExpression, scale, '14px');
 };
