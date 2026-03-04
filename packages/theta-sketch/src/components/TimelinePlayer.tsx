@@ -25,6 +25,7 @@ interface TimelinePlayerProps {
   timeline: any; // GSAP Timeline
   showProgress?: boolean;
   showSpeed?: boolean;
+  showRestartButton?: boolean;
   showMuteButton?: boolean;
   showNextButton?: boolean;
   enableNextButton?: boolean;
@@ -32,6 +33,7 @@ interface TimelinePlayerProps {
   onNext?: () => void;
   size?: 'small' | 'medium' | 'large';
   onStart: () => void;
+  onRestart?: () => void;
   onPause: () => void;
   onComplete: () => void;
   onMuteChange?: (isMuted: boolean) => void;
@@ -40,6 +42,7 @@ interface TimelinePlayerProps {
 export default function TimelinePlayer({
   timeline,
   showSpeed = false,
+  showRestartButton = true,
   showMuteButton = false,
   showNextButton = false,
   enableNextButton = false,
@@ -47,6 +50,7 @@ export default function TimelinePlayer({
   onNext,
   size = 'large',
   onStart,
+  onRestart,
   onPause,
   onComplete,
   onMuteChange,
@@ -98,8 +102,13 @@ export default function TimelinePlayer({
   };
 
   const handleRestart = () => {
+    if (onRestart) {
+      onRestart();
+      return;
+    }
     timeline.restart();
     setIsPlaying(true);
+    onStart();
   };
 
   const handleNextPage = () => {
@@ -193,15 +202,17 @@ export default function TimelinePlayer({
         <ProgressBar />
         {/* Control Buttons */}
         <Stack direction="row" spacing={1} justifyContent="center" alignItems="center" sx={{ py: 0.5 }}>
-          <Tooltip title="Restart">
-            <IconButton
-              onClick={handleRestart}
-              size={buttonSize}
-              sx={{ color: theme.palette.text.secondary }}
-            >
-              <RestartIcon />
-            </IconButton>
-          </Tooltip>
+          {showRestartButton && (
+            <Tooltip title="Restart">
+              <IconButton
+                onClick={handleRestart}
+                size={buttonSize}
+                sx={{ color: theme.palette.text.secondary }}
+              >
+                <RestartIcon />
+              </IconButton>
+            </Tooltip>
+          )}
 
           <Tooltip title={isPlaying ? 'Pause' : 'Play'}>
             <IconButton
