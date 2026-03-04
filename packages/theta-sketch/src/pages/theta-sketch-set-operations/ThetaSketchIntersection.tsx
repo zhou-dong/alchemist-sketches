@@ -34,7 +34,7 @@ const intersectionFormula = (theta: number, m: number, estimated: number) => {
 \\theta=\\min(\\theta_A,\\theta_B)=${theta.toFixed(2)} \\quad,
 h_1 = \\{v \\in A \\mid v < \\theta\\} \\quad,
 h_2 = \\{v \\in B \\mid v < \\theta\\} \\\\
-\\hat{N}=\\frac{|S|}{\\theta}=\\frac{|h_1 \\cap h_2|}{\\theta}=\\frac{${m}}{${theta.toFixed(2)}}=${estimated.toFixed(2)}
+\\hat{N}=\\frac{|h_1 \\cap h_2|}{\\theta}=\\frac{${m}}{${theta.toFixed(2)}}=${estimated.toFixed(2)}
 \\end{gathered}`;
 };
 
