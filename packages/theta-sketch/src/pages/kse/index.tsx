@@ -43,7 +43,8 @@ const STEP_NARRATIONS: Record<number, string> = {
 };
 
 // Calculate step durations and cumulative start times
-const { startTimes: STEP_START_TIMES } = calculateStepTimings(STEP_NARRATIONS);
+const { startTimes: STEP_START_TIMES, durations: STEP_DURATIONS } = calculateStepTimings(STEP_NARRATIONS);
+const narrationSize = Object.keys(STEP_NARRATIONS).length;
 
 const ANIMATION_DURATION = 0.8;
 
@@ -143,6 +144,10 @@ let timeline = buildAnimateTimeline(
     animationController.startAnimation,
     animationController.stopAnimation
 );
+
+// Ensure the timeline stays alive long enough for step-4 narration to finish
+// (otherwise onComplete can fire too early and cancel the utterance).
+timeline.to({}, { duration: STEP_DURATIONS[narrationSize - 1] ?? 1 }, STEP_START_TIMES[narrationSize - 1] ?? narrationSize - 1);
 
 function KmvPageContent() {
     const { completeStep, isStepCompleted } = useThetaSketchProgress();
