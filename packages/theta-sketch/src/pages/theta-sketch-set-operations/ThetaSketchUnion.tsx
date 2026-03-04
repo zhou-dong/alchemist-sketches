@@ -365,12 +365,19 @@ const Main = ({ sketchA, sketchB, union, k }: KmvUnionProps) => {
 }
 
 export default function KmvUnion() {
-
-    const k = 10;
-
-    const sketchA = { values: [0.04, 0.09, 0.13, 0.18, 0.24, 0.31, 0.39, 0.47, 0.58, 0.72], theta: 0.72 };
-    const sketchB = { values: [0.06, 0.10, 0.13, 0.20, 0.24, 0.34, 0.42, 0.53, 0.65, 0.79], theta: 0.79 };
-    const union = { values: [0.04, 0.06, 0.09, 0.10, 0.13, 0.18, 0.20, 0.24, 0.31, 0.34], theta: 0.34, estimated: 29.41 };
+    const k = React.useMemo(() => 10, []);
+    const sketchA = React.useMemo(
+        () => ({ values: [0.04, 0.09, 0.13, 0.18, 0.24, 0.31, 0.39, 0.47, 0.58, 0.72], theta: 0.72 }),
+        []
+    );
+    const sketchB = React.useMemo(
+        () => ({ values: [0.06, 0.10, 0.13, 0.20, 0.24, 0.34, 0.42, 0.53, 0.65, 0.79], theta: 0.79 }),
+        []
+    );
+    const union = React.useMemo(
+        () => ({ values: [0.04, 0.06, 0.09, 0.10, 0.13, 0.18, 0.20, 0.24, 0.31, 0.34], theta: 0.34, estimated: 29.41 }),
+        []
+    );
 
     return <Main sketchA={sketchA} sketchB={sketchB} union={union} k={k} />;
 }
