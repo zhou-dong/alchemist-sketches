@@ -238,7 +238,7 @@ export default function ThetaSketchSetOperationsFinish() {
                     </Typography>
 
                     <Stack direction="row" spacing={2} justifyContent="center" flexWrap="wrap">
-                        <Button variant="outlined" size="large" onClick={() => navigate('/theta-sketch')}>
+                        <Button variant="outlined" size="large" onClick={() => navigate('/sketches/theta')}>
                             Retake Course
                         </Button>
                         <Button variant="contained" size="large" onClick={() => navigate('/sketches')}>
