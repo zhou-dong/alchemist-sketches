@@ -42,7 +42,8 @@ const STEP_NARRATIONS: Record<number, string> = {
 };
 
 // Calculate step durations and cumulative start times
-const { startTimes: STEP_START_TIMES } = calculateStepTimings(STEP_NARRATIONS);
+const { startTimes: STEP_START_TIMES, durations: STEP_DURATIONS } = calculateStepTimings(STEP_NARRATIONS);
+const narrationSize = Object.keys(STEP_NARRATIONS).length;
 
 const OrderStatisticsExpression = `\\mathbb{E}[X_{(k)}] = \\frac{k}{n+1}`;
 const BetaDistributionExpectedValueExpression = `
@@ -180,6 +181,10 @@ let timelinePlayer = buildAnimateTimeline(
     animationController.startAnimation,
     animationController.stopAnimation
 );
+
+// Ensure the timeline stays alive long enough for step-4 narration to finish
+// (otherwise onComplete can fire too early and cancel the utterance).
+timelinePlayer.to({}, { duration: STEP_DURATIONS[narrationSize - 1] ?? 1 }, STEP_START_TIMES[narrationSize - 1] ?? narrationSize - 1);
 
 function OrderStatisticsPageContent() {
     const { completeStep, isStepCompleted } = useThetaSketchProgress();
