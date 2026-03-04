@@ -302,10 +302,19 @@ const Main = ({ sketchA, sketchB, difference, k }: ThetaSketchDifferenceProps) =
 };
 
 export default function ThetaSketchDifference() {
-    const k = 10;
-    const sketchA = { values: [0.04, 0.09, 0.13, 0.18, 0.24, 0.31, 0.39, 0.47, 0.58, 0.72], theta: 0.72 };
-    const sketchB = { values: [0.06, 0.10, 0.13, 0.20, 0.24, 0.34, 0.42, 0.53, 0.65, 0.79], theta: 0.79 };
-    const difference = { values: [0.04, 0.09, 0.18, 0.31, 0.39, 0.47, 0.58], theta: 0.72, estimated: 9.72 };
+    const k = React.useMemo(() => 10, []);
+    const sketchA = React.useMemo(
+        () => ({ values: [0.04, 0.09, 0.13, 0.18, 0.24, 0.31, 0.39, 0.47, 0.58, 0.72], theta: 0.72 }),
+        []
+    );
+    const sketchB = React.useMemo(
+        () => ({ values: [0.06, 0.10, 0.13, 0.20, 0.24, 0.34, 0.42, 0.53, 0.65, 0.79], theta: 0.79 }),
+        []
+    );
+    const difference = React.useMemo(
+        () => ({ values: [0.04, 0.09, 0.18, 0.31, 0.39, 0.47, 0.58], theta: 0.72, estimated: 9.72 }),
+        []
+    );
     return <Main sketchA={sketchA} sketchB={sketchB} difference={difference} k={k} />;
 }
 
