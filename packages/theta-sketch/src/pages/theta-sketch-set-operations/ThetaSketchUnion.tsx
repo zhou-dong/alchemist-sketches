@@ -17,13 +17,14 @@ import { ThetaSketchSetOperationHeader } from './ThetaSketchSetOperationsSharedC
 
 const NARRATION: Record<number, string> = {
     0: `On this page, we will compute a union using Theta Sketch. Each sketch keeps the K smallest hash values, and stores theta explicitly.`,
-    1: `For the estimation, we use the formula: estimated equals S divided by theta where S is the number of retained hashes, and theta is stored explicitly in the sketch.`,
+    1: `For the estimation, we use the formula: estimated equals S divided by theta, where S is the number of retained hashes, and theta is stored explicitly in the sketch.`,
     2: `This is Sketch A. It contains the K smallest hash values from stream A.`,
     3: `This is Sketch B. It contains the K smallest hash values from stream B.`,
     4: `This is the union sketch. It initially as an empty sketch.`,
     5: "We add the values from Sketch A and Sketch B to the union sketch.",
-    6: "We then remove duplicates and sort the values.",
-    7: "Finally, we keep the K smallest values, store theta as the maximum of those values, and estimate the union size.",
+    6: "We then remove duplicates, sort them, and keep the K smallest values.",
+    7: "Finally, we store theta as the maximum of those values, and estimate the union size.",
+    8: "As you can see, the union operation between KMV and Theta Sketch is quite similar. The main difference is that Theta Sketch stores theta explicitly.",
 };
 
 const unionFormula = (k: number, theta: number, s: number, estimated: number) => {
@@ -104,21 +105,21 @@ const Main = ({ sketchA, sketchB, union, k }: KmvUnionProps) => {
         const axisA = buildAxis({ x: startX, y: aY }, { x: endX, y: aY });
         const dotsA = sketchA.values.map((value) => buildDot({ x: startX, y: aY }, { x: endX, y: aY }, value, 1));
         const dotsA1 = sketchA.values.map((value) => buildDot({ x: startX, y: aY }, { x: endX, y: aY }, value, 1));
-        const latexA = buildThetaSketchInfoLatex("Sketch A", aY - 40, k, sketchA.theta, sketchA.theta > 0 ? k / sketchA.theta - 1 : 0, 1);
+        const latexA = buildThetaSketchInfoLatex("Sketch A", aY - 40, k, sketchA.theta, sketchA.theta > 0 ? k / sketchA.theta : 0, 1);
         const thetaMarkerA = buildThetaMarker({ x: startX, y: aY }, { x: endX, y: aY }, sketchA.theta, 1);
 
         const bY = window.innerHeight / 12 - window.innerHeight;
         const axisB = buildAxis({ x: startX, y: bY }, { x: endX, y: bY });
         const dotsB = sketchB.values.map((value) => buildDot({ x: startX, y: bY }, { x: endX, y: bY }, value, 1));
         const dotsB1 = sketchB.values.map((value) => buildDot({ x: startX, y: bY }, { x: endX, y: bY }, value, 1));
-        const latexB = buildThetaSketchInfoLatex("Sketch B", bY - 40, k, sketchB.theta, sketchB.theta > 0 ? k / sketchB.theta - 1 : 0, 1);
+        const latexB = buildThetaSketchInfoLatex("Sketch B", bY - 40, k, sketchB.theta, sketchB.theta > 0 ? k / sketchB.theta : 0, 1);
         const thetaMarkerB = buildThetaMarker({ x: startX, y: bY }, { x: endX, y: bY }, sketchB.theta, 1);
 
         const cY = -window.innerHeight / 12 - window.innerHeight;
         const axisC = buildAxis({ x: startX, y: cY }, { x: endX, y: cY });
         const dotsC = union.values.map((value) => buildDot({ x: startX, y: cY }, { x: endX, y: cY }, value, 0));
         const thetaMarkerC = buildThetaMarker({ x: startX, y: cY }, { x: endX, y: cY }, union.theta, 0);
-        const latexUnion = buildLatex(-window.innerHeight / 12 * 2 - window.innerHeight, unionFormula(k, union.theta, union.values.length, union.values.length / union.theta), 0, '14px');
+        const latexUnion = buildLatex(-window.innerHeight / 12 * 2 - window.innerHeight, unionFormula(k, union.theta, union.values.length, union.theta > 0 ? union.values.length / union.theta : 0), 0, '14px');
 
         const timelineScene: TimelineSceneThree = {
             objects: [
@@ -142,96 +143,96 @@ const Main = ({ sketchA, sketchB, union, k }: KmvUnionProps) => {
                 thetaMarkerC.thetaSign,
             ],
             timeline: [
-                at(NARRATION_START[0 + 1] ?? 0).animate(latexDescription.latexId, { scale: { x: 1, y: 1, z: 1 } }, { duration: 1 }),
-                at(NARRATION_START[1 + 1] ?? 1).animate(axisA.axisLineId, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 }),
-                at(NARRATION_START[1 + 1] ?? 1).animate(thetaMarkerA.thetaLineId, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 }),
-                at(NARRATION_START[1 + 1] ?? 1).animate(thetaMarkerA.thetaSignId, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 }),
+                at(NARRATION_START[1] ?? 1).animate(latexDescription.latexId, { scale: { x: 1, y: 1, z: 1 } }, { duration: 1 }),
+                at(NARRATION_START[2] ?? 2).animate(axisA.axisLineId, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 }),
+                at(NARRATION_START[2] ?? 2).animate(thetaMarkerA.thetaLineId, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 }),
+                at(NARRATION_START[2] ?? 2).animate(thetaMarkerA.thetaSignId, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 }),
                 ...dotsA.map((dot) =>
-                    at(NARRATION_START[1 + 1] ?? 1).animate(
+                    at(NARRATION_START[2] ?? 2).animate(
                         dot.dotId,
                         { position: { y: `+=${window.innerHeight}` } },
                         { duration: 1 }
                     )
                 ),
                 ...dotsA1.map((dot) =>
-                    at(NARRATION_START[1 + 1] ?? 1).animate(
+                    at(NARRATION_START[2] ?? 2).animate(
                         dot.dotId,
                         { position: { y: `+=${window.innerHeight}` } },
                         { duration: 1 }
                     )
                 ),
-                at(NARRATION_START[1 + 1] ?? 1).animate(
+                at(NARRATION_START[2] ?? 2).animate(
                     latexA.latexId,
                     { position: { y: `+=${window.innerHeight}` } },
                     { duration: 1 }
                 ),
-                at(NARRATION_START[2 + 1] ?? 2).animate(axisB.axisLineId, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 }),
-                at(NARRATION_START[2 + 1] ?? 2).animate(thetaMarkerB.thetaLineId, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 }),
-                at(NARRATION_START[2 + 1] ?? 2).animate(thetaMarkerB.thetaSignId, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 }),
+                at(NARRATION_START[3] ?? 3).animate(axisB.axisLineId, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 }),
+                at(NARRATION_START[3] ?? 3).animate(thetaMarkerB.thetaLineId, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 }),
+                at(NARRATION_START[3] ?? 3).animate(thetaMarkerB.thetaSignId, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 }),
                 ...dotsB.map((dot) =>
-                    at(NARRATION_START[2 + 1] ?? 2).animate(
+                    at(NARRATION_START[3] ?? 3).animate(
                         dot.dotId,
                         { position: { y: `+=${window.innerHeight}` } },
                         { duration: 1 }
                     )
                 ),
                 ...dotsB1.map((dot) =>
-                    at(NARRATION_START[2 + 1] ?? 2).animate(
+                    at(NARRATION_START[3] ?? 3).animate(
                         dot.dotId,
                         { position: { y: `+=${window.innerHeight}` } },
                         { duration: 1 }
                     )
                 ),
-                at(NARRATION_START[2 + 1] ?? 2).animate(
+                at(NARRATION_START[3] ?? 3).animate(
                     latexB.latexId,
                     { position: { y: `+=${window.innerHeight}` } },
                     { duration: 1 }
                 ),
-                at(NARRATION_START[3 + 1] ?? 3).animate(axisC.axisLineId, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 }),
-                at(NARRATION_START[3 + 1] ?? 3).animate(thetaMarkerC.thetaLineId, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 }),
-                at(NARRATION_START[3 + 1] ?? 3).animate(thetaMarkerC.thetaSignId, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 }),
+                at(NARRATION_START[4] ?? 4).animate(axisC.axisLineId, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 }),
+                at(NARRATION_START[4] ?? 4).animate(thetaMarkerC.thetaLineId, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 }),
+                at(NARRATION_START[4] ?? 4).animate(thetaMarkerC.thetaSignId, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 }),
                 ...dotsC.map((dot) =>
-                    at(NARRATION_START[3 + 1] ?? 3).animate(
+                    at(NARRATION_START[4] ?? 4).animate(
                         dot.dotId,
                         { position: { y: `+=${window.innerHeight}` } },
                         { duration: 1 }
                     )
                 ),
-                at(NARRATION_START[3 + 1] ?? 3).animate(
+                at(NARRATION_START[4] ?? 4).animate(
                     latexUnion.latexId,
                     { position: { y: `+=${window.innerHeight}` } },
                     { duration: 1 }
                 ),
-                ...dotsA1.map((dot) => at(NARRATION_START[4 + 1] ?? 4).animate(
+                ...dotsA1.map((dot) => at(NARRATION_START[5] ?? 5).animate(
                     dot.dotId,
                     { position: { y: `-=${window.innerHeight / 12 * 4}` } },
                     { duration: 1 }
                 )),
-                ...dotsB1.map((dot) => at(NARRATION_START[4 + 1] ?? 4).animate(
+                ...dotsB1.map((dot) => at(NARRATION_START[5] ?? 5).animate(
                     dot.dotId,
                     { position: { y: `-=${window.innerHeight / 12 * 2}` } },
                     { duration: 1 }
                 )),
-                at(NARRATION_START[6 + 1] ?? 6).animate(thetaMarkerC.thetaLineId, { scale: { x: 1, y: 1, z: 1 } }, { duration: 1 }),
-                at(NARRATION_START[6 + 1] ?? 6).animate(thetaMarkerC.thetaSignId, { scale: { x: 1, y: 1, z: 1 } }, { duration: 1 }),
-                ...dotsA1.map((dot) => at(NARRATION_START[6 + 1] ?? 6).animate(
+                ...dotsA1.map((dot) => at(NARRATION_START[6] ?? 6).animate(
                     dot.dotId,
                     { scale: { x: 0, y: 0, z: 0 } },
                     { duration: 1 }
                 )),
-                ...dotsB1.map((dot) => at(NARRATION_START[6 + 1] ?? 6).animate(
+                ...dotsB1.map((dot) => at(NARRATION_START[6] ?? 6).animate(
                     dot.dotId,
                     { scale: { x: 0, y: 0, z: 0 } },
                     { duration: 1 }
                 )),
                 ...dotsC.map((dot) =>
-                    at(NARRATION_START[6 + 1] ?? 6).animate(
+                    at(NARRATION_START[6] ?? 6).animate(
                         dot.dotId,
                         { scale: { x: 1, y: 1, z: 1 } },
                         { duration: 1 }
                     )
                 ),
-                at(NARRATION_START[6 + 1] ?? 6).animate(
+                at(NARRATION_START[7] ?? 7).animate(thetaMarkerC.thetaLineId, { scale: { x: 1, y: 1, z: 1 } }, { duration: 1 }),
+                at(NARRATION_START[7] ?? 7).animate(thetaMarkerC.thetaSignId, { scale: { x: 1, y: 1, z: 1 } }, { duration: 1 }),
+                at(NARRATION_START[7] ?? 7).animate(
                     latexUnion.latexId,
                     { scale: { x: 1, y: 1, z: 1 } },
                     { duration: 1 }
@@ -315,6 +316,7 @@ const Main = ({ sketchA, sketchB, union, k }: KmvUnionProps) => {
                     <TimelinePlayer
                         timeline={timeline}
                         showNextButton={true}
+                        showRestartButton={true}
                         showMuteButton={false}
                         nextButtonTooltip="Go to KMV Intersection"
                         enableNextButton={true}
@@ -337,6 +339,18 @@ const Main = ({ sketchA, sketchB, union, k }: KmvUnionProps) => {
                             animationController.stopAnimation();
                             pause();
                         }}
+                        onRestart={() => {
+                            speechSynthesis.cancel();
+                            stop();
+                            lastSpokenStepRef.current = -1;
+                            setCurrentNarration('');
+                            setUiStep(0);
+                            setIsPlaying(true);
+                            animationController.startAnimation();
+                            timeline.restart();
+                            resume();
+                            speakStep(0);
+                        }}
                         onComplete={() => {
                             setIsPlaying(false);
                             animationController.stopAnimation();
@@ -354,9 +368,9 @@ export default function KmvUnion() {
 
     const k = 10;
 
-    const sketchA = { values: [0.05, 0.12, 0.18, 0.26, 0.33, 0.41, 0.52, 0.61, 0.73, 0.88], theta: 0.98 };
-    const sketchB = { values: [0.07, 0.14, 0.21, 0.28, 0.36, 0.44, 0.55, 0.66, 0.79, 0.92], theta: 0.96 };
-    const union = { values: [0.05, 0.12, 0.18, 0.26, 0.33, 0.41, 0.52, 0.61, 0.73, 0.88], theta: 0.96, estimated: 9 };
+    const sketchA = { values: [0.04, 0.09, 0.13, 0.18, 0.24, 0.31, 0.39, 0.47, 0.58, 0.72], theta: 0.72 };
+    const sketchB = { values: [0.06, 0.10, 0.13, 0.20, 0.24, 0.34, 0.42, 0.53, 0.65, 0.79], theta: 0.79 };
+    const union = { values: [0.04, 0.06, 0.09, 0.10, 0.13, 0.18, 0.20, 0.24, 0.31, 0.34], theta: 0.34, estimated: 29.41 };
 
     return <Main sketchA={sketchA} sketchB={sketchB} union={union} k={k} />;
 }
