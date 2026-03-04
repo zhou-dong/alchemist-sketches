@@ -302,14 +302,14 @@ export default function NarrationPlayer({
             }}
           >
             <Typography
+              variant="body1"
               sx={{
-                fontSize: { xs: '1.1rem', md: '1.25rem' },
-                fontWeight: 400,
                 lineHeight: 1.6,
                 textAlign: 'center',
                 color: currentSubtitle ? 'text.primary' : 'text.secondary',
                 fontStyle: currentSubtitle ? 'normal' : 'italic',
                 transition: 'all 0.3s ease',
+                mb: -6,
               }}
             >
               {currentSubtitle}
