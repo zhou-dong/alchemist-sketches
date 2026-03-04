@@ -14,6 +14,7 @@ import { calculateStepTimings } from '@alchemist/theta-sketch/utils/narration';
 import { useNavigate } from 'react-router-dom';
 import { buildAxis, buildDot, buildLatex, buildThetaMarker, buildThetaSketchDescriptionLatex, buildThetaSketchInfoLatex } from './ThetaSketchSetOperationsSharedThree';
 import { ThetaSketchSetOperationHeader } from './ThetaSketchSetOperationsSharedComponents';
+import { useThetaSketchProgress } from '../../contexts/ThetaSketchProgressContext';
 
 const NARRATION: Record<number, string> = {
     0: `On this page, we compute difference using Theta Sketch. Each sketch stores retained values and theta explicitly.`,
@@ -51,6 +52,7 @@ const Main = ({ sketchA, sketchB, difference, k }: ThetaSketchDifferenceProps) =
     const navigate = useNavigate();
     const { animationController, containerRef, scene, renderer, camera } = useDualThreeStage();
     const { speak, stop, pause, resume } = useSpeech({ rate: 1.0 });
+    const { completeStep } = useThetaSketchProgress();
 
     useSyncObelusTheme();
 
@@ -291,6 +293,7 @@ const Main = ({ sketchA, sketchB, difference, k }: ThetaSketchDifferenceProps) =
                             setIsPlaying(false);
                             animationController.stopAnimation();
                             stop();
+                            completeStep(5);
                         }}
                     />
                 )}
