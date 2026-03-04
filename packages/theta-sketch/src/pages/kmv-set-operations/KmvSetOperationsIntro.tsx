@@ -210,7 +210,7 @@ export default function KmvSetOperationsIntroPage() {
                         timeline={timeline}
                         showNextButton={true}
                         onNext={() => {
-                            navigate('/theta-sketch/kmv-set-ops?op=union');
+                            navigate('/sketches/theta/kmv-set-operations/union');
                         }}
                         nextButtonTooltip="Go to KMV Union"
                         enableNextButton={true}
