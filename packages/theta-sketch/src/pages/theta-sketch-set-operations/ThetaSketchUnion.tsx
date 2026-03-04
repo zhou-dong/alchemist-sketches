@@ -29,7 +29,7 @@ const NARRATION: Record<number, string> = {
 
 const unionFormula = (k: number, theta: number, s: number, estimated: number) => {
     return `\\begin{gathered}
-     \\text{Union Sketch } | \\quad k = ${k} \\quad, s_1 = \\{v \\in A \\}, \\quad s_2 = \\{v \\in B \\}, \\quad S = \\text{sort(unique}(s_1 \\cup s_2))[:k] \\\\ 
+     \\text{Union Sketch } | \\quad k = ${k} \\quad, h_1 = \\{v \\in A \\}, \\quad h_2 = \\{v \\in B \\}, \\quad S = \\text{sort(unique}(h_1 \\cup h_2))[:k] \\\\ 
      \\theta = \\max(S) = ${theta.toFixed(2)},  \\quad |S| = ${s}, \\quad \\hat{N} = \\frac{|S|}{\\theta} = \\frac{${s}}{${theta}} = ${estimated.toFixed(2)}
     \\end{gathered}`;
 };
