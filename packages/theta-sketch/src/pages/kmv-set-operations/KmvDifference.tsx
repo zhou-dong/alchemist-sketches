@@ -15,6 +15,7 @@ import { calculateStepTimings } from '@alchemist/theta-sketch/utils/narration';
 import { useNavigate } from 'react-router-dom';
 import { buildAxis, buildDot, buildKmvInfoLatex, buildLatex, buildNumber } from './KmvSetOperationsSharedThree';
 import { KmvSetOperationHeader } from './KmvSetOperationsSharedComponents';
+import { useThetaSketchProgress } from '../../contexts/ThetaSketchProgressContext';
 
 const OPENING_DESCRIPTION = `
   Difference estimation works, but composition breaks: the operation uses shared θ = min(θ_A, θ_B), while the result may have fewer than K values, so inferred θ from the new sketch may not equal the operation θ.
@@ -56,7 +57,7 @@ const Main = ({ sketchA, sketchB, difference, k }: KmvDifferenceProps) => {
     const navigate = useNavigate();
     const { animationController, containerRef, scene, renderer, camera } = useDualThreeStage();
     const { speak, stop, pause, resume } = useSpeech({ rate: 1.0 });
-
+    const { completeStep } = useThetaSketchProgress();
     useSyncObelusTheme();
 
     useOrthographicImmediateResize(renderer, camera as THREE.OrthographicCamera, {
@@ -328,6 +329,7 @@ const Main = ({ sketchA, sketchB, difference, k }: KmvDifferenceProps) => {
                             setIsPlaying(false);
                             animationController.stopAnimation();
                             stop();
+                            completeStep(4);
                         }}
                     />
                 )}
