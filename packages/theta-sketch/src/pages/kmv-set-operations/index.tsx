@@ -69,7 +69,7 @@ export default function KmvSetOperationsIndexPage() {
                     top: '50%',
                     left: '24px',
                     transform: 'translateY(-50%)',
-                    zIndex: 100,
+                    zIndex: 10,
                 }}
             >
                 <Paper
