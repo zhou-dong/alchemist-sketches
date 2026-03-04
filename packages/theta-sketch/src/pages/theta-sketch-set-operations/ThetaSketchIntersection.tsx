@@ -21,18 +21,20 @@ const NARRATION: Record<number, string> = {
     2: `This is Sketch A with its retained values and stored theta.`,
     3: `This is Sketch B with its retained values and stored theta.`,
     4: `This is the intersection result sketch, which starts empty.`,
-    5: `We bring values from Sketch A and Sketch B into the intersection stage.`,
-    6: `Now we keep only values that appear in both sketches under the shared threshold.`,
-    7: `Finally, we store theta equals min(theta A, theta B) in the result and compute the estimate.`,
-    8: `Because theta is stored explicitly, this intersection result is composable for further set operations.`,
+    5: `We compute the theta by taking the minimum of theta A and theta B.`,
+    6: `We add the values, which are below the computed theta, from Sketch A and Sketch B into the intersection result sketch.`,
+    7: `We keep only values that appear in both sketches below the computed theta.`,
+    8: `Finally, we store the computed theta in the result and compute the estimate.`,
+    9: `Because theta is stored explicitly, this intersection result is composable for further set operations like union or difference.`,
 };
 
 const intersectionFormula = (theta: number, m: number, estimated: number) => {
     return `\\begin{gathered}
-\\text{Intersection Sketch} \\quad
-\\theta=\\min(\\theta_A,\\theta_B)=${theta.toFixed(2)} \\\\
-|h_1 \\cap h_2|=${m}, \\quad
-\\hat{N}=\\frac{|h_1 \\cap h_2|}{\\theta}=\\frac{${m}}{${theta.toFixed(2)}}=${estimated.toFixed(2)}
+\\text{Intersection Sketch } | \\quad
+\\theta=\\min(\\theta_A,\\theta_B)=${theta.toFixed(2)} \\quad,
+h_1 = \\{v \\in A \\mid v < \\theta\\} \\quad,
+h_2 = \\{v \\in B \\mid v < \\theta\\} \\\\
+\\hat{N}=\\frac{|S|}{\\theta}=\\frac{|h_1 \\cap h_2|}{\\theta}=\\frac{${m}}{${theta.toFixed(2)}}=${estimated.toFixed(2)}
 \\end{gathered}`;
 };
 
@@ -101,14 +103,14 @@ const Main = ({ sketchA, sketchB, intersection, k }: ThetaSketchIntersectionProp
         const latexDescription = buildThetaSketchDescriptionLatex(window.innerHeight / 12 * 4, 0);
         const axisA = buildAxis({ x: startX, y: aY }, { x: endX, y: aY });
         const dotsA = sketchA.values.map((value) => buildDot({ x: startX, y: aY }, { x: endX, y: aY }, value, 1));
-        const dotsA1 = sketchA.values.map((value) => buildDot({ x: startX, y: aY }, { x: endX, y: aY }, value, 1));
+        const dotsA1 = sketchA.values.filter((value) => value < thetaOp).map((value) => buildDot({ x: startX, y: aY }, { x: endX, y: aY }, value, 1));
         const latexA = buildThetaSketchInfoLatex("Sketch A", aY - 40, k, sketchA.theta, sketchA.theta > 0 ? k / sketchA.theta : 0, 1);
         const thetaMarkerA = buildThetaMarker({ x: startX, y: aY }, { x: endX, y: aY }, sketchA.theta, 1);
 
         const bY = window.innerHeight / 12 - window.innerHeight;
         const axisB = buildAxis({ x: startX, y: bY }, { x: endX, y: bY });
         const dotsB = sketchB.values.map((value) => buildDot({ x: startX, y: bY }, { x: endX, y: bY }, value, 1));
-        const dotsB1 = sketchB.values.map((value) => buildDot({ x: startX, y: bY }, { x: endX, y: bY }, value, 1));
+        const dotsB1 = sketchB.values.filter((value) => value < thetaOp).map((value) => buildDot({ x: startX, y: bY }, { x: endX, y: bY }, value, 1));
         const latexB = buildThetaSketchInfoLatex("Sketch B", bY - 40, k, sketchB.theta, sketchB.theta > 0 ? k / sketchB.theta : 0, 1);
         const thetaMarkerB = buildThetaMarker({ x: startX, y: bY }, { x: endX, y: bY }, sketchB.theta, 1);
 
@@ -163,19 +165,21 @@ const Main = ({ sketchA, sketchB, intersection, k }: ThetaSketchIntersectionProp
                 at(NARRATION_START[4] ?? 4).animate(axisC.axisLineId, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 }),
                 at(NARRATION_START[4] ?? 4).animate(thetaMarkerC.thetaLineId, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 }),
                 at(NARRATION_START[4] ?? 4).animate(thetaMarkerC.thetaSignId, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 }),
-                ...dotsC.map((dot) => at(NARRATION_START[4] ?? 4).animate(dot.dotId, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 })),
-                at(NARRATION_START[4] ?? 4).animate(latexIntersection.latexId, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 }),
 
-                ...dotsA1.map((dot) => at(NARRATION_START[5] ?? 5).animate(dot.dotId, { position: { y: `-=${window.innerHeight / 12 * 4}` } }, { duration: 1 })),
-                ...dotsB1.map((dot) => at(NARRATION_START[5] ?? 5).animate(dot.dotId, { position: { y: `-=${window.innerHeight / 12 * 2}` } }, { duration: 1 })),
+                at(NARRATION_START[5] ?? 5).animate(thetaMarkerC.thetaLineId, { scale: { x: 1, y: 1, z: 1 } }, { duration: 1 }),
+                at(NARRATION_START[5] ?? 5).animate(thetaMarkerC.thetaSignId, { scale: { x: 1, y: 1, z: 1 } }, { duration: 1 }),
 
-                ...dotsA1.map((dot) => at(NARRATION_START[6] ?? 6).animate(dot.dotId, { scale: { x: 0, y: 0, z: 0 } }, { duration: 1 })),
-                ...dotsB1.map((dot) => at(NARRATION_START[6] ?? 6).animate(dot.dotId, { scale: { x: 0, y: 0, z: 0 } }, { duration: 1 })),
-                ...dotsC.map((dot) => at(NARRATION_START[6] ?? 6).animate(dot.dotId, { scale: { x: 1, y: 1, z: 1 } }, { duration: 1 })),
+                ...dotsC.map((dot) => at(NARRATION_START[6] ?? 6).animate(dot.dotId, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 })),
+                at(NARRATION_START[6] ?? 6).animate(latexIntersection.latexId, { position: { y: `+=${window.innerHeight}` } }, { duration: 1 }),
 
-                at(NARRATION_START[7] ?? 7).animate(thetaMarkerC.thetaLineId, { scale: { x: 1, y: 1, z: 1 } }, { duration: 1 }),
-                at(NARRATION_START[7] ?? 7).animate(thetaMarkerC.thetaSignId, { scale: { x: 1, y: 1, z: 1 } }, { duration: 1 }),
-                at(NARRATION_START[7] ?? 7).animate(latexIntersection.latexId, { scale: { x: 1, y: 1, z: 1 } }, { duration: 1 }),
+                ...dotsA1.map((dot) => at(NARRATION_START[6] ?? 6).animate(dot.dotId, { position: { y: `-=${window.innerHeight / 12 * 4}` } }, { duration: 1 })),
+                ...dotsB1.map((dot) => at(NARRATION_START[6] ?? 6).animate(dot.dotId, { position: { y: `-=${window.innerHeight / 12 * 2}` } }, { duration: 1 })),
+
+                ...dotsA1.map((dot) => at(NARRATION_START[7] ?? 7).animate(dot.dotId, { scale: { x: 0, y: 0, z: 0 } }, { duration: 1 })),
+                ...dotsB1.map((dot) => at(NARRATION_START[7] ?? 7).animate(dot.dotId, { scale: { x: 0, y: 0, z: 0 } }, { duration: 1 })),
+                ...dotsC.map((dot) => at(NARRATION_START[7] ?? 7).animate(dot.dotId, { scale: { x: 1, y: 1, z: 1 } }, { duration: 1 })),
+
+                at(NARRATION_START[8] ?? 8).animate(latexIntersection.latexId, { scale: { x: 1, y: 1, z: 1 } }, { duration: 1 }),
             ],
         };
 
