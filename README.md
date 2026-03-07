@@ -78,6 +78,43 @@ Preview the production build:
 npm run preview
 ```
 
+## Deploy to Cloudflare Pages
+
+This repo is configured to deploy the web app from `apps/web/dist`.
+
+### Cloudflare Pages build settings
+
+- **Framework preset**: `Vite`
+- **Root directory**: repository root
+- **Build command**: `npm ci && npm run build`
+- **Build output directory**: `apps/web/dist`
+- **Environment variable (recommended)**: `NODE_VERSION=22`
+
+### Custom domain
+
+After first deploy:
+
+1. Open your Pages project in Cloudflare.
+2. Add custom domains:
+   - `alchemist-sketches.com`
+   - `www.alchemist-sketches.com` (optional)
+3. Choose one canonical domain and redirect the other.
+4. Enable HTTPS (Cloudflare handles cert issuance automatically).
+
+### SPA routing fallback
+
+Client-side routes (React Router) are handled via:
+
+- `apps/web/public/_redirects`
+
+with content:
+
+```txt
+/* /index.html 200
+```
+
+This ensures direct visits/refreshes on nested routes resolve to your app.
+
 ## Adding a New Sketch Module
 
 1. Create a new package directory:
