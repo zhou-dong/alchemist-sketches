@@ -194,6 +194,12 @@ function OrderStatisticsPageContent() {
     const navigate = useNavigate();
     const lastSpokenStepRef = useRef<number>(-1);
 
+    const cleanupPlayback = useCallback(() => {
+        timelinePlayer.pause();
+        animationController.stopAnimation();
+        speechSynthesis.cancel();
+    }, []);
+
     // Sync Three.js materials with the current global theme
     useSyncObelusTheme();
 
@@ -257,15 +263,19 @@ function OrderStatisticsPageContent() {
 
     React.useEffect(() => {
         return () => {
-            animationController.stopAnimation();
-            speechSynthesis.cancel();
+            cleanupPlayback();
         };
-    }, []);
+    }, [cleanupPlayback]);
 
     return (
         <>
             <StepTitle title="Order Statistics" />
-            <StepProgressIndicator currentStepId={1} />
+            <StepProgressIndicator
+                currentStepId={1}
+                onBeforeNavigate={() => {
+                    cleanupPlayback();
+                }}
+            />
 
             {/* Subtitle Display */}
             <Fade in={!!currentNarration}>
@@ -308,16 +318,26 @@ function OrderStatisticsPageContent() {
                     timeline={timelinePlayer}
                     showNextButton={true}
                     onNext={() => {
+                        cleanupPlayback();
                         navigate('/sketches/theta/kse');
                     }}
                     nextButtonTooltip="Go to K-th Smallest Estimation"
                     enableNextButton={isStepCompleted(1)}
                     onStart={() => {
                         animationController.startAnimation();
+                        speechSynthesis.resume();
                     }}
                     onPause={() => {
                         animationController.stopAnimation();
                         speechSynthesis.pause();
+                    }}
+                    onRestart={() => {
+                        speechSynthesis.cancel();
+                        setCurrentNarration('');
+                        lastSpokenStepRef.current = -1;
+                        timelinePlayer.restart();
+                        animationController.startAnimation();
+                        speakStep(0);
                     }}
                     onComplete={() => {
                         animationController.stopAnimation();
