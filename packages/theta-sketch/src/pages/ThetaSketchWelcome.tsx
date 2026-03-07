@@ -139,6 +139,7 @@ export const ThetaSketchWelcome = () => {
                 bottom: window.innerHeight / 12,
                 left: 0,
                 right: 0,
+                zIndex: 10,
                 display: 'flex',
                 justifyContent: 'center',
                 alignItems: 'center',
