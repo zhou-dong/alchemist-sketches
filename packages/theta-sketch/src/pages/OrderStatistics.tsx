@@ -252,9 +252,11 @@ function OrderStatisticsPageContent() {
     React.useEffect(() => {
         if (!timelinePlayer) return;
 
-        // Add labels and callbacks for each step at their calculated start times
+        // Add callbacks for steps >= 1.
+        // Step 0 is triggered explicitly from onStart/onRestart to avoid restart race conditions.
         Object.keys(STEP_NARRATIONS).forEach((stepKey) => {
             const stepIndex = parseInt(stepKey);
+            if (stepIndex === 0) return;
             const startTime = STEP_START_TIMES[stepIndex] ?? stepIndex;
             timelinePlayer.call(() => speakStep(stepIndex), [], startTime);
         });
@@ -344,6 +346,10 @@ function OrderStatisticsPageContent() {
                     onStart={() => {
                         animationController.startAnimation();
                         speechSynthesis.resume();
+                        if ((timelinePlayer?.progress?.() ?? 0) === 0) {
+                            lastSpokenStepRef.current = -1;
+                            speakStep(0);
+                        }
                     }}
                     onPause={() => {
                         animationController.stopAnimation();
@@ -355,6 +361,7 @@ function OrderStatisticsPageContent() {
                         lastSpokenStepRef.current = -1;
                         timelinePlayer.restart();
                         animationController.startAnimation();
+                        speechSynthesis.resume();
                         speakStep(0);
                     }}
                     onComplete={() => {
