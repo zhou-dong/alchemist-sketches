@@ -241,7 +241,7 @@ function KmvPageContent() {
                         left: '50%',
                         transform: 'translateX(-50%)',
                         maxWidth: '80%',
-                        zIndex: 1001,
+                        zIndex: 10,
                         textAlign: 'center',
                     }}
                 >
