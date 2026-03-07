@@ -95,7 +95,7 @@ export default function ThetaSketchSetOperationsIntro() {
                             transition: 'opacity 450ms ease 100ms, transform 450ms ease 100ms',
                         }}
                     >
-                        <Typography variant="caption" sx={{ fontWeight: 700, letterSpacing: 0.3 }}>
+                        <Typography variant="h6" sx={{ fontWeight: 700, letterSpacing: 0.3 }}>
                             KMV limitation
                         </Typography>
                         <Typography variant="body1" color="text.secondary" sx={{ lineHeight: 1.8 }}>
@@ -117,7 +117,7 @@ export default function ThetaSketchSetOperationsIntro() {
                             transition: 'opacity 450ms ease, transform 450ms ease',
                         }}
                     >
-                        <Typography variant="caption" sx={{ fontWeight: 700, letterSpacing: 0.3 }}>
+                        <Typography variant="h6" sx={{ fontWeight: 700, letterSpacing: 0.3 }}>
                             Natural evolution
                         </Typography>
                         <Typography variant="body1" color="text.secondary" sx={{ lineHeight: 1.8 }}>
@@ -139,10 +139,10 @@ export default function ThetaSketchSetOperationsIntro() {
                             transition: 'opacity 450ms ease, transform 450ms ease',
                         }}
                     >
-                        <Typography variant="caption" sx={{ fontWeight: 700, letterSpacing: 0.3 }}>
+                        <Typography variant="h6" sx={{ fontWeight: 700, letterSpacing: 0.3 }}>
                             Core formula
                         </Typography>
-                        <Typography variant="body1" sx={{ mt: 0.25, fontWeight: 600, letterSpacing: 0.1 }}>
+                        <Typography variant="body1" color="text.secondary" sx={{ lineHeight: 1.8 }}>
                             Theta Sketch = KMV values + stored θ
                         </Typography>
                     </Box>
