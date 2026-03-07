@@ -111,10 +111,8 @@ const displayLatexesSteps: TimelineEvent[] = latexes.map((_, index) => {
     return at(t(index + 1)).animate(`formula_${index}`, { position: { y: `+=${window.innerHeight}` } }, { duration: d });
 });
 
-const moveLatexesToLeftSteps: TimelineEvent[] = latexes.map((_, index) => {
-    // const distance = window.innerWidth / 4;
-    const distance = window.innerWidth;
-    return at(t(latexes.length + 1)).animate(`formula_${index}`, { position: { x: `-=${distance}` } }, { duration: d });
+const hideLatexes: TimelineEvent[] = latexes.map((_, index) => {
+    return at(t(latexes.length + 1)).animate(`formula_${index}`, { scale: { x: 0, y: 0, z: 0 } }, { duration: d });
 });
 
 const stepScene: TimelineSceneThree = {
@@ -125,7 +123,7 @@ const stepScene: TimelineSceneThree = {
     ],
     timeline: [
         ...displayLatexesSteps,
-        ...moveLatexesToLeftSteps,
+        ...hideLatexes,
         at(t(latexes.length + 1)).animate(`kse_formula`, { position: { y: `+=${window.innerHeight}` } }, { duration: d }),
         ...moveAxisSteps(),
         ...moveMarks(),
