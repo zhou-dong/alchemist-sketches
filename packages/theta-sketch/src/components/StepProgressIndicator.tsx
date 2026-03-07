@@ -16,11 +16,14 @@ interface StepProgressIndicatorProps {
     currentStepId: number;
     /** Initial visibility state */
     defaultExpanded?: boolean;
+    /** Called before navigating to another step route */
+    onBeforeNavigate?: () => void;
 }
 
 export default function StepProgressIndicator({
     currentStepId,
     defaultExpanded = false,
+    onBeforeNavigate,
 }: StepProgressIndicatorProps) {
     const theme = useTheme();
     const navigate = useNavigate();
@@ -34,6 +37,12 @@ export default function StepProgressIndicator({
         0
     );
     const progressPercent = (completedCount / totalSteps) * 100;
+
+    const handleStepNavigate = (route: string) => {
+        onBeforeNavigate?.();
+        speechSynthesis.cancel();
+        navigate(route);
+    };
 
     return (
         <Fade in timeout={400}>
@@ -140,7 +149,7 @@ export default function StepProgressIndicator({
                                     arrow
                                 >
                                     <Box
-                                        onClick={() => isClickable && navigate(step.route)}
+                                        onClick={() => isClickable && handleStepNavigate(step.route)}
                                         sx={{
                                             display: 'flex',
                                             alignItems: 'center',
