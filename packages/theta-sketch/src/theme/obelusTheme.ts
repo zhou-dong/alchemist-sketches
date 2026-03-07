@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import * as THREE from "three";
 import type { AxisProps } from 'obelus-three-render';
 import { neoGlassColors, typography, useTheme } from '@alchemist/shared';
@@ -122,6 +122,20 @@ export interface ObelusThemeStyles {
     };
 }
 
+function resolveObelusColors(
+    _currentTheme: ReturnType<typeof useTheme>['currentTheme'],
+    mode: ReturnType<typeof useTheme>['mode']
+) {
+    const isDark = mode === 'dark';
+    const mono = isDark ? '#FFFFFF' : '#000000';
+    return {
+        primary: mono,
+        secondary: mono,
+        accent: mono,
+        text: mono,
+    };
+}
+
 /**
  * React hook that provides Three.js materials based on the current global theme.
  * Materials are recreated when the theme or mode changes.
@@ -130,17 +144,7 @@ export function useObelusTheme(): ObelusThemeStyles {
     const { currentTheme, mode } = useTheme();
 
     return useMemo(() => {
-        const isDark = mode === 'dark';
-
-        // All elements use white in dark mode, black in light mode
-        const themeColor = isDark ? '#FFFFFF' : '#000000';
-
-        const colors = {
-            primary: themeColor,
-            secondary: themeColor,
-            accent: currentTheme.colors.tertiary?.main || currentTheme.colors.secondary.light,
-            text: themeColor,
-        };
+        const colors = resolveObelusColors(currentTheme, mode);
 
         const fontFamily = currentTheme.typography.fontFamily.primary;
 
@@ -173,13 +177,11 @@ export function useObelusTheme(): ObelusThemeStyles {
 export function useSyncObelusTheme(): void {
     const { currentTheme, mode } = useTheme();
 
-    useMemo(() => {
-        // All elements: white in dark mode, black in light mode
-        const isDark = mode === 'dark';
-        const themeColor = isDark ? '#FFFFFF' : '#000000';
-        const primaryColor = themeColor;
-        const secondaryColor = themeColor;
-        const textColor = themeColor;
+    useEffect(() => {
+        const colors = resolveObelusColors(currentTheme, mode);
+        const primaryColor = colors.primary;
+        const secondaryColor = colors.secondary;
+        const textColor = colors.text;
         const fontFamily = currentTheme.typography.fontFamily.primary;
 
         // Update the module-level materials in place
@@ -204,7 +206,7 @@ export function useSyncObelusTheme(): void {
 
         // Update existing CSS3D text elements in the DOM
         // CSS3D renderer creates elements with transform-style: preserve-3d
-        setTimeout(() => {
+        const timeoutId = setTimeout(() => {
             // Target CSS3D rendered elements (they have 3D transforms)
             const allElements = document.querySelectorAll('[style*="translate3d"], [style*="matrix3d"]');
             allElements.forEach(el => {
@@ -225,6 +227,10 @@ export function useSyncObelusTheme(): void {
                 htmlEl.style.color = textColor;
             });
         }, 0); // Use setTimeout to ensure DOM is updated
+
+        return () => {
+            clearTimeout(timeoutId);
+        };
     }, [currentTheme, mode]);
 }
 
