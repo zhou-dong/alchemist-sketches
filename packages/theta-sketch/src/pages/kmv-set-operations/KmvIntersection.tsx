@@ -8,13 +8,14 @@ import { useOrthographicImmediateResize } from '@alchemist/theta-sketch/hooks/us
 import * as THREE from 'three';
 import { at } from 'obelus';
 import { Box, Container, Fade, Typography } from '@mui/material';
-import { slideUp, useSpeech } from '@alchemist/shared';
+import { slideUp } from '@alchemist/shared';
 import TimelinePlayer from '@alchemist/theta-sketch/components/TimelinePlayer';
 import { clearScene, disposeDualSceneResources } from '@alchemist/theta-sketch/utils/threeUtils';
 import { calculateStepTimings } from '@alchemist/theta-sketch/utils/narration';
 import { useNavigate } from 'react-router-dom';
 import { buildAxis, buildDot, buildKmvInfoLatex, buildLatex, buildNumber } from './KmvSetOperationsSharedThree';
 import { KmvSetOperationHeader } from './KmvSetOperationsSharedComponents';
+import { useStepNarrationPlayback } from '../../hooks/useStepNarrationPlayback';
 
 const OPENING_DESCRIPTION = `
   Intersection estimation works, but composition breaks: the operation uses shared θ = min(θ_A, θ_B), while the result may have fewer than K values, so inferred θ from the new sketch may not equal the operation θ.
@@ -55,7 +56,6 @@ interface KmvIntersectionProps {
 const Main = ({ sketchA, sketchB, intersection, k }: KmvIntersectionProps) => {
     const navigate = useNavigate();
     const { animationController, containerRef, scene, renderer, camera } = useDualThreeStage();
-    const { speak, stop } = useSpeech({ rate: 1.0 });
 
     useSyncObelusTheme();
 
@@ -65,60 +65,25 @@ const Main = ({ sketchA, sketchB, intersection, k }: KmvIntersectionProps) => {
 
     const [timeline, setTimeline] = React.useState<any>(null);
     const [uiStep, setUiStep] = React.useState<number>(0);
-    const [isPlaying, setIsPlaying] = React.useState<boolean>(false);
-    const [currentNarration, setCurrentNarration] = React.useState<string>('');
-    const lastSpokenStepRef = React.useRef<number>(-1);
-
-    const speakStep = React.useCallback(
-        (step: number) => {
-            const text = NARRATION[step] ?? '';
-            if (!text) return;
-            if (lastSpokenStepRef.current === step) return;
-            lastSpokenStepRef.current = step;
-            setCurrentNarration(text);
-            speak(text);
-        },
-        [speak]
-    );
-
-    React.useEffect(() => stop, [stop]);
-
-    React.useEffect(() => {
-        if (!isPlaying) return;
-        speakStep(uiStep);
-    }, [isPlaying, speakStep, uiStep]);
-
-    const stopPlayback = React.useCallback(() => {
-        speechSynthesis.cancel();
-        setIsPlaying(false);
-        animationController?.stopAnimation?.();
-    }, [animationController]);
-
-    const pausePlayback = React.useCallback(() => {
-        setIsPlaying(false);
-        animationController?.stopAnimation?.();
-        speechSynthesis.pause();
-    }, [animationController]);
-
-    const startPlayback = React.useCallback(() => {
-        setIsPlaying(true);
-        animationController?.startAnimation?.();
-        speechSynthesis.resume();
-    }, [animationController]);
-
-    const resetNarrationState = React.useCallback(() => {
-        setUiStep(0);
-        lastSpokenStepRef.current = -1;
-        setCurrentNarration('');
-        speakStep(0);
-    }, []);
+    const {
+        currentNarration,
+        speakStep,
+        stopPlayback,
+        pausePlayback,
+        startPlayback,
+        resetNarrationState,
+    } = useStepNarrationPlayback({
+        narrations: NARRATION,
+        uiStep,
+        onResetUiStep: () => setUiStep(0),
+        animationController,
+        rate: 1.0,
+    });
 
     React.useEffect(() => {
         if (!scene || !animationController) return;
 
         setUiStep(0);
-        lastSpokenStepRef.current = -1;
-        setCurrentNarration('');
 
         disposeDualSceneResources(scene);
         clearScene(scene);

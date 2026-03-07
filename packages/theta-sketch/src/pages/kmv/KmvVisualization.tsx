@@ -13,6 +13,7 @@ import { useThetaSketchProgress } from '../../contexts/ThetaSketchProgressContex
 import { useSpeech } from '@alchemist/shared';
 import { slideUp } from '@alchemist/shared';
 import { useOrthographicImmediateResize } from '@alchemist/theta-sketch/hooks/useOrthographicResize';
+import { ensureSpeechVoicesReady } from '@alchemist/theta-sketch/utils/speech';
 import * as THREE from 'three';
 import { useNavigate } from 'react-router-dom';
 import StepProgressIndicator from '@alchemist/theta-sketch/components/StepProgressIndicator';
@@ -161,6 +162,8 @@ export default function KmvVisualization({
     const [timeline, setTimeline] = React.useState<any>(null);
     const [currentSubtitle, setCurrentSubtitle] = React.useState<string>('');
     const hasBuiltRef = React.useRef(false);
+    const speechRequestIdRef = React.useRef(0);
+    const playbackVoiceRef = React.useRef<SpeechSynthesisVoice | null>(null);
 
     const { containerRef } = useThreeContainer(renderer);
 
@@ -217,6 +220,7 @@ export default function KmvVisualization({
     }, [startSubtitleTracking]);
 
     const cleanupPlayback = React.useCallback(() => {
+        speechRequestIdRef.current += 1;
         timeline?.pause();
         animationController.stopAnimation();
         speechSynthesis.cancel();
@@ -228,92 +232,102 @@ export default function KmvVisualization({
     // Speak the intro narration
     const speakIntro = React.useCallback((text: string) => {
         if (!text) return;
+        const requestId = ++speechRequestIdRef.current;
+        void (async () => {
+            if (!playbackVoiceRef.current) {
+                await ensureSpeechVoicesReady();
+                if (requestId !== speechRequestIdRef.current) return;
+                playbackVoiceRef.current = getCurrentVoice();
+            }
+            if (requestId !== speechRequestIdRef.current) return;
 
-        speechSynthesis.cancel();
-        const utterance = new SpeechSynthesisUtterance(text);
-        utterance.rate = 1.1;
+            speechSynthesis.cancel();
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.rate = 1.1;
+            if (playbackVoiceRef.current) {
+                utterance.voice = playbackVoiceRef.current;
+            }
 
-        const voice = getCurrentVoice();
-        if (voice) {
-            utterance.voice = voice;
-        }
+            boundaryDrivenRef.current = false;
+            boundaryEverFiredRef.current = false;
 
-        boundaryDrivenRef.current = false;
-        boundaryEverFiredRef.current = false;
+            // Prepare sentence ranges for boundary-aligned subtitles.
+            // We keep indices into the original text so `event.charIndex` maps correctly.
+            const sentenceRegex = /[^.!?]+[.!?]+(?:\s+|$)|[^.!?]+$/g;
+            const matches = Array.from(text.matchAll(sentenceRegex));
+            const ranges = (matches.length > 0 ? matches : [{ 0: text, index: 0 } as any]).map((m: any) => {
+                const raw = String(m[0] ?? '');
+                const startIndex = Number(m.index ?? 0);
+                const endIndex = startIndex + raw.length;
+                const display = raw.replace(/\s+/g, ' ').trim();
+                return { text: display, startIndex, endIndex };
+            }).filter((s) => s.text.length > 0);
+            sentenceRangesRef.current = ranges;
 
-        // Prepare sentence ranges for boundary-aligned subtitles.
-        // We keep indices into the original text so `event.charIndex` maps correctly.
-        const sentenceRegex = /[^.!?]+[.!?]+(?:\s+|$)|[^.!?]+$/g;
-        const matches = Array.from(text.matchAll(sentenceRegex));
-        const ranges = (matches.length > 0 ? matches : [{ 0: text, index: 0 } as any]).map((m: any) => {
-            const raw = String(m[0] ?? '');
-            const startIndex = Number(m.index ?? 0);
-            const endIndex = startIndex + raw.length;
-            const display = raw.replace(/\s+/g, ' ').trim();
-            return { text: display, startIndex, endIndex };
-        }).filter((s) => s.text.length > 0);
-        sentenceRangesRef.current = ranges;
+            // Fallback sentence list for time-based tracking (same display text).
+            const sentenceList = ranges.length > 0 ? ranges.map((r) => r.text) : [text.replace(/\s+/g, ' ').trim()];
+            const totalWords = text.split(/\s+/).filter(Boolean).length || 1;
 
-        // Fallback sentence list for time-based tracking (same display text).
-        const sentenceList = ranges.length > 0 ? ranges.map((r) => r.text) : [text.replace(/\s+/g, ' ').trim()];
-        const totalWords = text.split(/\s+/).filter(Boolean).length || 1;
+            let cumulative = 0;
+            const data = sentenceList.map((s) => {
+                const wc = s.split(/\s+/).filter(Boolean).length || 1;
+                const weight = wc / totalWords;
+                const start = cumulative;
+                cumulative += weight * 100;
+                return { text: s, start, end: cumulative };
+            });
+            sentenceDataRef.current = data;
 
-        let cumulative = 0;
-        const data = sentenceList.map((s) => {
-            const wc = s.split(/\s+/).filter(Boolean).length || 1;
-            const weight = wc / totalWords;
-            const start = cumulative;
-            cumulative += weight * 100;
-            return { text: s, start, end: cumulative };
-        });
-        sentenceDataRef.current = data;
+            // Estimate duration: conservative speaking speed so we don't jump early.
+            const wordsPerSecond = 2.0 * utterance.rate; // ~120 wpm at rate=1
+            const estimatedMs = (totalWords / wordsPerSecond) * 1000;
+            narrationEstimatedDurationMsRef.current = Math.max(estimatedMs, 800);
+            narrationStartTimeRef.current = Date.now();
+            narrationPauseStartedAtRef.current = null;
+            isNarratingRef.current = true;
 
-        // Estimate duration: conservative speaking speed so we don't jump early.
-        const wordsPerSecond = 2.0 * utterance.rate; // ~120 wpm at rate=1
-        const estimatedMs = (totalWords / wordsPerSecond) * 1000;
-        narrationEstimatedDurationMsRef.current = Math.max(estimatedMs, 800);
-        narrationStartTimeRef.current = Date.now();
-        narrationPauseStartedAtRef.current = null;
-        isNarratingRef.current = true;
+            // Start at the first sentence.
+            setCurrentSubtitle(data[0]?.text ?? '');
+            startSubtitleTracking();
 
-        // Start at the first sentence.
-        setCurrentSubtitle(data[0]?.text ?? '');
-        startSubtitleTracking();
+            // Prefer boundary-driven subtitle updates when available.
+            utterance.onboundary = (event: SpeechSynthesisEvent) => {
+                const charIndex = (event as any).charIndex as number | undefined;
+                if (typeof charIndex !== 'number') return;
+                boundaryEverFiredRef.current = true;
+                boundaryDrivenRef.current = true;
 
-        // Prefer boundary-driven subtitle updates when available.
-        utterance.onboundary = (event: SpeechSynthesisEvent) => {
-            const charIndex = (event as any).charIndex as number | undefined;
-            if (typeof charIndex !== 'number') return;
-            boundaryEverFiredRef.current = true;
-            boundaryDrivenRef.current = true;
+                const rs = sentenceRangesRef.current;
+                if (!rs || rs.length === 0) return;
+                const current = rs.find((r) => charIndex >= r.startIndex && charIndex < r.endIndex) ?? rs[rs.length - 1];
+                if (current?.text) setCurrentSubtitle(current.text);
 
-            const rs = sentenceRangesRef.current;
-            if (!rs || rs.length === 0) return;
-            const current = rs.find((r) => charIndex >= r.startIndex && charIndex < r.endIndex) ?? rs[rs.length - 1];
-            if (current?.text) setCurrentSubtitle(current.text);
+                // Once boundaries are firing, stop the time-based tracker to avoid jitter.
+                stopSubtitleTracking();
+            };
 
-            // Once boundaries are firing, stop the time-based tracker to avoid jitter.
-            stopSubtitleTracking();
-        };
+            utterance.onend = () => {
+                if (requestId !== speechRequestIdRef.current) return;
+                isNarratingRef.current = false;
+                stopSubtitleTracking();
+                setCurrentSubtitle('');
+            };
+            utterance.onerror = () => {
+                if (requestId !== speechRequestIdRef.current) return;
+                isNarratingRef.current = false;
+                stopSubtitleTracking();
+                setCurrentSubtitle('');
+            };
 
-        utterance.onend = () => {
-            isNarratingRef.current = false;
-            stopSubtitleTracking();
-            setCurrentSubtitle('');
-        };
-        utterance.onerror = () => {
-            isNarratingRef.current = false;
-            stopSubtitleTracking();
-            setCurrentSubtitle('');
-        };
-
-        speechSynthesis.speak(utterance);
+            speechSynthesis.speak(utterance);
+        })();
     }, [getCurrentVoice, startSubtitleTracking, stopSubtitleTracking]);
 
     // Cleanup on unmount: stop animation + cancel any ongoing speech.
     // (Avoid setState in cleanup to prevent updates on unmounted component.)
     React.useEffect(() => {
         return () => {
+            speechRequestIdRef.current += 1;
             animationController.stopAnimation();
             speechSynthesis.cancel();
             isNarratingRef.current = false;
@@ -454,6 +468,7 @@ As more items arrive, the estimate updates as N-hat equals K divided by theta, m
                         }}
                         onRestart={() => {
                             cleanupPlayback();
+                            playbackVoiceRef.current = null;
                             timeline.restart();
                             animationController.startAnimation();
                             speechSynthesis.resume();

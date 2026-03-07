@@ -13,6 +13,7 @@ import { Container, Box, Typography, Fade } from '@mui/material';
 import { useTheme, useSpeech } from '@alchemist/shared';
 import { useThetaSketchProgress } from '../../contexts/ThetaSketchProgressContext';
 import { calculateStepTimings } from '../../utils/narration';
+import { ensureSpeechVoicesReady } from '../../utils/speech';
 import StepProgressIndicator from '@alchemist/theta-sketch/components/StepProgressIndicator';
 import { slideUp } from '@alchemist/shared';
 import { useOrthographicImmediateResize } from '@alchemist/theta-sketch/hooks/useOrthographicResize';
@@ -154,11 +155,15 @@ function KmvPageContent() {
     const { getCurrentVoice } = useSpeech({ rate: 1.0 });
     const navigate = useNavigate();
     const lastSpokenStepRef = useRef<number>(-1);
+    const speechRequestIdRef = useRef<number>(0);
+    const playbackVoiceRef = useRef<SpeechSynthesisVoice | null>(null);
 
     const cleanupPlayback = useCallback(() => {
+        speechRequestIdRef.current += 1;
         timeline.pause();
         animationController.stopAnimation();
         speechSynthesis.cancel();
+        setCurrentNarration('');
     }, []);
 
     // Sync Three.js materials with the current global theme
@@ -173,20 +178,33 @@ function KmvPageContent() {
             lastSpokenStepRef.current = stepIndex;
             setCurrentNarration(narration);
 
-            speechSynthesis.cancel();
-            const utterance = new SpeechSynthesisUtterance(narration);
+            const requestId = ++speechRequestIdRef.current;
+            void (async () => {
+                if (!playbackVoiceRef.current) {
+                    await ensureSpeechVoicesReady();
+                    if (requestId !== speechRequestIdRef.current) return;
+                    playbackVoiceRef.current = getCurrentVoice();
+                }
 
-            // Use getCurrentVoice() to always get the latest voice (safe for callbacks)
-            const voice = getCurrentVoice();
-            if (voice) {
-                utterance.voice = voice;
-            }
-
-            utterance.rate = 1.0;
-            utterance.onend = () => {
-                setCurrentNarration('');
-            };
-            speechSynthesis.speak(utterance);
+                if (requestId !== speechRequestIdRef.current) return;
+                speechSynthesis.cancel();
+                const utterance = new SpeechSynthesisUtterance(narration);
+                utterance.rate = 1.0;
+                if (playbackVoiceRef.current) {
+                    utterance.voice = playbackVoiceRef.current;
+                }
+                utterance.onend = () => {
+                    if (requestId === speechRequestIdRef.current) {
+                        setCurrentNarration('');
+                    }
+                };
+                utterance.onerror = () => {
+                    if (requestId === speechRequestIdRef.current) {
+                        setCurrentNarration('');
+                    }
+                };
+                speechSynthesis.speak(utterance);
+            })();
         }
     }, [getCurrentVoice]);
 
@@ -285,8 +303,8 @@ function KmvPageContent() {
                         speechSynthesis.pause();
                     }}
                     onRestart={() => {
-                        speechSynthesis.cancel();
-                        setCurrentNarration('');
+                        cleanupPlayback();
+                        playbackVoiceRef.current = null;
                         lastSpokenStepRef.current = -1;
                         timeline.restart();
                         animationController.startAnimation();
