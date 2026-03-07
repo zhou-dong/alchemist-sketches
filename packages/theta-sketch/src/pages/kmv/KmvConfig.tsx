@@ -380,7 +380,7 @@ Please choose and configure the K and stream size, then press Start demo to watc
             <Box
                 sx={{
                     position: 'fixed',
-                    bottom: { xs: 20, sm: 28 },
+                    bottom: window.innerHeight / 12,
                     left: 0,
                     right: 0,
                     zIndex: 1200,
