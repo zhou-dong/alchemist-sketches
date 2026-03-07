@@ -41,7 +41,7 @@ const Main = ({ sketchA, sketchB, union, k }: KmvUnionProps) => {
     // useSyncObelusTheme();
     const navigate = useNavigate();
     const { animationController, containerRef, scene, renderer, camera } = useDualThreeStage();
-    const { speak, stop, pause, resume } = useSpeech({ rate: 1.0 });
+    const { speak, stop } = useSpeech({ rate: 1.0 });
 
     useSyncObelusTheme();
 
@@ -323,6 +323,32 @@ const Main = ({ sketchA, sketchB, union, k }: KmvUnionProps) => {
         };
     }, [animationController, k, scene, sketchA.values, sketchB.values, union.values]);
 
+    const stopPlayback = React.useCallback(() => {
+        speechSynthesis.cancel();
+        setIsPlaying(false);
+        animationController?.stopAnimation?.();
+    }, [animationController]);
+
+    const pausePlayback = React.useCallback(() => {
+        setIsPlaying(false);
+        animationController?.stopAnimation?.();
+        speechSynthesis.pause();
+    }, [animationController]);
+
+    const startPlayback = React.useCallback(() => {
+        setIsPlaying(true);
+        animationController?.startAnimation?.();
+        speechSynthesis.resume();
+    }, [animationController]);
+
+    const resetNarrationState = React.useCallback(() => {
+        speechSynthesis.cancel();
+        setUiStep(0);
+        lastSpokenStepRef.current = -1;
+        setCurrentNarration('');
+        speakStep(0);
+    }, []);
+
     return (
         <>
             <KmvSetOperationHeader title="KMV Union" description="KMV keeps only the K smallest hash values and infers θ from the K-th (max stored) value. Union will return exactly K values, so θ is recoverable and the result stays composable." />
@@ -374,28 +400,25 @@ const Main = ({ sketchA, sketchB, union, k }: KmvUnionProps) => {
                         nextButtonTooltip="Go to KMV Intersection"
                         enableNextButton={true}
                         onNext={() => {
-                            speechSynthesis.cancel();
-                            setIsPlaying(false);
-                            animationController.stopAnimation();
-                            stop();
+                            stopPlayback();
                             navigate('/sketches/theta/kmv-set-operations/intersection');
                         }}
                         onStart={() => {
-                            setIsPlaying(true);
-                            animationController.startAnimation();
-                            resume();
+                            startPlayback();
                             // If starting from the beginning, speak the intro right away.
                             if (uiStep === 0) speakStep(0);
                         }}
                         onPause={() => {
-                            setIsPlaying(false);
-                            animationController.stopAnimation();
-                            pause();
+                            pausePlayback();
                         }}
                         onComplete={() => {
-                            setIsPlaying(false);
-                            animationController.stopAnimation();
-                            stop();
+                            stopPlayback();
+                        }}
+                        onRestart={() => {
+                            stopPlayback();
+                            resetNarrationState();
+                            startPlayback();
+                            timeline.restart();
                         }}
                     />
                 )}
