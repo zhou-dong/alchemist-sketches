@@ -157,6 +157,12 @@ function KmvPageContent() {
     const navigate = useNavigate();
     const lastSpokenStepRef = useRef<number>(-1);
 
+    const cleanupPlayback = useCallback(() => {
+        timeline.pause();
+        animationController.stopAnimation();
+        speechSynthesis.cancel();
+    }, []);
+
     // Sync Three.js materials with the current global theme
     useSyncObelusTheme();
 
@@ -203,10 +209,9 @@ function KmvPageContent() {
 
     React.useEffect(() => {
         return () => {
-            animationController.stopAnimation();
-            speechSynthesis.cancel();
+            cleanupPlayback();
         };
-    }, []);
+    }, [cleanupPlayback]);
 
     // Re-render the scene when mode changes to apply new colors
     React.useEffect(() => {
@@ -220,7 +225,12 @@ function KmvPageContent() {
     return (
         <>
             <StepTitle title="K-th Smallest Estimation" />
-            <StepProgressIndicator currentStepId={2} />
+            <StepProgressIndicator
+                currentStepId={2}
+                onBeforeNavigate={() => {
+                    cleanupPlayback();
+                }}
+            />
 
             {/* Subtitle Display */}
             <Fade in={!!currentNarration}>
@@ -263,16 +273,26 @@ function KmvPageContent() {
                     timeline={timeline}
                     showNextButton={true}
                     onNext={() => {
+                        cleanupPlayback();
                         navigate('/sketches/theta/kmv');
                     }}
                     nextButtonTooltip="Go to KMV Algorithm"
                     enableNextButton={isStepCompleted(2)}
                     onStart={() => {
                         animationController.startAnimation();
+                        speechSynthesis.resume();
                     }}
                     onPause={() => {
                         animationController.stopAnimation();
                         speechSynthesis.pause();
+                    }}
+                    onRestart={() => {
+                        speechSynthesis.cancel();
+                        setCurrentNarration('');
+                        lastSpokenStepRef.current = -1;
+                        timeline.restart();
+                        animationController.startAnimation();
+                        speakStep(0);
                     }}
                     onComplete={() => {
                         animationController.stopAnimation();
