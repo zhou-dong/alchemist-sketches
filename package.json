@@ -9,7 +9,7 @@
   ],
   "scripts": {
     "dev": "npm run dev -w @alchemist/web",
-    "build": "npm run build -w @alchemist/shared && npm run build -w @alchemist/theta-sketch && npm run build -w @alchemist/web",
+    "build": "npm exec -w @alchemist/web vite build",
     "build:all": "npm run build -ws --if-present",
     "lint": "eslint .",
     "preview": "npm run preview -w @alchemist/web"
