@@ -25,7 +25,7 @@ const { startTimes: NARRATION_START, durations: NARRATION_DUR } = calculateStepT
 
 export default function KmvSetOperationsIntroPage() {
     const navigate = useNavigate();
-    const { speak, stop, pause, resume } = useSpeech({ rate: 1.0 });
+    const { speak, stop } = useSpeech({ rate: 1.0 });
     const [timeline, setTimeline] = React.useState<gsap.core.Timeline | null>(null);
     const [uiStep, setUiStep] = React.useState(0);
     const [currentNarration, setCurrentNarration] = React.useState('');
@@ -210,18 +210,31 @@ export default function KmvSetOperationsIntroPage() {
                         timeline={timeline}
                         showNextButton={true}
                         onNext={() => {
+                            speechSynthesis.cancel();
+                            setCurrentNarration('');
+                            timeline.pause();
+                            stop();
                             navigate('/sketches/theta/kmv-set-operations/union');
                         }}
                         nextButtonTooltip="Go to KMV Union"
                         enableNextButton={true}
                         onStart={() => {
-                            if (!isMutedRef.current) resume();
+                            speechSynthesis.resume();
+                            timeline.play();
                         }}
                         onPause={() => {
-                            pause();
+                            speechSynthesis.pause();
+                            timeline.pause();
                         }}
                         onComplete={() => {
-                            stop();
+                            speechSynthesis.cancel();
+                            timeline.pause();
+                        }}
+                        onRestart={() => {
+                            speechSynthesis.cancel();
+                            setCurrentNarration('');
+                            timeline.restart();
+                            speechSynthesis.resume();
                         }}
                     />
                 )}

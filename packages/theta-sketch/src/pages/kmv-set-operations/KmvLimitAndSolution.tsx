@@ -180,6 +180,11 @@ export default function KmvLimitAndSolution() {
                             timeline.pause();
                             stop();
                         }}
+                        onRestart={() => {
+                            speechSynthesis.cancel();
+                            timeline.restart();
+                            speechSynthesis.resume();
+                        }}
                     />
                 )}
             </Container>

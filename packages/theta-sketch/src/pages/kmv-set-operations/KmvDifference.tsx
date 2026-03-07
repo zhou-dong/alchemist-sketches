@@ -56,7 +56,7 @@ interface KmvDifferenceProps {
 const Main = ({ sketchA, sketchB, difference, k }: KmvDifferenceProps) => {
     const navigate = useNavigate();
     const { animationController, containerRef, scene, renderer, camera } = useDualThreeStage();
-    const { speak, stop, pause, resume } = useSpeech({ rate: 1.0 });
+    const { speak, stop } = useSpeech({ rate: 1.0 });
     const { completeStep } = useThetaSketchProgress();
     useSyncObelusTheme();
 
@@ -89,13 +89,38 @@ const Main = ({ sketchA, sketchB, difference, k }: KmvDifferenceProps) => {
         speakStep(uiStep);
     }, [isPlaying, speakStep, uiStep]);
 
+    const stopPlayback = React.useCallback(() => {
+        speechSynthesis.cancel();
+        setIsPlaying(false);
+        animationController?.stopAnimation?.();
+    }, [animationController]);
+
+    const pausePlayback = React.useCallback(() => {
+        setIsPlaying(false);
+        animationController?.stopAnimation?.();
+        speechSynthesis.pause();
+    }, [animationController]);
+
+    const startPlayback = React.useCallback(() => {
+        setIsPlaying(true);
+        animationController?.startAnimation?.();
+        speechSynthesis.resume();
+    }, [animationController]);
+
+    const resetNarrationState = React.useCallback(() => {
+        setUiStep(0);
+        lastSpokenStepRef.current = -1;
+        setCurrentNarration('');
+        speakStep(0);
+    }, []);
+
     React.useEffect(() => {
         if (!scene || !animationController) return;
 
         setUiStep(0);
         lastSpokenStepRef.current = -1;
         setCurrentNarration('');
-
+        speakStep(0);
         disposeDualSceneResources(scene);
         clearScene(scene);
 
@@ -308,27 +333,24 @@ const Main = ({ sketchA, sketchB, difference, k }: KmvDifferenceProps) => {
                         nextButtonTooltip="Go to Solution"
                         enableNextButton={true}
                         onNext={() => {
-                            speechSynthesis.cancel();
-                            setIsPlaying(false);
-                            animationController.stopAnimation();
-                            stop();
+                            stopPlayback();
                             navigate('/sketches/theta/kmv-set-operations/solution');
                         }}
                         onStart={() => {
-                            setIsPlaying(true);
-                            animationController.startAnimation();
-                            resume();
+                            startPlayback();
                             if (uiStep === 0) speakStep(0);
                         }}
                         onPause={() => {
-                            setIsPlaying(false);
-                            animationController.stopAnimation();
-                            pause();
+                            pausePlayback();
+                        }}
+                        onRestart={() => {
+                            stopPlayback();
+                            resetNarrationState();
+                            startPlayback();
+                            timeline.restart();
                         }}
                         onComplete={() => {
-                            setIsPlaying(false);
-                            animationController.stopAnimation();
-                            stop();
+                            stopPlayback();
                             completeStep(4);
                         }}
                     />
