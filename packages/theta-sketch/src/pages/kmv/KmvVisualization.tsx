@@ -15,6 +15,7 @@ import { slideUp } from '@alchemist/shared';
 import { useOrthographicImmediateResize } from '@alchemist/theta-sketch/hooks/useOrthographicResize';
 import * as THREE from 'three';
 import { useNavigate } from 'react-router-dom';
+import StepProgressIndicator from '@alchemist/theta-sketch/components/StepProgressIndicator';
 
 // Scene dimensions
 const axisWidth = window.innerWidth / 2;
@@ -215,6 +216,15 @@ export default function KmvVisualization({
         startSubtitleTracking();
     }, [startSubtitleTracking]);
 
+    const cleanupPlayback = React.useCallback(() => {
+        timeline?.pause();
+        animationController.stopAnimation();
+        speechSynthesis.cancel();
+        isNarratingRef.current = false;
+        stopSubtitleTracking();
+        setCurrentSubtitle('');
+    }, [timeline, stopSubtitleTracking]);
+
     // Speak the intro narration
     const speakIntro = React.useCallback((text: string) => {
         if (!text) return;
@@ -375,6 +385,12 @@ As more items arrive, the estimate updates as N-hat equals K divided by theta, m
 
     return (
         <>
+            <StepProgressIndicator
+                currentStepId={3}
+                onBeforeNavigate={() => {
+                    cleanupPlayback();
+                }}
+            />
             {/* Subtitle display for current narration */}
             <Fade in={!!currentSubtitle}>
                 <Box
@@ -384,7 +400,7 @@ As more items arrive, the estimate updates as N-hat equals K divided by theta, m
                         left: '50%',
                         transform: 'translateX(-50%)',
                         width: 'min(900px, calc(100vw - 32px))',
-                        zIndex: 1001,
+                        zIndex: 10,
                         textAlign: 'center',
                         pointerEvents: 'none',
                     }}
@@ -412,7 +428,7 @@ As more items arrive, the estimate updates as N-hat equals K divided by theta, m
                         bottom: window.innerHeight / 12,
                         left: 0,
                         right: 0,
-                        zIndex: 1000,
+                        zIndex: 10,
                         animation: `${slideUp} 1s ease-out 0.25s both`,
                     }}
                 >
@@ -421,6 +437,7 @@ As more items arrive, the estimate updates as N-hat equals K divided by theta, m
                         showNextButton={true}
                         showMuteButton={false}
                         onNext={() => {
+                            cleanupPlayback();
                             navigate('/sketches/theta/kmv-set-operations/intro');
                         }}
                         nextButtonTooltip="Go to KMV Set Operations"
@@ -434,6 +451,12 @@ As more items arrive, the estimate updates as N-hat equals K divided by theta, m
                             animationController.stopAnimation();
                             speechSynthesis.pause();
                             pauseSubtitleTracking();
+                        }}
+                        onRestart={() => {
+                            cleanupPlayback();
+                            timeline.restart();
+                            animationController.startAnimation();
+                            speechSynthesis.resume();
                         }}
                         onComplete={() => {
                             animationController.stopAnimation();

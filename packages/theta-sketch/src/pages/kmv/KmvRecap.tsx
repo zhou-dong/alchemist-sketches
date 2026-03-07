@@ -8,6 +8,7 @@ import * as SkipNext from '@mui/icons-material/SkipNext';
 import * as Replay from '@mui/icons-material/Replay';
 import * as PlayArrow from '@mui/icons-material/PlayArrow';
 import * as Pause from '@mui/icons-material/Pause';
+import StepProgressIndicator from '@alchemist/theta-sketch/components/StepProgressIndicator';
 
 const SkipNextIcon = SkipNext.default as unknown as React.ElementType;
 const ReplayIcon = Replay.default as unknown as React.ElementType;
@@ -376,6 +377,12 @@ export default function KseToKmv({ onClose }: { onClose: () => void }) {
                 gap: 5,
             }}
         >
+            <StepProgressIndicator
+                currentStepId={3}
+                onBeforeNavigate={() => {
+                    stop();
+                }}
+            />
             {/* Section 1: The Core Insight */}
             <Fade in={isSectionVisible(0)} timeout={600}>
                 <Box>

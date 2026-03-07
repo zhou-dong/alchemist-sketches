@@ -19,6 +19,7 @@ import * as Functions from '@mui/icons-material/Functions';
 import * as RestartAlt from '@mui/icons-material/RestartAlt';
 
 import NarrationPlayer from '../../components/NarrationPlayer';
+import StepProgressIndicator from '@alchemist/theta-sketch/components/StepProgressIndicator';
 
 const MemoryIcon = Memory.default as unknown as React.ElementType;
 const PlaylistAddIcon = PlaylistAdd.default as unknown as React.ElementType;
@@ -161,6 +162,12 @@ Please choose and configure the K and stream size, then press Start demo to watc
 
     return (
         <>
+            <StepProgressIndicator
+                currentStepId={3}
+                onBeforeNavigate={() => {
+                    speechSynthesis.cancel();
+                }}
+            />
             <Box
                 sx={{
                     width: '100vw',

@@ -7,7 +7,6 @@ import StepTitle from '@alchemist/theta-sketch/components/StepTitle';
 import SettingsIcon from '@mui/icons-material/Settings';
 import RocketLaunchIcon from '@mui/icons-material/RocketLaunch';
 import LightbulbIcon from '@mui/icons-material/Lightbulb';
-import StepProgressIndicator from '@alchemist/theta-sketch/components/StepProgressIndicator';
 import KmvVisualization from './KmvVisualization';
 
 function ThetaSketchPageContent() {
@@ -24,7 +23,6 @@ function ThetaSketchPageContent() {
     return (
         <>
             <StepTitle title="K Minimum Value (KMV)" />
-            <StepProgressIndicator currentStepId={3} />
 
             {/* Introduction */}
             {flowStep === 0 && <Recap onClose={() => setFlowStep(1)} />}
