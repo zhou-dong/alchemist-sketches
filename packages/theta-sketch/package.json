@@ -9,6 +9,9 @@
     ".": "./src/index.ts",
     "./components": "./src/components/index.ts"
   },
+  "scripts": {
+    "build": "tsc -b"
+  },
   "dependencies": {
     "@alchemist/shared": "*",
     "@emotion/react": "^11.14.0",
