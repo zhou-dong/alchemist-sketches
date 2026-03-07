@@ -100,6 +100,41 @@ export const Home = () => {
           </Button>
         </Fade>
       </Box>
+
+      {/* Subtle footer contact bar */}
+      <Box
+        sx={{
+          position: 'fixed',
+          bottom: 0,
+          left: 0,
+          right: 0,
+          zIndex: 20,
+          py: 1,
+          px: 2,
+          display: 'flex',
+          justifyContent: 'center',
+        }}
+      >
+        <Typography
+          variant="caption"
+          sx={{
+            opacity: 0.75,
+            letterSpacing: '0.04em',
+            textDecoration: 'none',
+            transition: 'color 200ms ease, opacity 200ms ease, transform 200ms ease',
+            '&:hover': {
+              opacity: 1,
+              color: 'text.primary',
+              transform: 'translateY(-1px)',
+            },
+          }}
+          component="a"
+          href="mailto:alchemist.dong@gmail.com"
+          color="text.secondary"
+        >
+          Contact: alchemist.dong@gmail.com
+        </Typography>
+      </Box>
     </Box>
   );
 };
