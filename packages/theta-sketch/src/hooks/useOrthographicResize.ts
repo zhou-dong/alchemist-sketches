@@ -40,6 +40,12 @@ export function useOrthographicDebouncedResize(
             }, debounceMs);
         };
 
+        // Recenter immediately on mount/show, not only after a future resize event.
+        const width = window.innerWidth;
+        const height = window.innerHeight;
+        updateOrthographicResize(renderer, camera, width, height);
+        onResizeRef.current?.();
+
         window.addEventListener('resize', handleResize);
         return () => {
             window.removeEventListener('resize', handleResize);
@@ -72,6 +78,9 @@ export function useOrthographicImmediateResize(
             updateOrthographicResize(renderer, camera, width, height);
             onResizeRef.current?.();
         };
+
+        // Recenter immediately on mount/show, not only after a future resize event.
+        handleResize();
 
         window.addEventListener('resize', handleResize);
         return () => window.removeEventListener('resize', handleResize);
