@@ -17,6 +17,27 @@ import { buildAxis, buildDot, buildKmvInfoLatex, buildLatex, buildNumber } from 
 import { KmvSetOperationHeader } from './KmvSetOperationsSharedComponents';
 import { useThetaSketchProgress } from '../../contexts/ThetaSketchProgressContext';
 
+async function ensureSpeechVoicesReady(timeoutMs = 1000): Promise<void> {
+    if (typeof window === 'undefined' || !('speechSynthesis' in window)) return;
+    if (speechSynthesis.getVoices().length > 0) return;
+    await new Promise<void>((resolve) => {
+        let settled = false;
+        const finish = () => {
+            if (settled) return;
+            settled = true;
+            clearTimeout(timeoutId);
+            speechSynthesis.removeEventListener('voiceschanged', onVoicesChanged);
+            resolve();
+        };
+        const onVoicesChanged = () => {
+            if (speechSynthesis.getVoices().length > 0) finish();
+        };
+        const timeoutId = setTimeout(finish, timeoutMs);
+        speechSynthesis.addEventListener('voiceschanged', onVoicesChanged);
+        onVoicesChanged();
+    });
+}
+
 const OPENING_DESCRIPTION = `
   Difference estimation works, but composition breaks: the operation uses shared θ = min(θ_A, θ_B), while the result may have fewer than K values, so inferred θ from the new sketch may not equal the operation θ.
   The fix is to store θ explicitly in the result.
@@ -56,7 +77,7 @@ interface KmvDifferenceProps {
 const Main = ({ sketchA, sketchB, difference, k }: KmvDifferenceProps) => {
     const navigate = useNavigate();
     const { animationController, containerRef, scene, renderer, camera } = useDualThreeStage();
-    const { speak, stop } = useSpeech({ rate: 1.0 });
+    const { stop, getCurrentVoice } = useSpeech({ rate: 1.0 });
     const { completeStep } = useThetaSketchProgress();
     useSyncObelusTheme();
 
@@ -69,6 +90,7 @@ const Main = ({ sketchA, sketchB, difference, k }: KmvDifferenceProps) => {
     const [isPlaying, setIsPlaying] = React.useState<boolean>(false);
     const [currentNarration, setCurrentNarration] = React.useState<string>('');
     const lastSpokenStepRef = React.useRef<number>(-1);
+    const playbackVoiceRef = React.useRef<SpeechSynthesisVoice | null>(null);
 
     const speakStep = React.useCallback(
         (step: number) => {
@@ -77,9 +99,29 @@ const Main = ({ sketchA, sketchB, difference, k }: KmvDifferenceProps) => {
             if (lastSpokenStepRef.current === step) return;
             lastSpokenStepRef.current = step;
             setCurrentNarration(text);
-            speak(text);
+            void (async () => {
+                // Lock a single voice for the whole playback session.
+                if (!playbackVoiceRef.current) {
+                    await ensureSpeechVoicesReady();
+                    playbackVoiceRef.current = getCurrentVoice();
+                }
+
+                speechSynthesis.cancel();
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.rate = 1.0;
+                if (playbackVoiceRef.current) {
+                    utterance.voice = playbackVoiceRef.current;
+                }
+                utterance.onend = () => {
+                    setCurrentNarration('');
+                };
+                utterance.onerror = () => {
+                    setCurrentNarration('');
+                };
+                speechSynthesis.speak(utterance);
+            })();
         },
-        [speak]
+        [getCurrentVoice]
     );
 
     React.useEffect(() => stop, [stop]);
@@ -111,8 +153,9 @@ const Main = ({ sketchA, sketchB, difference, k }: KmvDifferenceProps) => {
         setUiStep(0);
         lastSpokenStepRef.current = -1;
         setCurrentNarration('');
+        playbackVoiceRef.current = null;
         speakStep(0);
-    }, []);
+    }, [speakStep]);
 
     React.useEffect(() => {
         if (!scene || !animationController) return;
