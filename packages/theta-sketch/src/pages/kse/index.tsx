@@ -212,8 +212,11 @@ function KmvPageContent() {
     React.useEffect(() => {
         if (!timeline) return;
 
+        // Add callbacks for steps >= 1.
+        // Step 0 is triggered explicitly from onStart/onRestart to avoid restart race conditions.
         Object.keys(STEP_NARRATIONS).forEach((stepKey) => {
             const stepIndex = parseInt(stepKey);
+            if (stepIndex === 0) return;
             const startTime = STEP_START_TIMES[stepIndex] ?? 0;
             timeline.call(() => speakStep(stepIndex), [], startTime);
         });
@@ -297,6 +300,10 @@ function KmvPageContent() {
                     onStart={() => {
                         animationController.startAnimation();
                         speechSynthesis.resume();
+                        if ((timeline?.progress?.() ?? 0) === 0) {
+                            lastSpokenStepRef.current = -1;
+                            speakStep(0);
+                        }
                     }}
                     onPause={() => {
                         animationController.stopAnimation();
@@ -308,6 +315,7 @@ function KmvPageContent() {
                         lastSpokenStepRef.current = -1;
                         timeline.restart();
                         animationController.startAnimation();
+                        speechSynthesis.resume();
                         speakStep(0);
                     }}
                     onComplete={() => {
