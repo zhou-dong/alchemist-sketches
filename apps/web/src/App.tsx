@@ -25,7 +25,7 @@ function App() {
           <GlobalAnimationStyles />
           <Layout>
             <Routes>
-              <Route path="/" element={<Home />} />˝
+              <Route path="/" element={<Home />} />
               {/* Sketches list */}
               <Route path="/sketches" element={<Sketches />} />
               {/* Theta Sketch module routes */}
