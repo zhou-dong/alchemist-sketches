@@ -33,6 +33,7 @@ export const Home = () => {
           flexDirection: 'column',
           justifyContent: 'center',
           alignItems: 'center',
+          pb: { xs: '6vh', md: '10vh' },
           zIndex: 10,
         }}
       >
