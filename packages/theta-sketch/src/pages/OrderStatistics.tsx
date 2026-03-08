@@ -302,7 +302,7 @@ function OrderStatisticsPageContent() {
                 <Box
                     sx={{
                         position: 'fixed',
-                        bottom: window.innerHeight / 12 + 140,
+                        bottom: window.innerHeight / 12 + 120,
                         left: '50%',
                         transform: 'translateX(-50%)',
                         maxWidth: '80%',
