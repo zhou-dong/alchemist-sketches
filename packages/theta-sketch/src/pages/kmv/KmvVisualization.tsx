@@ -243,7 +243,7 @@ export default function KmvVisualization({
 
             speechSynthesis.cancel();
             const utterance = new SpeechSynthesisUtterance(text);
-            utterance.rate = 1.1;
+            utterance.rate = 1.0;
             if (playbackVoiceRef.current) {
                 utterance.voice = playbackVoiceRef.current;
             }
