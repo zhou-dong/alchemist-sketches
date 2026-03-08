@@ -3,8 +3,9 @@ import { keyframes } from '@mui/system';
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import { useNavigate } from 'react-router-dom';
-import { useEffect } from 'react';
-import { useThetaSketchProgress } from '@alchemist/theta-sketch';
+import { useState } from 'react';
+import NarrationPlayer from '@alchemist/theta-sketch/components/NarrationPlayer';
+import { slideUp } from '@alchemist/shared/components/common/NeoGlassComponents';
 
 const confettiFall = keyframes`
   0% { transform: translateY(-12vh) rotate(0deg); opacity: 0; }
@@ -71,181 +72,214 @@ const CONFETTI = [
     { left: '92%', color: '#ff7043', delayMs: 700, durationMs: 3600 },
 ];
 
-export default function ThetaSketchSetOperationsFinish() {
+const FINISH_NARRATION = `
+Congrats, you completed the Theta Sketch course.
+The journey took you from Order Statistics, K-th Smallest Estimation, KMV, and Theta Sketch.
+You now understand how Theta Sketch works.
+Free feel to retake the course or explore the other sketches.
+`;
+
+const Celebration = () => {
     const theme = useTheme();
     const navigate = useNavigate();
-    const { completeStep } = useThetaSketchProgress();
-
-    useEffect(() => {
-        completeStep(5);
-    }, [completeStep]);
 
     return (
-        <>
-            <Box
-                sx={{
-                    position: 'relative',
-                    overflow: 'hidden',
-                    minHeight: '100vh',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    px: 2,
-                }}
-            >
-                {/* Fireworks and confetti background */}
-                <Box sx={{ position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 0 }}>
-                    {FIREWORKS.map((f, idx) => (
-                        <Box
-                            key={`fw-${idx}`}
-                            sx={{
-                                position: 'absolute',
-                                top: f.top,
-                                left: f.left,
-                                right: f.right,
-                                width: 10,
-                                height: 10,
-                                borderRadius: '50%',
-                                bgcolor: alpha(f.color, 0.8),
-                                animation: `${fireworkPop} 1.8s ease-out ${f.delayMs}ms infinite`,
-                            }}
-                        >
-                            {[...Array(8)].map((_, i) => {
-                                const angle = (i * 360) / 8;
-                                const rad = (angle * Math.PI) / 180;
-                                const x = Math.cos(rad) * 26;
-                                const y = Math.sin(rad) * 26;
-                                return (
-                                    <Box
-                                        key={i}
-                                        sx={{
-                                            position: 'absolute',
-                                            left: `calc(50% + ${x}px)`,
-                                            top: `calc(50% + ${y}px)`,
-                                            width: 6,
-                                            height: 6,
-                                            borderRadius: '50%',
-                                            bgcolor: alpha(f.color, 0.95),
-                                            transform: 'translate(-50%, -50%)',
-                                        }}
-                                    />
-                                );
-                            })}
-                        </Box>
-                    ))}
-
-                    {CONFETTI.map((c, idx) => (
-                        <Box
-                            key={`confetti-${idx}`}
-                            sx={{
-                                position: 'absolute',
-                                left: c.left,
-                                top: '-10vh',
-                                width: 8,
-                                height: 18,
-                                borderRadius: 1,
-                                bgcolor: alpha(c.color, 0.85),
-                                animation: `${confettiFall} ${c.durationMs}ms linear ${c.delayMs}ms infinite`,
-                            }}
-                        />
-                    ))}
-                </Box>
-
-                <Stack
-                    spacing={3}
-                    sx={{
-                        position: 'relative',
-                        overflow: 'hidden',
-                        zIndex: 1,
-                        width: '100%',
-                        maxWidth: { xs: '92vw', md: 760 },
-                        textAlign: 'center',
-                        transform: { xs: 'translateY(-4vh)', md: 'translateY(-6vh)' },
-                        p: 3,
-                        borderRadius: 2,
-                        // background: "transparent",
-                        border: `1px solid ${alpha(theme.palette.success.main, 0.35)}`,
-                        background: alpha(theme.palette.success.main, 0.05),
-                        backdropFilter: "blur(4px)",
-                        animation: `${popIn} 520ms ease-out, ${sectionBorderPulse} 2.6s ease-in-out infinite, ${sectionBounce} 2.2s ease-in-out infinite`,
-                    }}
-                >
+        <Box
+            sx={{
+                position: 'relative',
+                overflow: 'hidden',
+                minHeight: '100vh',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                px: 2,
+            }}
+        >
+            {/* Fireworks and confetti background */}
+            <Box sx={{ position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 0 }}>
+                {FIREWORKS.map((f, idx) => (
                     <Box
+                        key={`fw-${idx}`}
                         sx={{
                             position: 'absolute',
-                            top: -8,
-                            right: 18,
+                            top: f.top,
+                            left: f.left,
+                            right: f.right,
                             width: 10,
                             height: 10,
                             borderRadius: '50%',
-                            bgcolor: alpha(theme.palette.warning.main, 0.85),
-                            animation: `${floatUp} 2.2s ease-in-out infinite`,
-                        }}
-                    />
-                    <Box
-                        sx={{
-                            position: 'absolute',
-                            top: 22,
-                            left: 26,
-                            width: 8,
-                            height: 8,
-                            borderRadius: '50%',
-                            bgcolor: alpha(theme.palette.info.main, 0.85),
-                            animation: `${floatUp} 1.9s ease-in-out 300ms infinite`,
-                        }}
-                    />
-                    <Box
-                        sx={{
-                            position: 'relative',
-                            alignSelf: 'center',
-                            width: 72,
-                            height: 72,
-                            borderRadius: '50%',
-                            display: 'grid',
-                            placeItems: 'center',
-                            color: theme.palette.warning.main,
-                            background: alpha(theme.palette.warning.main, 0.12),
-                            animation: `${glowPulse} 1.8s ease-out infinite`,
+                            bgcolor: alpha(f.color, 0.8),
+                            animation: `${fireworkPop} 1.8s ease-out ${f.delayMs}ms infinite`,
                         }}
                     >
-                        <EmojiEventsIcon sx={{ fontSize: 38 }} />
-                        <AutoAwesomeIcon
-                            sx={{
-                                position: 'absolute',
-                                top: 8,
-                                right: -8,
-                                color: alpha(theme.palette.warning.light, 0.95),
-                                fontSize: 18,
-                                animation: `${sparkleTwinkle} 1.6s ease-in-out infinite`,
-                            }}
-                        />
-                        <AutoAwesomeIcon
-                            sx={{
-                                position: 'absolute',
-                                bottom: 10,
-                                left: -10,
-                                color: alpha(theme.palette.info.light, 0.95),
-                                fontSize: 16,
-                                animation: `${sparkleTwinkle} 1.9s ease-in-out 250ms infinite`,
-                            }}
-                        />
+                        {[...Array(8)].map((_, i) => {
+                            const angle = (i * 360) / 8;
+                            const rad = (angle * Math.PI) / 180;
+                            const x = Math.cos(rad) * 26;
+                            const y = Math.sin(rad) * 26;
+                            return (
+                                <Box
+                                    key={i}
+                                    sx={{
+                                        position: 'absolute',
+                                        left: `calc(50% + ${x}px)`,
+                                        top: `calc(50% + ${y}px)`,
+                                        width: 6,
+                                        height: 6,
+                                        borderRadius: '50%',
+                                        bgcolor: alpha(f.color, 0.95),
+                                        transform: 'translate(-50%, -50%)',
+                                    }}
+                                />
+                            );
+                        })}
                     </Box>
-                    <Typography variant="h5" sx={{ fontWeight: 900 }}>
-                        Congrats! You completed the Theta Sketch course.
-                    </Typography>
-                    <Typography variant="body1" color="text.secondary" sx={{ lineHeight: 1.8 }}>
-                        You completed the full journey from Order Statistics to KMV to Theta Sketch, and now understand how Theta Sketch works.
-                    </Typography>
+                ))}
 
-                    <Stack direction="row" spacing={2} justifyContent="center" flexWrap="wrap">
-                        <Button variant="outlined" size="large" onClick={() => navigate('/sketches/theta')}>
-                            Retake Course
-                        </Button>
-                        <Button variant="contained" size="large" onClick={() => navigate('/sketches')}>
-                            Continue to Sketches
-                        </Button>
-                    </Stack>
+                {CONFETTI.map((c, idx) => (
+                    <Box
+                        key={`confetti-${idx}`}
+                        sx={{
+                            position: 'absolute',
+                            left: c.left,
+                            top: '-10vh',
+                            width: 8,
+                            height: 18,
+                            borderRadius: 1,
+                            bgcolor: alpha(c.color, 0.85),
+                            animation: `${confettiFall} ${c.durationMs}ms linear ${c.delayMs}ms infinite`,
+                        }}
+                    />
+                ))}
+            </Box>
+
+            <Stack
+                spacing={3}
+                sx={{
+                    position: 'relative',
+                    overflow: 'hidden',
+                    zIndex: 1,
+                    width: '100%',
+                    maxWidth: { xs: '92vw', md: 760 },
+                    textAlign: 'center',
+                    transform: { xs: 'translateY(-4vh)', md: 'translateY(-6vh)' },
+                    p: 3,
+                    borderRadius: 2,
+                    // background: "transparent",
+                    border: `1px solid ${alpha(theme.palette.success.main, 0.35)}`,
+                    background: alpha(theme.palette.success.main, 0.05),
+                    backdropFilter: "blur(4px)",
+                    animation: `${popIn} 520ms ease-out, ${sectionBorderPulse} 2.6s ease-in-out infinite, ${sectionBounce} 2.2s ease-in-out infinite`,
+                }}
+            >
+                <Box
+                    sx={{
+                        position: 'absolute',
+                        top: -8,
+                        right: 18,
+                        width: 10,
+                        height: 10,
+                        borderRadius: '50%',
+                        bgcolor: alpha(theme.palette.warning.main, 0.85),
+                        animation: `${floatUp} 2.2s ease-in-out infinite`,
+                    }}
+                />
+                <Box
+                    sx={{
+                        position: 'absolute',
+                        top: 22,
+                        left: 26,
+                        width: 8,
+                        height: 8,
+                        borderRadius: '50%',
+                        bgcolor: alpha(theme.palette.info.main, 0.85),
+                        animation: `${floatUp} 1.9s ease-in-out 300ms infinite`,
+                    }}
+                />
+                <Box
+                    sx={{
+                        position: 'relative',
+                        alignSelf: 'center',
+                        width: 72,
+                        height: 72,
+                        borderRadius: '50%',
+                        display: 'grid',
+                        placeItems: 'center',
+                        color: theme.palette.warning.main,
+                        background: alpha(theme.palette.warning.main, 0.12),
+                        animation: `${glowPulse} 1.8s ease-out infinite`,
+                    }}
+                >
+                    <EmojiEventsIcon sx={{ fontSize: 38 }} />
+                    <AutoAwesomeIcon
+                        sx={{
+                            position: 'absolute',
+                            top: 8,
+                            right: -8,
+                            color: alpha(theme.palette.warning.light, 0.95),
+                            fontSize: 18,
+                            animation: `${sparkleTwinkle} 1.6s ease-in-out infinite`,
+                        }}
+                    />
+                    <AutoAwesomeIcon
+                        sx={{
+                            position: 'absolute',
+                            bottom: 10,
+                            left: -10,
+                            color: alpha(theme.palette.info.light, 0.95),
+                            fontSize: 16,
+                            animation: `${sparkleTwinkle} 1.9s ease-in-out 250ms infinite`,
+                        }}
+                    />
+                </Box>
+                <Typography variant="h5" sx={{ fontWeight: 900 }}>
+                    Congrats! You completed the Theta Sketch course.
+                </Typography>
+                <Typography variant="body1" color="text.secondary" sx={{ lineHeight: 1.8 }}>
+                    You completed the full journey from Order Statistics to KMV to Theta Sketch, and now understand how Theta Sketch works.
+                </Typography>
+
+
+                <Stack direction="row" spacing={2} justifyContent="center" flexWrap="wrap">
+                    <Button variant="outlined" size="large" onClick={() => navigate('/sketches/theta')}>
+                        Retake Course
+                    </Button>
+                    <Button variant="contained" size="large" onClick={() => navigate('/sketches')}>
+                        Continue to Sketches
+                    </Button>
                 </Stack>
+            </Stack>
+        </Box>
+    );
+}
+
+export default function ThetaSketchSetOperationsFinish() {
+
+    const [displayCelebration, setDisplayCelebration] = useState(false);
+
+    return (
+        <>
+            {displayCelebration && <Celebration />}
+            <Box sx={{
+                position: 'fixed',
+                bottom: window.innerHeight / 20,
+                left: 0,
+                right: 0,
+                zIndex: 10,
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                animation: `${slideUp} 1s ease-out 0.25s both`,
+            }}>
+                <NarrationPlayer
+                    content={FINISH_NARRATION}
+                    rate={1}
+                    showSubtitles
+                    onComplete={() => {
+                        setDisplayCelebration(true);
+                        speechSynthesis.cancel();
+                    }}
+                />
             </Box>
         </>
     );
