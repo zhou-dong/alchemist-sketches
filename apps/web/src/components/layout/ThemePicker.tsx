@@ -13,6 +13,10 @@ import {
   Divider,
   Switch,
   FormControlLabel,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
 } from '@mui/material';
 import PaletteIcon from '@mui/icons-material/Palette';
 import DarkModeIcon from '@mui/icons-material/DarkMode';
@@ -115,7 +119,17 @@ const ThemeCard: React.FC<ThemeCardProps> = ({
 // THEME PICKER
 // =============================================================================
 
-export const ThemePicker: React.FC = () => {
+export type BackgroundEffectsLevel = 'low' | 'balanced' | 'showcase';
+
+interface ThemePickerProps {
+  backgroundEffectsLevel: BackgroundEffectsLevel;
+  onBackgroundEffectsLevelChange: (level: BackgroundEffectsLevel) => void;
+}
+
+export const ThemePicker: React.FC<ThemePickerProps> = ({
+  backgroundEffectsLevel,
+  onBackgroundEffectsLevelChange,
+}) => {
   const { themeId, mode, availableThemes, setTheme, toggleMode } = useTheme();
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
 
@@ -197,6 +211,33 @@ export const ThemePicker: React.FC = () => {
             sx={{ m: 0, width: '100%', justifyContent: 'space-between' }}
             labelPlacement="start"
           />
+        </Box>
+
+        <Divider sx={{ my: 1 }} />
+
+        {/* Background effects level */}
+        <Typography
+          variant="caption"
+          sx={{ px: 1.5, py: 0.5, color: 'text.secondary', display: 'block' }}
+        >
+          Background effects
+        </Typography>
+        <Box sx={{ px: 1.5, pb: 1 }}>
+          <FormControl fullWidth size="small">
+            <InputLabel id="background-effects-label">Performance</InputLabel>
+            <Select
+              labelId="background-effects-label"
+              value={backgroundEffectsLevel}
+              label="Performance"
+              onChange={(event) => {
+                onBackgroundEffectsLevelChange?.(event.target.value as BackgroundEffectsLevel);
+              }}
+            >
+              <MenuItem value="low">Low (best for older Intel)</MenuItem>
+              <MenuItem value="balanced">Balanced</MenuItem>
+              <MenuItem value="showcase">Showcase</MenuItem>
+            </Select>
+          </FormControl>
         </Box>
 
         <Divider sx={{ my: 1 }} />

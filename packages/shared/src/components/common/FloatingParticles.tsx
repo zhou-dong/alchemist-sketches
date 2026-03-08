@@ -59,7 +59,10 @@ const FloatingParticle = ({ particle }: { particle: Particle }) => (
           rgba(139, 92, 246, ${particle.opacity * 0.7}) 50%, 
           transparent 100%
         )`,
-      boxShadow: `0 0 ${particle.size * 4}px rgba(99, 102, 241, ${particle.opacity * 0.8})`,
+      // Small particles don't need expensive glow shadows.
+      boxShadow: particle.size >= 4.5
+        ? `0 0 ${particle.size * 2.5}px rgba(99, 102, 241, ${particle.opacity * 0.45})`
+        : 'none',
       pointerEvents: 'none',
       zIndex: -1,
       animation: `${particleFloat} ${15 + particle.id % 10}s ease-in-out infinite`,

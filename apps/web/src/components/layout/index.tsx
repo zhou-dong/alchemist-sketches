@@ -3,8 +3,9 @@ import HomeIcon from '@mui/icons-material/Home';
 import type { ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ThemeToggle } from './ThemeToggle';
-import { ThemePicker } from './ThemePicker';
+import { ThemePicker, type BackgroundEffectsLevel } from './ThemePicker';
 import { FloatingParticles, GlowOrbs } from '@alchemist/shared';
+import { useLocalStorage } from '@alchemist/shared';
 
 const placementStyles = {
     'bottom-right': { bottom: 20, right: 20 },
@@ -39,24 +40,38 @@ const Header = () => {
     );
 };
 
-const Background = () => (
+const BACKGROUND_PRESETS: Record<BackgroundEffectsLevel, { orbPreset: 'minimal' | 'teal-violet' | 'vibrant'; particleCount: number }> = {
+    low: { orbPreset: 'minimal', particleCount: 24 },
+    balanced: { orbPreset: 'teal-violet', particleCount: 40 },
+    showcase: { orbPreset: 'vibrant', particleCount: 80 },
+};
+
+const Background = ({ level }: { level: BackgroundEffectsLevel }) => (
     <>
-        <GlowOrbs preset="vibrant" />
-        <FloatingParticles particleCount={100} />
+        <GlowOrbs preset={BACKGROUND_PRESETS[level].orbPreset} />
+        <FloatingParticles particleCount={BACKGROUND_PRESETS[level].particleCount} />
     </>
 );
 
 export const Layout = ({ children }: { children: ReactNode }) => {
+    const [backgroundEffectsLevel, setBackgroundEffectsLevel] = useLocalStorage<BackgroundEffectsLevel>(
+        'background-effects-level',
+        'balanced'
+    );
+
     return (
         <>
-            <Background />
+            <Background level={backgroundEffectsLevel} />
 
             <ButtonContainer placement="top-left">
                 <Header />
             </ButtonContainer>
 
             <ButtonContainer placement="top-right">
-                <ThemePicker />
+                <ThemePicker
+                    backgroundEffectsLevel={backgroundEffectsLevel}
+                    onBackgroundEffectsLevelChange={setBackgroundEffectsLevel}
+                />
             </ButtonContainer>
 
             <ButtonContainer placement="bottom-right">
