@@ -256,7 +256,7 @@ function KmvPageContent() {
                 <Box
                     sx={{
                         position: 'fixed',
-                        bottom: window.innerHeight / 12 + 120,
+                        bottom: window.innerHeight / 20 + 120,
                         left: '50%',
                         transform: 'translateX(-50%)',
                         maxWidth: '80%',
@@ -281,7 +281,7 @@ function KmvPageContent() {
                 maxWidth="md"
                 sx={{
                     position: 'fixed',
-                    bottom: window.innerHeight / 12,
+                    bottom: window.innerHeight / 20,
                     left: 0,
                     right: 0,
                     zIndex: 10,

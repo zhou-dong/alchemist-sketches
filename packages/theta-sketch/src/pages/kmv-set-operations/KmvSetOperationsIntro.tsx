@@ -179,7 +179,7 @@ export default function KmvSetOperationsIntroPage() {
                 <Box
                     sx={{
                         position: 'fixed',
-                        bottom: window.innerHeight / 12 + 130,
+                        bottom: window.innerHeight / 20 + 130,
                         left: '50%',
                         transform: 'translateX(-50%)',
                         width: 'min(900px, calc(100vw - 32px))',
@@ -198,7 +198,7 @@ export default function KmvSetOperationsIntroPage() {
                 maxWidth="sm"
                 sx={{
                     position: 'fixed',
-                    bottom: window.innerHeight / 12,
+                    bottom: window.innerHeight / 20,
                     left: 0,
                     right: 0,
                     zIndex: 1000,
