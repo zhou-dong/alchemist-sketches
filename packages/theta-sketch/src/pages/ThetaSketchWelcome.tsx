@@ -136,7 +136,7 @@ export const ThetaSketchWelcome = () => {
 
             <Box sx={{
                 position: 'fixed',
-                bottom: window.innerHeight / 12,
+                bottom: window.innerHeight / 20,
                 left: 0,
                 right: 0,
                 zIndex: 10,

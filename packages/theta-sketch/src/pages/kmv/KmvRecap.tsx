@@ -361,7 +361,7 @@ export default function KseToKmv({ onClose }: { onClose: () => void }) {
 
     return (
         <Container
-            maxWidth="xl"
+            maxWidth="lg"
             sx={{
                 position: "absolute",
                 top: 0,
@@ -468,7 +468,7 @@ export default function KseToKmv({ onClose }: { onClose: () => void }) {
             <Box
                 sx={{
                     position: 'fixed',
-                    bottom: window.innerHeight / 12,
+                    bottom: window.innerHeight / 20,
                     left: 0,
                     right: 0,
                     display: 'flex',
@@ -487,7 +487,7 @@ export default function KseToKmv({ onClose }: { onClose: () => void }) {
                         background: 'transparent',
                         minWidth: 600,
                         pointerEvents: 'auto',
-                        zIndex: 100,
+                        zIndex: 10,
                     }}
                 >
                     <Stack spacing={1.5}>

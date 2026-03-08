@@ -410,7 +410,7 @@ As more items arrive, the estimate updates as N-hat equals K divided by theta, m
                 <Box
                     sx={{
                         position: 'fixed',
-                        bottom: window.innerHeight / 12 + 140,
+                        bottom: window.innerHeight / 20 + 120,
                         left: '50%',
                         transform: 'translateX(-50%)',
                         width: 'min(900px, calc(100vw - 32px))',
@@ -439,7 +439,7 @@ As more items arrive, the estimate updates as N-hat equals K divided by theta, m
                     maxWidth="sm"
                     sx={{
                         position: 'fixed',
-                        bottom: window.innerHeight / 12,
+                        bottom: window.innerHeight / 20,
                         left: 0,
                         right: 0,
                         zIndex: 10,

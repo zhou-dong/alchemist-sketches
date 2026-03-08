@@ -255,11 +255,11 @@ const Main = ({ sketchA, sketchB, difference, k }: KmvDifferenceProps) => {
                 <Box
                     sx={{
                         position: 'fixed',
-                        bottom: window.innerHeight / 12 + 120,
+                        bottom: window.innerHeight / 20 + 120,
                         left: '50%',
                         transform: 'translateX(-50%)',
                         maxWidth: 'min(900px, 92vw)',
-                        zIndex: 1001,
+                        zIndex: 10,
                         textAlign: 'center',
                         px: 2,
                         pointerEvents: 'none',
@@ -282,7 +282,7 @@ const Main = ({ sketchA, sketchB, difference, k }: KmvDifferenceProps) => {
                 maxWidth="sm"
                 sx={{
                     position: 'fixed',
-                    bottom: window.innerHeight / 12,
+                    bottom: window.innerHeight / 20,
                     left: 0,
                     right: 0,
                     zIndex: 1000,
