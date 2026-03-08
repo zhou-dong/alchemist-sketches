@@ -309,7 +309,7 @@ export default function NarrationPlayer({
                 color: currentSubtitle ? 'text.primary' : 'text.secondary',
                 fontStyle: currentSubtitle ? 'normal' : 'italic',
                 transition: 'all 0.3s ease',
-                mb: -6,
+                mb: -10,
               }}
             >
               {currentSubtitle}
