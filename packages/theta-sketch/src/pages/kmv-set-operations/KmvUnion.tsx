@@ -323,7 +323,7 @@ const Main = ({ sketchA, sketchB, union, k }: KmvUnionProps) => {
                         left: '50%',
                         transform: 'translateX(-50%)',
                         maxWidth: 'min(900px, 92vw)',
-                        zIndex: 1001,
+                        zIndex: 10,
                         textAlign: 'center',
                         px: 2,
                         pointerEvents: 'none',

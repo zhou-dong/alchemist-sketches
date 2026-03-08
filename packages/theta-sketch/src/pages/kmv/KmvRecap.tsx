@@ -487,7 +487,7 @@ export default function KseToKmv({ onClose }: { onClose: () => void }) {
                         background: 'transparent',
                         minWidth: 600,
                         pointerEvents: 'auto',
-                        zIndex: 100,
+                        zIndex: 10,
                     }}
                 >
                     <Stack spacing={1.5}>

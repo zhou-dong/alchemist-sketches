@@ -179,11 +179,11 @@ export default function KmvSetOperationsIntroPage() {
                 <Box
                     sx={{
                         position: 'fixed',
-                        bottom: window.innerHeight / 12 + 140,
+                        bottom: window.innerHeight / 12 + 130,
                         left: '50%',
                         transform: 'translateX(-50%)',
                         width: 'min(900px, calc(100vw - 32px))',
-                        zIndex: 1001,
+                        zIndex: 10,
                         textAlign: 'center',
                         pointerEvents: 'none',
                     }}

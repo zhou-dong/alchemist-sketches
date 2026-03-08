@@ -8,7 +8,7 @@ export function KmvSetOperationHeader({ title, description }: { title: string, d
                 top: window.innerHeight / 20,
                 left: '50%',
                 transform: 'translateX(-50%)',
-                zIndex: 1000,
+                zIndex: 10,
                 width: { xs: '92%', md: 920 },
                 pointerEvents: 'none',
             }}
