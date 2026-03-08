@@ -41,6 +41,10 @@ export class AnimationController {
         }
     }
 
+    isAnimating = () => {
+        return this.animationFrameId !== null;
+    }
+
     renderAnimationOnce = () => {
         this.render();
     }
