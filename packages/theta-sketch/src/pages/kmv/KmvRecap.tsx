@@ -361,7 +361,7 @@ export default function KseToKmv({ onClose }: { onClose: () => void }) {
 
     return (
         <Container
-            maxWidth="xl"
+            maxWidth="lg"
             sx={{
                 position: "absolute",
                 top: 0,
