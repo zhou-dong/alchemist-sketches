@@ -81,6 +81,8 @@ export default function TimelinePlayer({
     timeline.eventCallback('onUpdate', updateProgress);
     timeline.eventCallback('onComplete', () => {
       setIsPlaying(false);
+      timeline.pause();
+      onPause();
       onComplete();
     });
 
