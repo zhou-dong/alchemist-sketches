@@ -19,9 +19,9 @@ import { useStepNarrationPlayback } from '../../hooks/useStepNarrationPlayback';
 const NARRATION: Record<number, string> = {
     0: `On this page, we will compute a union using Theta Sketch. Each sketch keeps the K smallest hash values, and stores theta explicitly.`,
     1: `For the estimation, we use the formula: estimated equals S divided by theta, where S is the number of retained hashes, and theta is stored explicitly in the sketch.`,
-    2: `This is Sketch A. It contains the K smallest hash values from stream A.`,
-    3: `This is Sketch B. It contains the K smallest hash values from stream B.`,
-    4: `This is the union sketch. It initially as an empty sketch.`,
+    2: `This is Sketch A with its retained values and stored theta. `,
+    3: `This is Sketch B with its retained values and stored theta.`,
+    4: `This is the union result sketch, which starts empty.`,
     5: "We add the values from Sketch A and Sketch B to the union sketch.",
     6: "We then remove duplicates, sort them, and keep the K smallest values.",
     7: "Finally, we store theta as the maximum of those values, and estimate the union size.",
