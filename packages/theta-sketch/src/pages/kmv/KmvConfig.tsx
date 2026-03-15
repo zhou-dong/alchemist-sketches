@@ -151,11 +151,11 @@ Let's build a KMV sketch and demonstrate how it works.
 
 First, the kmv implementation consists of three steps: initialize, process, and estimate.
 
-Initialize: we keep only the K smallest hash values.
+Initialize: we initialize an empty container to store the K smallest hash values.
 Process: we hash an item into a value between 0 and 1, and place it on the number line. If the new value is smaller than theta, we add it to the sketch and remove the largest stored value. If the new value is larger than theta, we ignore it.
 Estimate: we estimate N as K divided by theta, minus 1.
 
-Please choose and configure the K and stream size, then press Start demo to watch the sketch update on the number line.
+Please choose and configure the K and stream size, then press Start demo to watch the sketch update.
 `;
         return narration;
     }, []);
