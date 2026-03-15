@@ -363,7 +363,10 @@ Theta is the current K-th smallest value, shown by the vertical line.
 Implementation rules: if the sketch is not full yet, add the new hash. 
 If the sketch is full, compare the new hash to theta; if it is smaller than theta, add it and remove the largest stored value; if it is larger than theta, ignore it.
 
-As more items arrive, the estimate updates as N-hat equals K divided by theta, minus 1.`;
+As more items arrive, the estimate updates as N-hat equals K divided by theta, minus 1.
+
+Please enjoy watching the sketch update on the number line.
+`;
         const animationStartTime = 0;
 
         const entries = buildTimelineEntries(streamSize, k);
