@@ -39,7 +39,7 @@ const STEP_NARRATIONS: Record<number, string> = {
     14: "And the index of the node is 2.",
     15: "What does this mean? We can generalize the formula as k over n plus 1, which gives the expected value of the k-th node out of n nodes. This is called order statistics.",
     16: "This can be proven using the Beta distribution. However, the Beta distribution is beyond the scope of this sketch, so we'll skip the proof.",
-    17: "On the next page, we'll see how to use order statistics to estimate the k-th smallest estimation.",
+    17: "On the next page, we'll see how to use order statistics to estimate the total number of nodes, which is called the k-th smallest estimation.",
 };
 
 // Calculate step durations and cumulative start times
