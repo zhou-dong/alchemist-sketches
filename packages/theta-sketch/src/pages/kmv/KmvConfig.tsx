@@ -184,6 +184,7 @@ Please choose and configure the K and stream size, then press Start demo to watc
                     maxWidth="lg"
                     sx={{
                         animation: `${slideUp} 0.8s ease-out 0.1s both`,
+                        mt: { xs: '-4vh', md: '-7vh' },
                     }}
                 >
                     {/* Page header */}
